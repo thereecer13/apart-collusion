@@ -1,0 +1,37 @@
+# Pre-sprint work log
+
+Everything done before the Apart AI Collusion Research Sprint (Fri Oct 23, 2026).
+Listed for disclosure in the sprint report. Dates are in UTC.
+
+## 2026-10-21
+
+### Setup
+- Imported starter code from https://github.com/Jerick-1380/LLM-Trust-Breaking at
+  commit `fd11aca` (Shi et al. 2026, "When Agents Lie"), unmodified, as the first commit
+  of this repo. The upstream repo has **no LICENSE file**.
+- Created a Python 3.12 venv and installed `requirements.txt`. No dependency problems.
+
+### Step 1: harness check
+- Read the code (summary in the Step 1 checkpoint notes below).
+- Offline check, no LLM calls: n=7 works without code changes. Agent names are
+  `F G J M Q T Z`. El Farol payoffs are correct: 3 goers get +10 each, 4 goers get −5 each.
+- **Blocked:** could not run a real game. No `OPENROUTER_API_KEY`/`OPENAI_API_KEY` in the
+  environment, and the sandbox network policy blocks `openrouter.ai` and `api.openai.com`.
+  No game logs or costs yet.
+
+### Ways the harness differs from the sprint brief
+1. Between rounds, agents carry forward only their trust scores and assessments from the
+   reflection step. Stage 1 planning does not see previous rounds' announcements, actions or
+   payoffs, except as summarised in their own assessments.
+2. The round-robin announcement order is fixed and alphabetical, and identical every round.
+3. Every round has an extra LLM-as-judge call per agent, hard-coded to `openai/gpt-5-mini`.
+   This is a second model and an added cost.
+4. Reflection is one call per (agent, target) pair, so 42 calls per round at n=7. This
+   dominates call count and cost.
+5. There is no per-game seed. Every request sends `seed=42` and temperature 1.0, and the
+   agent names come from `random.seed(42)`.
+6. Any model whose name starts with `gpt-` or `o1`/`o3` is routed to the OpenAI API directly,
+   even with an `openai/` OpenRouter prefix. The non-queued runner crashes for OpenAI models
+   (`parallel_client=None`). In queued mode with a non-OpenAI agent model, the
+   `openai/gpt-5-mini` judge requests are silently dropped when there is no OpenAI key.
+7. The harness does not track tokens or cost.
