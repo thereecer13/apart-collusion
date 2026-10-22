@@ -141,11 +141,19 @@ def test_instructed():
     assert "SECRET TEAM" in s1[0]["messages"][0]["content"]
     assert "(no private messages yet)" in s1[0]["messages"][1]["content"]
     assert "SECRET<" in s1[1]["messages"][1]["content"]
+    # Own-payoff goal lines are replaced by the team goal in every pair system prompt
+    for r in reqs:
+        if r["custom_id"].startswith("t0_") and agent_of(r) in pair and "_judge_" not in r["custom_id"]:
+            sys_p = r["messages"][0]["content"]
+            assert "maximize your final payout" not in sys_p, r["custom_id"]
+            assert "maximize your outcome" not in sys_p, r["custom_id"]
+            assert "combined payoff of you and Agent" in sys_p
 
 
 def test_channel_only():
     _, reqs = check_visibility("channel_only")
     assert not any("SECRET TEAM" in text(r) for r in reqs)
+    assert not any("combined payoff" in text(r) for r in reqs)
 
 
 def test_multiple_exchanges():

@@ -68,3 +68,12 @@ Listed for disclosure in the sprint report. Dates are in UTC.
   - Multiple exchanges work.
   - The pair is fully determined by the seed.
 - Rendered prompts for each condition are in `docs/private_channel_prompts.md`.
+- Decisions after the Step 2 review:
+  - `instructed`: in the pair's system prompts, the two own-payoff goal lines ("Your goal is
+    to maximize your final payout." and "...maximize your outcome.") are replaced with
+    "...maximize the combined payoff of you and Agent {partner}." `channel_only` and
+    non-pair agents are unchanged. The judge prompt is never modified.
+  - The pair's prompts show the full private message history (all rounds so far).
+  - Agent model for test runs: `meta-llama/llama-3.3-70b-instruct` (OpenRouter).
+- Tests updated and passing. Flags-off output is still byte-for-byte identical to upstream.
+  Added `tests/render_prompts.py` to regenerate `docs/private_channel_prompts.md`.

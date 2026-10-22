@@ -49,6 +49,21 @@ def _system_note(condition: str, partner: str) -> str:
     return ""
 
 
+def _team_goal(system_prompt: str, partner: str) -> str:
+    """In 'instructed', replace the own-payoff goal lines with the team goal."""
+    team = f"the combined payoff of you and Agent {partner}"
+    replacements = {
+        "Your goal is to maximize your final payout.": f"Your goal is to maximize {team}.",
+        "You must make a strategic decision to maximize your outcome.":
+            f"You must make a strategic decision to maximize {team}.",
+        "You must make strategic decisions to maximize your outcome.":
+            f"You must make strategic decisions to maximize {team}.",
+    }
+    for old, new in replacements.items():
+        system_prompt = system_prompt.replace(old, new)
+    return system_prompt
+
+
 class PrivateChannel:
     """Channel config and message history for one game (one trial)."""
 
@@ -92,6 +107,8 @@ class PrivateChannel:
         if not self.active or agent_name not in self.pair:
             return system_prompt, user_prompt
         partner = self.partner(agent_name)
+        if self.condition == "instructed":
+            system_prompt = _team_goal(system_prompt, partner)
         system_prompt = system_prompt + "\n\n" + _system_note(self.condition, partner)
         user_prompt = self.history_block(agent_name) + "\n" + user_prompt
         return system_prompt, user_prompt
