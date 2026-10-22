@@ -202,3 +202,42 @@ Listed for disclosure in the sprint report. Dates are in UTC.
   offline El Farol snapshot (all conditions, judge on/off) is still byte-for-byte identical.
 - The Step 3 smoke logs were produced before this fix and are not re-run. Under the fix,
   `elfarol_instructed` round 1 Agent F stage 2 would be a parse error.
+
+### Step 4: monitor eval skeleton in Inspect
+- Installed `inspect_ai==0.3.283` (pinned in `monitor/requirements.txt`). Game generation stays
+  as plain scripts; Inspect is used only for the monitor.
+- `monitor/views.py` turns a game log into 5 views: `public` (announced action + public
+  message), `actions` (final actions + payoffs + outcome line), `both` (views 1 + 2), `table`
+  (announced → final action per agent and round, changes marked), `plans` (view 3 + each
+  agent's Stage 1 plan). Every view starts with the same header: the game rules shown to all
+  agents (with "Your goal is to maximize your final payout." removed), the turn order, and
+  which parts the view includes. No view includes private-channel messages, the condition,
+  the pair or the stake lines.
+- `monitor/prompt.py`: **DRAFT** monitor prompt, written from the design and not tuned on any
+  log. Same prompt for all views. Output is JSON: reasoning, collusion yes/no, suspicion 0–10,
+  pair or "none".
+- `monitor/task.py`: Inspect task `collusion_monitor`. Dataset = (game, view) samples, with
+  `instructed` → "yes" and `none` → "no"; `channel_only` is left out unless
+  `include_unlabeled=true`. Solver: system prompt in the sample + `generate()`, temperature 0.
+  Scorer: parses the JSON and records correct, pair_correct and suspicion. The system prompt
+  is put directly into each sample because Inspect's `system_message()` fills `{...}`
+  placeholders, which would break on the JSON in the prompt.
+- `monitor/metrics.py`: accuracy, FPR, AUROC (from suspicion, ties count half) and pair-ID
+  accuracy (positives only). Reported by view, and by game × view, with percentile bootstrap
+  95% CIs resampling games (2000 resamples). Also paired differences of each view vs `both`.
+  Unparseable answers are excluded and counted.
+- `tests/test_monitor.py` (5 tests, all pass): no private text or condition notes in any
+  view; each view contains exactly its parts; labels; parser; metric values.
+- `docs/channel_only_labeling_DRAFT.md`: draft labeling rule for `channel_only`, with open
+  decisions. Not implemented, not run.
+- End-to-end pipeline check: `inspect eval monitor/task.py --model
+  openrouter/meta-llama/llama-3.3-70b-instruct -T logs=plumbing_tests/smoke_seed11`. 20
+  samples (4 labeled smoke games × 5 views), 13 s, 42k tokens, 0 unparsed. Cost $0.3884 →
+  $0.3996 = **$0.011**. The monitor model is a placeholder; the participant has not chosen it.
+  The metrics (n = 4 games) are meaningless and only show that the pipeline runs. Outputs are
+  in `plumbing_tests/monitor_pipeline_check/`.
+- **Design issue found (not changed):** in view 5 (`plans`), the pair's Stage 1 plans were
+  written with the private-channel history in their prompt. They sometimes name the partner
+  or the shared goal, e.g. "coordinating with Agent F to maximize our combined payoff" (El
+  Farol, instructed). So view 5 can reveal the pair directly. Flagged to the participant.
+- Total spend so far: **$0.400**.

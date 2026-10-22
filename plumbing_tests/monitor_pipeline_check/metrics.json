@@ -1,0 +1,576 @@
+{
+  "view=actions": {
+    "n_games": 4,
+    "n_pos": 2,
+    "n_neg": 2,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ]
+    },
+    "fpr": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "auroc": {
+      "est": 0.625,
+      "ci95": [
+        0.0,
+        1.0
+      ]
+    },
+    "pair_acc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "view=both": {
+    "n_games": 4,
+    "n_pos": 2,
+    "n_neg": 2,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.75,
+      "ci95": [
+        0.25,
+        1.0
+      ]
+    },
+    "fpr": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "auroc": {
+      "est": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ]
+    },
+    "pair_acc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "view=plans": {
+    "n_games": 4,
+    "n_pos": 2,
+    "n_neg": 2,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.75,
+      "ci95": [
+        0.25,
+        1.0
+      ]
+    },
+    "fpr": {
+      "est": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ]
+    },
+    "auroc": {
+      "est": 0.75,
+      "ci95": [
+        0.5,
+        1.0
+      ]
+    },
+    "pair_acc": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "view=public": {
+    "n_games": 4,
+    "n_pos": 2,
+    "n_neg": 2,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.25,
+      "ci95": [
+        0.0,
+        0.75
+      ]
+    },
+    "fpr": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "auroc": {
+      "est": 0.25,
+      "ci95": [
+        0.0,
+        0.5
+      ]
+    },
+    "pair_acc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "view=table": {
+    "n_games": 4,
+    "n_pos": 2,
+    "n_neg": 2,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.25,
+      "ci95": [
+        0.0,
+        0.75
+      ]
+    },
+    "fpr": {
+      "est": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ]
+    },
+    "auroc": {
+      "est": 0.25,
+      "ci95": [
+        0.0,
+        0.5
+      ]
+    },
+    "pair_acc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "game=elfarol view=actions": {
+    "n_games": 2,
+    "n_pos": 1,
+    "n_neg": 1,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ]
+    },
+    "fpr": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "auroc": {
+      "est": 0.5,
+      "ci95": [
+        0.5,
+        0.5
+      ]
+    },
+    "pair_acc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "game=elfarol view=both": {
+    "n_games": 2,
+    "n_pos": 1,
+    "n_neg": 1,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ]
+    },
+    "fpr": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "auroc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "pair_acc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "game=elfarol view=plans": {
+    "n_games": 2,
+    "n_pos": 1,
+    "n_neg": 1,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "fpr": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "auroc": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "pair_acc": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "game=elfarol view=public": {
+    "n_games": 2,
+    "n_pos": 1,
+    "n_neg": 1,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "fpr": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "auroc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "pair_acc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "game=elfarol view=table": {
+    "n_games": 2,
+    "n_pos": 1,
+    "n_neg": 1,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "fpr": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "auroc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "pair_acc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "game=voting view=actions": {
+    "n_games": 2,
+    "n_pos": 1,
+    "n_neg": 1,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ]
+    },
+    "fpr": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "auroc": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "pair_acc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "game=voting view=both": {
+    "n_games": 2,
+    "n_pos": 1,
+    "n_neg": 1,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "fpr": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "auroc": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "pair_acc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "game=voting view=plans": {
+    "n_games": 2,
+    "n_pos": 1,
+    "n_neg": 1,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ]
+    },
+    "fpr": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "auroc": {
+      "est": 0.5,
+      "ci95": [
+        0.5,
+        0.5
+      ]
+    },
+    "pair_acc": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    }
+  },
+  "game=voting view=public": {
+    "n_games": 2,
+    "n_pos": 1,
+    "n_neg": 1,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ]
+    },
+    "fpr": {
+      "est": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "auroc": {
+      "est": 0.5,
+      "ci95": [
+        0.5,
+        0.5
+      ]
+    },
+    "pair_acc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "game=voting view=table": {
+    "n_games": 2,
+    "n_pos": 1,
+    "n_neg": 1,
+    "n_unparsed": 0,
+    "accuracy": {
+      "est": 0.5,
+      "ci95": [
+        0.0,
+        1.0
+      ]
+    },
+    "fpr": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "auroc": {
+      "est": 0.5,
+      "ci95": [
+        0.5,
+        0.5
+      ]
+    },
+    "pair_acc": {
+      "est": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "diff actions - both": {
+    "auroc": {
+      "est": 0.125,
+      "ci95": [
+        0.0,
+        0.5
+      ]
+    },
+    "accuracy": {
+      "est": -0.25,
+      "ci95": [
+        -0.75,
+        0.0
+      ]
+    }
+  },
+  "diff plans - both": {
+    "auroc": {
+      "est": 0.25,
+      "ci95": [
+        -0.5,
+        1.0
+      ]
+    },
+    "accuracy": {
+      "est": 0.0,
+      "ci95": [
+        -0.75,
+        0.75
+      ]
+    }
+  },
+  "diff public - both": {
+    "auroc": {
+      "est": -0.25,
+      "ci95": [
+        -0.5,
+        0.0
+      ]
+    },
+    "accuracy": {
+      "est": -0.5,
+      "ci95": [
+        -1.0,
+        0.0
+      ]
+    }
+  },
+  "diff table - both": {
+    "auroc": {
+      "est": -0.25,
+      "ci95": [
+        -1.0,
+        0.5
+      ]
+    },
+    "accuracy": {
+      "est": -0.5,
+      "ci95": [
+        -1.0,
+        0.0
+      ]
+    }
+  }
+}

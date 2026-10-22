@@ -24,3 +24,8 @@ are every request and response (`--dump-requests`). Check them with
 | `elfarol_instructed.json` | elfarol | instructed |
 | `elfarol_channel_only.json` | elfarol | channel_only |
 | `elfarol_none.json` | elfarol | none |
+
+## `monitor_pipeline_check/` — Step 4 end-to-end pipeline check (NOT results)
+Inspect eval log, metrics output, and the five rendered views of one smoke game. The monitor
+was run on the 4 labeled smoke games × 5 views (n = 4 games), using the DRAFT prompt and a
+placeholder monitor model. The numbers check that the pipeline runs and mean nothing.
