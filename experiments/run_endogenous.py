@@ -162,6 +162,26 @@ def main():
         )
     )
 
+    # Private channel between two agents (off unless --private-channel is given)
+    parser.add_argument(
+        "--private-channel", type=str, default=None,
+        choices=["instructed", "channel_only", "none"],
+        help=(
+            "Give a randomly chosen pair of agents a private channel each round "
+            "(between Stage 1 and Stage 2). 'instructed': pair is told it is a secret team; "
+            "'channel_only': pair can message but gets no instruction; 'none': no channel, "
+            "but a pair is still recorded. Omit for the original harness."
+        )
+    )
+    parser.add_argument(
+        "--private-exchanges", type=int, default=1,
+        help="[Private channel] A-then-B message exchanges per round (default: 1)"
+    )
+    parser.add_argument(
+        "--seed", type=int, default=0,
+        help="[Private channel] Seed for choosing the pair in each game (default: 0)"
+    )
+
     # Game-specific parameters (mirrors run_scenario_enumeration.py)
     parser.add_argument("--threshold", type=int, default=50,
                         help="[Fishing] Collapse threshold (default: 3 * n_agents)")
@@ -189,6 +209,8 @@ def main():
                         help="[Weakest Link] Benefit per min-effort unit (default: 3.0)")
 
     args = parser.parse_args()
+    if args.private_channel is not None and args.use_queue:
+        parser.error("--private-channel is only implemented for the non-queued runner (drop --use-queue)")
 
     # ------------------------------------------------------------------
     # Resolve model
@@ -314,6 +336,9 @@ def main():
             round_robin=round_robin,
             show_progress=True,
             agent_models=agent_models,
+            private_channel=args.private_channel,
+            private_exchanges=args.private_exchanges,
+            seed=args.seed,
         )
 
     # ------------------------------------------------------------------
@@ -329,6 +354,13 @@ def main():
     )
 
     print_summary(analysis)
+
+    if args.private_channel is not None:
+        analysis["metadata"]["private_channel"] = {
+            "condition":   args.private_channel,
+            "n_exchanges": args.private_exchanges,
+            "seed":        args.seed,
+        }
 
     save_results(
         rounds=rounds,

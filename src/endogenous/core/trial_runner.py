@@ -35,6 +35,9 @@ from src.endogenous.core.prompt_builders import (
     build_single_agent_reflection_prompt, build_single_agent_reflection_schema,
     build_judge_prompt,
 )
+from src.endogenous.core.private_channel import (
+    PrivateChannel, choose_pair, build_private_message_prompt,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -342,6 +345,7 @@ def _run_stage1(
     supports_structured: bool,
     takeaways_by_agent: Optional[Dict[str, Dict[str, str]]] = None,
     agent_models: Optional[Dict[str, str]] = None,
+    channel: Optional[PrivateChannel] = None,
 ) -> Dict[str, Dict[str, Any]]:
     """
     Fire Stage 1 for all agents in parallel and return parsed results.
@@ -368,6 +372,8 @@ def _run_stage1(
             supports_structured=agent_supports_structured,
             takeaways=agent_takeaways,
         )
+        if channel is not None:
+            system_p, user_p = channel.decorate(agent_name, system_p, user_p)
         req = _build_request(
             custom_id=f"t{trial_id}_s1_{agent_name}",
             model=agent_model,
@@ -407,6 +413,7 @@ def _run_stage2(
     round_robin: bool = False,
     announcement_order: Optional[List[str]] = None,
     agent_models: Optional[Dict[str, str]] = None,
+    channel: Optional[PrivateChannel] = None,
 ) -> Dict[str, Dict[str, Any]]:
     """
     Fire Stage 2 for all agents.
@@ -442,6 +449,8 @@ def _run_stage2(
                 supports_structured=agent_supports_structured,
                 prior_announcements=None,
             )
+            if channel is not None:
+                system_p, user_p = channel.decorate(agent_name, system_p, user_p)
             req = _build_request(
                 custom_id=f"t{trial_id}_s2_{agent_name}",
                 model=agent_model,
@@ -494,6 +503,8 @@ def _run_stage2(
                 supports_structured=agent_supports_structured,
                 prior_announcements=prior,
             )
+            if channel is not None:
+                system_p, user_p = channel.decorate(agent_name, system_p, user_p)
             req = _build_request(
                 custom_id=f"t{trial_id}_s2_{agent_name}",
                 model=agent_model,
@@ -530,6 +541,7 @@ def _run_stage3(
     supports_structured: bool,
     self_reference: bool,
     agent_models: Optional[Dict[str, str]] = None,
+    channel: Optional[PrivateChannel] = None,
 ) -> Dict[str, Dict[str, Any]]:
     """
     Fire Stage 3 for all agents in parallel (each sees all Stage 2 messages).
@@ -554,6 +566,8 @@ def _run_stage3(
             self_reference=self_reference,
             supports_structured=agent_supports_structured,
         )
+        if channel is not None:
+            system_p, user_p = channel.decorate(agent_name, system_p, user_p)
         req = _build_request(
             custom_id=f"t{trial_id}_s3_{agent_name}",
             model=agent_model,
@@ -598,6 +612,7 @@ def _run_reflection(
     current_takeaways: Dict[str, Dict[str, str]],
     round_idx: int,
     agent_models: Optional[Dict[str, str]] = None,
+    channel: Optional[PrivateChannel] = None,
 ) -> Dict[str, Dict[str, Any]]:
     """
     Fire granular reflection prompts: one prompt per (focal_agent, target_agent) pair.
@@ -637,6 +652,8 @@ def _run_reflection(
                 round_idx=round_idx,
                 supports_structured=agent_supports_structured,
             )
+            if channel is not None:
+                system_p, user_p = channel.decorate(agent_name, system_p, user_p)
             req = _build_request(
                 custom_id=f"t{trial_id}_refl_{agent_name}_about_{target_agent}",
                 model=agent_model,
@@ -674,6 +691,69 @@ def _run_reflection(
             results[agent_name]["takeaways"][target_agent] = {}
 
     return results
+
+
+# ---------------------------------------------------------------------------
+# Private channel executor (only runs when a channel condition is set)
+# ---------------------------------------------------------------------------
+
+def _run_private_channel(
+    trial_id: int,
+    game_type: str,
+    agent_names: List[str],
+    game_params: Dict[str, Any],
+    llm_client: Any,
+    parallel_client: Any,
+    stage1_results: Dict[str, Dict[str, Any]],
+    channel: PrivateChannel,
+    round_idx: int,
+    agent_models: Optional[Dict[str, str]] = None,
+) -> None:
+    """
+    Pair exchanges private messages: A, then B, repeated channel.n_exchanges times.
+    Messages are appended to channel.messages. Does nothing in the 'none' condition.
+    """
+    if not channel.active:
+        return
+    for exchange in range(channel.n_exchanges):
+        for sender in channel.pair:
+            receiver = channel.partner(sender)
+            agent_model = agent_models[sender] if agent_models else llm_client.model
+            agent_supports_structured = _model_supports_structured_output(agent_model)
+
+            # Base system prompt = the agent's normal Stage 2 system prompt (game rules)
+            base_system_p, _, _ = build_stage2_prompt(
+                game_type=game_type,
+                agent_name=sender,
+                agent_names=agent_names,
+                stage1_result=stage1_results.get(sender, {}),
+                game_params=game_params,
+            )
+            system_p, user_p, schema = build_private_message_prompt(
+                channel, sender, base_system_p,
+                stage1_results.get(sender, {}),
+                supports_structured=agent_supports_structured,
+            )
+            req = _build_request(
+                custom_id=f"t{trial_id}_pm{exchange}_{sender}",
+                model=agent_model,
+                system_prompt=system_p,
+                user_prompt=user_p,
+                json_schema=schema,
+                temperature=llm_client.temperature,
+                supports_structured=agent_supports_structured,
+                llm_client=llm_client,
+            )
+            raw = parallel_client.execute_parallel([req])
+            parsed = _parse_response(raw.get(req["custom_id"], {}), [])
+            channel.messages.append({
+                "round":     round_idx,
+                "exchange":  exchange,
+                "sender":    sender,
+                "receiver":  receiver,
+                "message":   parsed.get("message", ""),
+                "_parse_ok": bool(parsed.get("message")),
+            })
 
 
 # ---------------------------------------------------------------------------
@@ -780,6 +860,7 @@ def run_trial(
     round_idx: int = 0,
     run_reflection: bool = False,
     agent_models: Optional[Dict[str, str]] = None,
+    channel: Optional[PrivateChannel] = None,
 ) -> Dict[str, Any]:
     """
     Run a single three-stage trial, optionally followed by a reflection step.
@@ -809,7 +890,16 @@ def run_trial(
         llm_client, parallel_client, supports_structured,
         takeaways_by_agent=takeaways_by_agent,
         agent_models=agent_models,
+        channel=channel,
     )
+
+    # Private channel: pair exchanges messages (only if a channel condition is set)
+    if channel is not None:
+        _run_private_channel(
+            trial_id, game_type, agent_names, game_params,
+            llm_client, parallel_client, stage1, channel, round_idx,
+            agent_models=agent_models,
+        )
 
     # Stage 2: public announcement (sees own Stage 1 output)
     stage2 = _run_stage2(
@@ -818,6 +908,7 @@ def run_trial(
         round_robin=round_robin,
         announcement_order=order,
         agent_models=agent_models,
+        channel=channel,
     )
 
     # Stage 3: action selection (sees all Stage 2 messages)
@@ -825,6 +916,7 @@ def run_trial(
         trial_id, game_type, agent_names, stage1, stage2, game_params,
         llm_client, parallel_client, supports_structured, self_reference,
         agent_models=agent_models,
+        channel=channel,
     )
 
     # Judge: LLM-as-judge classification — uses same client/model as agents
@@ -904,6 +996,9 @@ def run_trial(
     }
     if round_robin:
         result["announcement_order"] = order
+    if channel is not None:
+        # Kept separate from the public stage2 messages under "agents"
+        result["private_channel"] = channel.round_log(round_idx)
 
     # Optional reflection step
     if run_reflection:
@@ -915,6 +1010,7 @@ def run_trial(
             current_takeaways=takeaways_by_agent or {},
             round_idx=round_idx,
             agent_models=agent_models,
+            channel=channel,
         )
         for agent_name in agent_names:
             result["agents"][agent_name]["reflection"] = {
@@ -941,6 +1037,9 @@ def run_all_trials(
     round_robin: bool = False,
     show_progress: bool = True,
     agent_models: Optional[Dict[str, str]] = None,
+    private_channel: Optional[str] = None,
+    private_exchanges: int = 1,
+    seed: int = 0,
 ) -> List[Dict[str, Any]]:
     """
     Run n_trials independent game instances for n_rounds, collecting all results.
@@ -952,6 +1051,10 @@ def run_all_trials(
     Args:
         n_rounds:        number of sequential rounds; with n_rounds=1 takeaways
                          are always empty (identical to old behaviour)
+        private_channel: None (original harness), or one of
+                         'instructed' / 'channel_only' / 'none'. See private_channel.py.
+        private_exchanges: A-then-B message exchanges per round
+        seed:            picks the pair for each trial (only used with private_channel)
 
     Returns:
         List of round dicts: [{"round_id": int, "trials": [trial_result, ...]}, ...]
@@ -982,6 +1085,14 @@ def run_all_trials(
         for tid in range(n_trials)
     }
 
+    # One private channel per trial, with its own randomly chosen pair
+    channels: Dict[int, Optional[PrivateChannel]] = {tid: None for tid in range(n_trials)}
+    if private_channel is not None:
+        for tid in range(n_trials):
+            pair = choose_pair(seed, tid, agent_names)
+            channels[tid] = PrivateChannel(private_channel, pair, private_exchanges)
+            print(f"  Trial {tid}: private channel '{private_channel}', pair {pair[0]} & {pair[1]}")
+
     all_rounds = []
 
     for round_idx in range(n_rounds):
@@ -1008,6 +1119,7 @@ def run_all_trials(
                 round_idx=round_idx,
                 run_reflection=do_reflect,
                 agent_models=agent_models,
+                channel=channels[trial_id],
             )
             round_results.append(result)
 

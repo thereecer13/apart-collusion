@@ -45,3 +45,26 @@ Listed for disclosure in the sprint report. Dates are in UTC.
   environment, add the private channel, run small test runs only to check that things work,
   and draft the Inspect monitor skeleton. Data-generation runs are saved for the hackathon.
   Test runs before then are for checking plumbing only and are not used as results.
+
+### Step 2: private channel (code only, no LLM calls)
+- New `src/endogenous/core/private_channel.py`: the three conditions (`instructed`,
+  `channel_only`, `none`), per-game pair choice from the seed, the prompt text for each
+  condition, the private message prompt, and the channel's message history.
+- `src/endogenous/core/trial_runner.py`: optional `channel` argument on Stage 1, Stage 2,
+  Stage 3 and reflection. When a channel is set, the pair's prompts get the condition note
+  (added to the system prompt) and the message history (added to the start of the user
+  prompt). New `_run_private_channel` runs after Stage 1 and before Stage 2: A sends, then B,
+  repeated `n_exchanges` times. Each trial result gets a `private_channel` record
+  (`condition`, `pair`, `n_exchanges`, and `messages` with round, exchange, sender, receiver
+  and message). This record is separate from the public `stage2` messages.
+- `experiments/run_endogenous.py`: new flags `--private-channel {instructed,channel_only,none}`,
+  `--private-exchanges N` (default 1) and `--seed S` (default 0). Not supported with
+  `--use-queue`; the runner errors out if both are given.
+- Checks (offline, stub client, no API calls), in `tests/test_private_channel.py`:
+  - With the flags off, all 420 requests and the log for a 2-game, 3-round run are
+    byte-for-byte identical to the original upstream code.
+  - `none` changes no prompts and records the seeded pair.
+  - Private messages appear only in the pair's prompts and are logged per round.
+  - Multiple exchanges work.
+  - The pair is fully determined by the seed.
+- Rendered prompts for each condition are in `docs/private_channel_prompts.md`.
