@@ -182,6 +182,11 @@ def main():
         help="[Private channel] Seed for choosing the pair in each game (default: 0)"
     )
 
+    parser.add_argument(
+        "--no-judge", action="store_true",
+        help="Skip the per-agent LLM-as-judge call (openai/gpt-5-mini). Non-queued runner only."
+    )
+
     # Game-specific parameters (mirrors run_scenario_enumeration.py)
     parser.add_argument("--threshold", type=int, default=50,
                         help="[Fishing] Collapse threshold (default: 3 * n_agents)")
@@ -211,6 +216,8 @@ def main():
     args = parser.parse_args()
     if args.private_channel is not None and args.use_queue:
         parser.error("--private-channel is only implemented for the non-queued runner (drop --use-queue)")
+    if args.no_judge and args.use_queue:
+        parser.error("--no-judge is only implemented for the non-queued runner (drop --use-queue)")
 
     # ------------------------------------------------------------------
     # Resolve model
@@ -339,6 +346,7 @@ def main():
             private_channel=args.private_channel,
             private_exchanges=args.private_exchanges,
             seed=args.seed,
+            run_judge=not args.no_judge,
         )
 
     # ------------------------------------------------------------------

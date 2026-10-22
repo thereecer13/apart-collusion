@@ -861,6 +861,7 @@ def run_trial(
     run_reflection: bool = False,
     agent_models: Optional[Dict[str, str]] = None,
     channel: Optional[PrivateChannel] = None,
+    run_judge: bool = True,
 ) -> Dict[str, Any]:
     """
     Run a single three-stage trial, optionally followed by a reflection step.
@@ -920,12 +921,14 @@ def run_trial(
     )
 
     # Judge: LLM-as-judge classification — uses same client/model as agents
-    judge = _run_judge(
-        trial_id, agent_names, stage1, stage2, stage3,
-        parallel_client=parallel_client,
-        llm_client=llm_client,
-        supports_structured=supports_structured,
-    )
+    judge = {}
+    if run_judge:
+        judge = _run_judge(
+            trial_id, agent_names, stage1, stage2, stage3,
+            parallel_client=parallel_client,
+            llm_client=llm_client,
+            supports_structured=supports_structured,
+        )
 
     # Compute deception measures per agent
     parse_errors = 0
@@ -980,7 +983,7 @@ def run_trial(
                 "primary_label": j.get("primary_label", "Inconsistency / Error"),
                 "confidence":    j.get("confidence", 1),
                 "_parse_ok":     j.get("_parse_ok", False),
-            },
+            } if run_judge else {"skipped": True, "_parse_ok": False},
         }
 
     # Compute outcomes (needed for reflection and stored on result)
@@ -1040,6 +1043,7 @@ def run_all_trials(
     private_channel: Optional[str] = None,
     private_exchanges: int = 1,
     seed: int = 0,
+    run_judge: bool = True,
 ) -> List[Dict[str, Any]]:
     """
     Run n_trials independent game instances for n_rounds, collecting all results.
@@ -1055,6 +1059,7 @@ def run_all_trials(
                          'instructed' / 'channel_only' / 'none'. See private_channel.py.
         private_exchanges: A-then-B message exchanges per round
         seed:            picks the pair for each trial (only used with private_channel)
+        run_judge:       False skips the LLM-as-judge call (judge entries marked skipped)
 
     Returns:
         List of round dicts: [{"round_id": int, "trials": [trial_result, ...]}, ...]
@@ -1120,6 +1125,7 @@ def run_all_trials(
                 run_reflection=do_reflect,
                 agent_models=agent_models,
                 channel=channels[trial_id],
+                run_judge=run_judge,
             )
             round_results.append(result)
 

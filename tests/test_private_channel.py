@@ -49,13 +49,14 @@ class StubParallel:
         return out
 
 
-def run(condition, n_trials=2, n_rounds=2, exchanges=1, seed=7):
+def run(condition, n_trials=2, n_rounds=2, exchanges=1, seed=7, run_judge=True):
     client = StubParallel()
     rounds = run_all_trials(
         game_type="elfarol", agent_names=AGENTS, game_params={"threshold": 0.5},
         llm_client=StubLLM(), parallel_client=client,
         n_trials=n_trials, n_rounds=n_rounds, round_robin=True, show_progress=False,
         private_channel=condition, private_exchanges=exchanges, seed=seed,
+        run_judge=run_judge,
     )
     return rounds, client.requests
 
@@ -158,6 +159,18 @@ def test_channel_only():
 
 def test_multiple_exchanges():
     check_visibility("instructed", exchanges=2)
+
+
+def test_no_judge():
+    rounds, reqs = run("instructed", run_judge=False)
+    _, reqs_judged = run("instructed")
+    assert not any("_judge_" in r["custom_id"] for r in reqs)
+    # Everything except the judge calls is unchanged
+    assert reqs == [r for r in reqs_judged if "_judge_" not in r["custom_id"]]
+    for rd in rounds:
+        for t in rd["trials"]:
+            for a in t["agents"].values():
+                assert a["judge"] == {"skipped": True, "_parse_ok": False}
 
 
 def test_pair_is_seeded():

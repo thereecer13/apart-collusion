@@ -77,3 +77,7 @@ Listed for disclosure in the sprint report. Dates are in UTC.
   - Agent model for test runs: `meta-llama/llama-3.3-70b-instruct` (OpenRouter).
 - Tests updated and passing. Flags-off output is still byte-for-byte identical to upstream.
   Added `tests/render_prompts.py` to regenerate `docs/private_channel_prompts.md`.
+- Added `--no-judge` (non-queued runner only): skips the per-agent `openai/gpt-5-mini`
+  LLM-as-judge call. Each agent's `judge` entry is then `{"skipped": true, "_parse_ok": false}`,
+  which the existing analyzer already leaves out of its counts. The default is unchanged,
+  so the judge still runs. Test added; flags-off output is still identical to upstream.
