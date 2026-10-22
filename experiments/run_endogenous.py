@@ -38,6 +38,25 @@ from src.endogenous.analysis.endogenous_analyzer import (
 )
 
 
+class RequestDumper:
+    """Wraps the parallel client and appends each request + response to a JSONL file."""
+
+    def __init__(self, inner, path):
+        self.inner = inner
+        self.path = path
+
+    def execute_parallel(self, requests):
+        responses = self.inner.execute_parallel(requests)
+        with open(self.path, "a") as f:
+            for r in requests:
+                f.write(json.dumps({"request": r, "response": responses.get(r["custom_id"])},
+                                   default=str) + "\n")
+        return responses
+
+    def __getattr__(self, name):
+        return getattr(self.inner, name)
+
+
 def build_game_params(args) -> dict:
     """Construct the game_params dict from CLI arguments."""
     game = args.game
@@ -188,6 +207,11 @@ def main():
         "--no-judge", action="store_true",
         help="Skip the per-agent LLM-as-judge call (openai/gpt-5-mini). Non-queued runner only."
     )
+    parser.add_argument(
+        "--dump-requests", type=str, default=None,
+        help="Append every request and its parsed response to this JSONL file "
+             "(for plumbing checks). Non-queued runner only."
+    )
 
     # Game-specific parameters (mirrors run_scenario_enumeration.py)
     parser.add_argument("--threshold", type=int, default=50,
@@ -222,6 +246,8 @@ def main():
         parser.error("--no-judge is only implemented for the non-queued runner (drop --use-queue)")
     if args.game == "voting" and args.use_queue:
         parser.error("--game voting is only implemented for the non-queued runner (drop --use-queue)")
+    if args.dump_requests and args.use_queue:
+        parser.error("--dump-requests is only implemented for the non-queued runner (drop --use-queue)")
 
     # ------------------------------------------------------------------
     # Resolve model
@@ -269,6 +295,8 @@ def main():
         temperature=args.temperature,
         max_workers=20,
     )
+    if args.dump_requests:
+        parallel_client = RequestDumper(parallel_client, args.dump_requests)
 
     # ------------------------------------------------------------------
     # Game parameters
