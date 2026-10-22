@@ -41,3 +41,7 @@ Listed for disclosure in the sprint report. Dates are in UTC.
 - Still blocked: no OpenRouter API key in the environment. No environment variable is set,
   and a direct call to `/api/v1/key` returns 401 "No cookie auth credentials found", so the
   proxy isn't injecting one either. No games run yet.
+- Scope for pre-sprint work, as set by the participant: read the code, set up the
+  environment, add the private channel, run small test runs only to check that things work,
+  and draft the Inspect monitor skeleton. Data-generation runs are saved for the hackathon.
+  Test runs before then are for checking plumbing only and are not used as results.
