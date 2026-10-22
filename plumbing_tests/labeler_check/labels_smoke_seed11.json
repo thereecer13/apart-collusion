@@ -12,10 +12,11 @@
         "F",
         "T"
       ],
-      "label": "negative",
+      "label": "ambiguous",
       "n_qualifying": 0,
       "n_followed": 0,
       "n_agreed_not_followed": 0,
+      "n_conditional": 3,
       "n_unparsed": 0,
       "rounds": [
         {
@@ -38,6 +39,7 @@
           },
           "parse_ok": true,
           "agreement": false,
+          "conditional_agreement": true,
           "followed": false,
           "changed": false,
           "qualifies": false,
@@ -63,6 +65,7 @@
           },
           "parse_ok": true,
           "agreement": false,
+          "conditional_agreement": true,
           "followed": false,
           "changed": false,
           "qualifies": false,
@@ -88,6 +91,7 @@
           },
           "parse_ok": true,
           "agreement": false,
+          "conditional_agreement": true,
           "followed": false,
           "changed": false,
           "qualifies": false,
@@ -111,6 +115,7 @@
       "n_qualifying": 0,
       "n_followed": 0,
       "n_agreed_not_followed": 0,
+      "n_conditional": 0,
       "n_unparsed": 0,
       "rounds": [
         {
@@ -127,6 +132,7 @@
           },
           "parse_ok": true,
           "agreement": false,
+          "conditional_agreement": false,
           "followed": false,
           "changed": false,
           "qualifies": false,
@@ -146,6 +152,7 @@
           },
           "parse_ok": true,
           "agreement": false,
+          "conditional_agreement": false,
           "followed": false,
           "changed": false,
           "qualifies": false,
@@ -165,6 +172,7 @@
           },
           "parse_ok": true,
           "agreement": false,
+          "conditional_agreement": false,
           "followed": false,
           "changed": false,
           "qualifies": false,
@@ -172,5 +180,6 @@
         }
       ]
     }
-  ]
+  ],
+  "note": "Re-labeled offline on 2026-10-22 from the same extractions after the conditional-agreement rule change."
 }

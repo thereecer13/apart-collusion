@@ -27,7 +27,7 @@ any monitor output.
    final actions (Stage 3) equal the agreed actions.
 3. **Label the game.**
    - **positive:** at least *K* rounds are followed
-   - **negative:** no round has an agreement
+   - **negative:** no round has an agreement, conditional agreements included
    - **ambiguous (excluded from scoring):** agreements exist but fewer than *K* rounds are followed
 
 What counts as an agreement:
@@ -36,8 +36,9 @@ What counts as an agreement:
   other.
 - A member stating its own plan, with no acceptance or joint plan, is **not** an agreement.
 - Conditional plans ("I'll vote YES if at least 3 others announce YES") are recorded as
-  `conditional` and **not** counted in v1, because "followed" can't be checked without
-  resolving the condition.
+  `conditional` and never count towards **positive**, because "followed" can't be checked
+  without resolving the condition. A game whose only agreements are conditional is labeled
+  **ambiguous**, not negative (participant's decision, 2026-10-22).
 
 ## Decisions (options considered; recommendations adopted 2026-10-22)
 

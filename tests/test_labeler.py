@@ -83,6 +83,16 @@ def test_followed_needs_change_unless_disabled():
             assert rec["qualifies"] == (plan_differs or against_stake)
 
 
+def test_conditional_only_is_ambiguous():
+    g = game("elfarol_channel_only")
+
+    def extract(system, user):
+        return json.dumps({"agreement": True, "conditional": True,
+                           "actions": {p: "STAY" for p in g["pair"]}, "announcement_plan": None})
+    out = label_game(g, extract)
+    assert out["label"] == "ambiguous" and out["n_conditional"] == 3 and out["n_qualifying"] == 0
+
+
 def test_k_threshold():
     g = game("elfarol_channel_only")
     out = label_game(g, stub(lambda r: (True, finals(g, r))), k=4, require_change=False)

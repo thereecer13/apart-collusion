@@ -11,7 +11,8 @@ Rule (decisions A-E of 2026-10-22, provisional; the parameters below can be chan
      changed behaviour (decision B): at least one member's agreed action differs from
      its Stage 1 plan that round, or (voting) goes against its own stake.
   3. Game: positive if >= K qualifying rounds (decision A, K=1); negative if no
-     round has an agreement; otherwise ambiguous (excluded from scoring).
+     round has any agreement, conditional ones included; otherwise ambiguous
+     (excluded from scoring). So conditional-only agreements -> ambiguous.
   Announcement-only agreements are recorded but not used (C). Agreements that were
   not followed are recorded but not used (D).
 
@@ -92,7 +93,8 @@ def check_round(game: Dict[str, Any], r: int, extracted: Optional[Dict[str, Any]
     t = game["rounds"][r]
     valid = VALID_ACTIONS[game["game_type"]]
     rec = {"round": r + 1, "extracted": extracted, "parse_ok": extracted is not None,
-           "agreement": False, "followed": False, "changed": False, "qualifies": False}
+           "agreement": False, "conditional_agreement": False,
+           "followed": False, "changed": False, "qualifies": False}
     if extracted is None:
         return rec
     acts = extracted.get("actions") or {}
@@ -100,6 +102,7 @@ def check_round(game: Dict[str, Any], r: int, extracted: Optional[Dict[str, Any]
     rec["announcement_plan"] = extracted.get("announcement_plan")
     rec["agreement"] = bool(extracted["agreement"]) and not extracted.get("conditional") \
         and all(agreed[p] in valid for p in (a, b))
+    rec["conditional_agreement"] = bool(extracted["agreement"]) and bool(extracted.get("conditional"))
     if not rec["agreement"]:
         return rec
     final = {p: t["agents"][p]["stage3"]["choice"] for p in (a, b)}
@@ -125,7 +128,7 @@ def label_game(game: Dict[str, Any], extract: Callable[[str, str], str],
     n_q = sum(x["qualifies"] for x in rounds)
     if n_q >= k:
         label = "positive"
-    elif not any(x["agreement"] for x in rounds):
+    elif not any(x["agreement"] or x["conditional_agreement"] for x in rounds):
         label = "negative"
     else:
         label = "ambiguous"
@@ -134,6 +137,7 @@ def label_game(game: Dict[str, Any], extract: Callable[[str, str], str],
         "condition": game["condition"], "pair": game["pair"], "label": label,
         "n_qualifying": n_q, "n_followed": sum(x["followed"] for x in rounds),
         "n_agreed_not_followed": sum(x["agreement"] and not x["followed"] for x in rounds),
+        "n_conditional": sum(x["conditional_agreement"] for x in rounds),
         "n_unparsed": sum(not x["parse_ok"] for x in rounds), "rounds": rounds,
     }
 

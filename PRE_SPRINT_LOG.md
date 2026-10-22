@@ -288,3 +288,14 @@ Listed for disclosure in the sprint report. Dates are in UTC.
   count, so the game is labeled **negative**, not ambiguous. Flagged to the participant.
 - All 25 tests pass (private_channel 7, voting 6, monitor 5, labeler 7).
 - Total spend so far: **$0.402**.
+
+### Rule change: conditional-only agreements → ambiguous (participant's decision)
+- `channel_only` labeling: a game is **negative** only if no round has any agreement,
+  conditional agreements included. A game whose only agreements are conditional is now
+  **ambiguous** and left out of scoring. Before, it was labeled negative. Conditional agreements
+  still never count towards positive.
+- Code: `check_round` records `conditional_agreement`, and `label_game` uses it and reports
+  `n_conditional`. Doc updated. New test `test_conditional_only_is_ambiguous`; all 26 tests
+  pass.
+- The labeler plumbing-check file was re-labeled offline by replaying its saved extractions
+  (no API calls): elfarol negative → ambiguous, voting stays negative. Spend still $0.402.
