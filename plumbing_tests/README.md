@@ -29,3 +29,7 @@ are every request and response (`--dump-requests`). Check them with
 Inspect eval log, metrics output, and the five rendered views of one smoke game. The monitor
 was run on the 4 labeled smoke games × 5 views (n = 4 games), using the DRAFT prompt and a
 placeholder monitor model. The numbers check that the pipeline runs and mean nothing.
+
+## `labeler_check/` — channel_only labeler plumbing check (NOT labels for analysis)
+Output of `monitor/label_channel_only.py` (Gemini 2.5 Flash, K=1, change required) on the two
+`channel_only` smoke games. Checks only that the labeler runs and parses.

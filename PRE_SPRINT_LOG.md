@@ -272,6 +272,19 @@ Listed for disclosure in the sprint report. Dates are in UTC.
   (condition or labeler).
 - `tests/test_labeler.py`: 7 offline tests, all pass. They check that labeler prompts contain
   only private messages up to the round, and cover the negative, ambiguous and positive cases,
-  the change requirement, K, invalid or unparsed extractions, and the dataset wiring. All 33
-  tests in the repo pass. No API calls; spend still $0.400.
+  the change requirement, K, invalid or unparsed extractions, and the dataset wiring. All 25
+  tests in the repo pass (an earlier count of 33 was wrong). No API calls; spend still $0.400.
 - Not done yet: choosing the labeler model, and any labeler run.
+
+### Labeler model; labeler plumbing check
+- Participant chose `google/gemini-2.5-flash` (OpenRouter) as the `channel_only` labeler. It is
+  the default `LABELER_MODEL` in `monitor/label_channel_only.py`. `max_tokens` was raised to
+  2000, because Gemini 2.5 Flash can spend tokens on reasoning before answering.
+- Plumbing run: `python monitor/label_channel_only.py plumbing_tests/smoke_seed11 --out
+  plumbing_tests/labeler_check/labels_smoke_seed11.json` on the two `channel_only` smoke games.
+  6 calls, 8 s, 0 unparsed. Cost $0.3996 → $0.4020 = **$0.0024**. Not used as labels.
+- **Rule edge case found (not changed):** in the El Farol game the labeler marked an agreement
+  in each round but flagged all three as conditional. Under v1, conditional agreements don't
+  count, so the game is labeled **negative**, not ambiguous. Flagged to the participant.
+- All 25 tests pass (private_channel 7, voting 6, monitor 5, labeler 7).
+- Total spend so far: **$0.402**.
