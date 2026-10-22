@@ -35,3 +35,9 @@ Listed for disclosure in the sprint report. Dates are in UTC.
    (`parallel_client=None`). In queued mode with a non-OpenAI agent model, the
    `openai/gpt-5-mini` judge requests are silently dropped when there is no OpenAI key.
 7. The harness does not track tokens or cost.
+
+## 2026-10-22
+- Network access fixed: `openrouter.ai` is now reachable (HTTP 200).
+- Still blocked: no OpenRouter API key in the environment. No environment variable is set,
+  and a direct call to `/api/v1/key` returns 401 "No cookie auth credentials found", so the
+  proxy isn't injecting one either. No games run yet.
