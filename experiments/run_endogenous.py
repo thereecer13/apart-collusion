@@ -74,6 +74,8 @@ def build_game_params(args) -> dict:
         }
     elif game == "volunteer":
         return {}
+    elif game == "voting":
+        return {}  # stakes are drawn per round by the runner from --seed
     else:
         return {}
 
@@ -86,7 +88,7 @@ def main():
     # Core arguments
     parser.add_argument(
         "--game", type=str, default="fishing",
-        choices=["fishing", "publicgoods", "weakestlink", "elfarol", "volunteer", "diners"],
+        choices=["fishing", "publicgoods", "weakestlink", "elfarol", "volunteer", "diners", "voting"],
         help="Game type to test"
     )
     parser.add_argument(
@@ -179,7 +181,7 @@ def main():
     )
     parser.add_argument(
         "--seed", type=int, default=0,
-        help="[Private channel] Seed for choosing the pair in each game (default: 0)"
+        help="Seed for choosing the private-channel pair and the voting-game stakes (default: 0)"
     )
 
     parser.add_argument(
@@ -218,6 +220,8 @@ def main():
         parser.error("--private-channel is only implemented for the non-queued runner (drop --use-queue)")
     if args.no_judge and args.use_queue:
         parser.error("--no-judge is only implemented for the non-queued runner (drop --use-queue)")
+    if args.game == "voting" and args.use_queue:
+        parser.error("--game voting is only implemented for the non-queued runner (drop --use-queue)")
 
     # ------------------------------------------------------------------
     # Resolve model

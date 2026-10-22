@@ -38,6 +38,7 @@ from src.endogenous.core.prompt_builders import (
 from src.endogenous.core.private_channel import (
     PrivateChannel, choose_pair, build_private_message_prompt,
 )
+from src.games.voting import draw_stakes
 
 
 # ---------------------------------------------------------------------------
@@ -238,7 +239,7 @@ def _parse_response(response: Any, action_fields: List[str]) -> Dict[str, Any]:
 
 def _normalize_action(action: Any, game_type: str) -> Any:
     """Normalize an action to canonical form (int for numeric games, str for binary)."""
-    binary_str_games = {"volunteer", "elfarol", "diners"}
+    binary_str_games = {"volunteer", "elfarol", "diners", "voting"}
     if game_type in binary_str_games:
         return str(action).strip().upper() if action is not None else None
     else:
@@ -257,7 +258,7 @@ def _compare_actions(a: Any, b: Any, game_type: str) -> Optional[bool]:
     if a_norm is None or b_norm is None:
         return None
 
-    binary_str_games = {"volunteer", "elfarol", "diners"}
+    binary_str_games = {"volunteer", "elfarol", "diners", "voting"}
     if game_type in binary_str_games:
         return a_norm != b_norm
     else:
@@ -1110,11 +1111,15 @@ def run_all_trials(
             iterator = tqdm(iterator, desc=f"  Trials (round {round_idx + 1})", unit="trial")
 
         for trial_id in iterator:
+            # Voting game: fresh private stakes each round, seeded by (seed, trial, round)
+            trial_params = game_params
+            if game_type == "voting":
+                trial_params = dict(game_params, stakes=draw_stakes(seed, trial_id, round_idx, agent_names))
             result = run_trial(
                 trial_id=trial_id,
                 game_type=game_type,
                 agent_names=agent_names,
-                game_params=game_params,
+                game_params=trial_params,
                 llm_client=llm_client,
                 parallel_client=parallel_client,
                 self_reference=self_reference,
@@ -1127,6 +1132,8 @@ def run_all_trials(
                 channel=channels[trial_id],
                 run_judge=run_judge,
             )
+            if game_type == "voting":
+                result["stakes"] = trial_params["stakes"]
             round_results.append(result)
 
             # Update takeaways from reflection for next round

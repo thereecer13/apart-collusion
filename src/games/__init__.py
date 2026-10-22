@@ -12,6 +12,7 @@ from src.games.elfarol import ElFarolGame
 from src.games.fishing import FishingGame
 from src.games.publicgoods import PublicGoodsGame
 from src.games.volunteer import VolunteerGame
+from src.games.voting import VotingGame
 from src.games.weakestlink import WeakestLinkGame
 
 
@@ -22,6 +23,7 @@ GAMES = {
     "fishing": FishingGame,
     "publicgoods": PublicGoodsGame,
     "volunteer": VolunteerGame,
+    "voting": VotingGame,
     "weakestlink": WeakestLinkGame,
 }
 
@@ -52,6 +54,9 @@ GAME_PARAM_MAPPINGS = {
         "cooperate_payout": "cooperate_payout",
         "defect_success_payout": "defect_success_payout",
         "defect_fail_payout": "defect_fail_payout",
+    },
+    "voting": {
+        "stakes": "stakes",
     },
     "weakestlink": {
         "max_effort": "max_effort",
@@ -86,6 +91,9 @@ GAME_PARAM_DEFAULTS = {
         "cooperate_payout": 0.0,
         "defect_success_payout": 1.0,
         "defect_fail_payout": -5.0,
+    },
+    "voting": {
+        "stakes": None,  # Drawn per round by the runner (see voting.draw_stakes)
     },
     "weakestlink": {
         "max_effort": 5,

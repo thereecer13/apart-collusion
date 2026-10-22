@@ -77,6 +77,14 @@ def _action_schema_fragment(game_type: str, game_params: Dict[str, Any], field_n
                 "description": "Whether to go to the bar (GO) or stay home (STAY)"
             }
         }
+    elif game_type == "voting":
+        return {
+            field_name: {
+                "type": "string",
+                "enum": ["YES", "NO"],
+                "description": "Your vote on the proposal: YES or NO"
+            }
+        }
     elif game_type == "diners":
         return {
             field_name: {
@@ -104,20 +112,32 @@ def _action_range_description(game_type: str, game_params: Dict[str, Any]) -> st
         return '"YES" (volunteer) or "NO" (do not volunteer)'
     elif game_type == "elfarol":
         return '"GO" (go to the bar) or "STAY" (stay home)'
+    elif game_type == "voting":
+        return '"YES" or "NO" (your vote on the proposal)'
     elif game_type == "diners":
         return '"EXPENSIVE" or "CHEAP"'
     else:
         raise ValueError(f"Unknown game type: {game_type}")
 
 
-def _get_game_rules(game_type: str, agent_names: List[str], game_params: Dict[str, Any]) -> str:
-    """Retrieve game rules from the game registry."""
+def _get_game_rules(game_type: str, agent_names: List[str], game_params: Dict[str, Any],
+                    agent_name: Optional[str] = None) -> str:
+    """Retrieve game rules from the game registry.
+
+    Games with per-agent private information (e.g. voting stakes) define
+    private_info(agent_name); it is appended for the focal agent only.
+    """
     from src.games import create_game, GAME_PARAM_MAPPINGS
 
     valid_keys = set(GAME_PARAM_MAPPINGS.get(game_type, {}).values())
     filtered = {k: v for k, v in game_params.items() if k in valid_keys}
     game = create_game(game_type, agent_names, **filtered)
-    return game.game_rules
+    rules = game.game_rules
+    if agent_name is not None and hasattr(game, "private_info"):
+        info = game.private_info(agent_name)
+        if info:
+            rules += "\n\n" + info
+    return rules
 
 
 def _json_instructions_for_model(supports_structured: bool, stage: str, game_type: str,
@@ -208,7 +228,7 @@ def build_stage1_prompt(
         (system_prompt, user_prompt, json_schema)
     """
     n_agents = len(agent_names)
-    game_rules = _get_game_rules(game_type, agent_names, game_params)
+    game_rules = _get_game_rules(game_type, agent_names, game_params, agent_name)
     action_desc = _action_range_description(game_type, game_params)
 
     # Build takeaway block from prior rounds (empty string if no history yet)
@@ -320,7 +340,7 @@ def build_stage2_prompt(
         (system_prompt, user_prompt, json_schema)
     """
     n_agents = len(agent_names)
-    game_rules = _get_game_rules(game_type, agent_names, game_params)
+    game_rules = _get_game_rules(game_type, agent_names, game_params, agent_name)
     action_desc = _action_range_description(game_type, game_params)
 
     intended_action   = stage1_result.get("intended_action", "unknown")
@@ -432,7 +452,7 @@ def build_stage3_prompt(
         (system_prompt, user_prompt, json_schema)
     """
     n_agents = len(agent_names)
-    game_rules = _get_game_rules(game_type, agent_names, game_params)
+    game_rules = _get_game_rules(game_type, agent_names, game_params, agent_name)
     action_desc = _action_range_description(game_type, game_params)
 
     system_prompt = (
@@ -578,7 +598,7 @@ def build_single_agent_reflection_prompt(
     Returns:
         (system_prompt, user_prompt, json_schema)
     """
-    game_rules = _get_game_rules(game_type, agent_names, game_params)
+    game_rules = _get_game_rules(game_type, agent_names, game_params, agent_name)
     other_agents = [a for a in agent_names if a != agent_name]
 
     # Announcements block (all agents including self)
@@ -688,7 +708,7 @@ def build_reflection_prompt(
         current_takeaways: dict mapping other_agent_name -> current takeaway string
         round_idx:      0-indexed round number (used for display only)
     """
-    game_rules = _get_game_rules(game_type, agent_names, game_params)
+    game_rules = _get_game_rules(game_type, agent_names, game_params, agent_name)
     other_agents = [a for a in agent_names if a != agent_name]
 
     # Announcements block (all agents including self)
