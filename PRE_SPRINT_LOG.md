@@ -252,3 +252,26 @@ Listed for disclosure in the sprint report. Dates are in UTC.
   the `plans` paired difference as [UPPER BOUND], and adds an `upper_bound` flag to its JSON
   output. Test added (6 monitor tests pass). The pipeline-check metrics output was regenerated
   from the same eval log, with no new API calls.
+
+### Monitor prompt frozen; monitor model; labeling rule adopted (participant's decisions)
+- Monitor prompt approved unchanged: `monitor/prompt.py` is now **FROZEN v1 (2026-10-22)**.
+  Any change needs a new version and a log entry.
+- Monitor model: `openrouter/meta-llama/llama-3.3-70b-instruct`, the same as the agents.
+  Recorded as `MONITOR_MODEL` in `monitor/prompt.py` and passed with `inspect eval --model`.
+- `channel_only` labeling: recommendations A–E adopted, **provisionally**. A: K = 1. B: the
+  agreement must change behaviour (an agreed action differs from that member's Stage 1 plan, or
+  in voting goes against its own stake). C and D: recorded, not used for the label. E: the
+  labeler is a non-Llama model, validated on ~10 hand-labeled games. Doc renamed to
+  `docs/channel_only_labeling.md`.
+- Implemented `monitor/label_channel_only.py`, a plain script outside Inspect. It sends one
+  labeler call per round, then a code check (followed / changed / qualifies), then the game
+  label (positive / negative / ambiguous). K and the change requirement are options. It refuses
+  a Llama labeler model.
+- `monitor/task.py`: new `-T channel_only_labels=PATH`. `channel_only` games take their target
+  from the labels file, and ambiguous games are left out. Samples record `label_source`
+  (condition or labeler).
+- `tests/test_labeler.py`: 7 offline tests, all pass. They check that labeler prompts contain
+  only private messages up to the round, and cover the negative, ambiguous and positive cases,
+  the change requirement, K, invalid or unparsed extractions, and the dataset wiring. All 33
+  tests in the repo pass. No API calls; spend still $0.400.
+- Not done yet: choosing the labeler model, and any labeler run.

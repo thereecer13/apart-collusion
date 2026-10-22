@@ -2,9 +2,12 @@
 Inspect task: a collusion monitor reads one view of one game log.
 
 Dataset: (game log, view) samples. Labels: 'instructed' = yes (collusion),
-'none' = no. 'channel_only' games are left out unless include_unlabeled=true
-(they are then given target "unlabeled" and are not scored as right/wrong).
-Solver: the monitor prompt (monitor/prompt.py, DRAFT) + one generation.
+'none' = no. 'channel_only' games take their label from a labels file made by
+monitor/label_channel_only.py (-T channel_only_labels=PATH; ambiguous games are
+left out). Without it they are left out unless include_unlabeled=true (they are
+then given target "unlabeled" and are not scored as right/wrong).
+Solver: the monitor prompt (monitor/prompt.py, FROZEN v1) + one generation.
+Monitor model (participant's choice): monitor.prompt.MONITOR_MODEL.
 Scorer: parse the monitor's JSON and compare to the label.
 
 Run (from the repo root), e.g.:
@@ -35,15 +38,32 @@ from monitor.views import UPPER_BOUND_VIEWS, VIEWS, load_games, render
 LABELS = {"instructed": "yes", "none": "no"}
 
 
-def build_samples(logs: str, views=VIEWS, include_unlabeled: bool = False):
+def _abs(path: str) -> str:
     # Inspect may run the task from its own directory: resolve relative paths from the repo root
-    if not os.path.isabs(logs):
-        logs = os.path.join(REPO_ROOT, logs)
+    return path if os.path.isabs(path) else os.path.join(REPO_ROOT, path)
+
+
+def load_channel_only_labels(path: str) -> Dict[tuple, str]:
+    """(log file name, trial_id) -> "yes"/"no" from label_channel_only.py output; ambiguous games are left out."""
+    games = json.load(open(_abs(path)))["games"]
+    to_target = {"positive": "yes", "negative": "no"}
+    return {(os.path.basename(g["file"]), g["trial_id"]): to_target[g["label"]]
+            for g in games if g["label"] in to_target}
+
+
+def build_samples(logs: str, views=VIEWS, include_unlabeled: bool = False,
+                  channel_only_labels: Optional[str] = None):
+    logs = _abs(logs)
+    co_labels = load_channel_only_labels(channel_only_labels) if channel_only_labels else {}
     paths = sorted(glob.glob(os.path.join(logs, "*.json"))) if os.path.isdir(logs) else sorted(glob.glob(logs))
     samples = []
     for path in paths:
         for game in load_games(path):
             label = LABELS.get(game["condition"])
+            label_source = "condition"
+            if game["condition"] == "channel_only":
+                label = co_labels.get((os.path.basename(path), game["trial_id"]))
+                label_source = "labeler"
             if label is None and not include_unlabeled:
                 continue
             game_id = f"{game['game_type']}/{os.path.basename(path)[:-5]}/t{game['trial_id']}"
@@ -59,6 +79,7 @@ def build_samples(logs: str, views=VIEWS, include_unlabeled: bool = False):
                         "game_id": game_id, "game_type": game["game_type"], "view": view,
                         "condition": game["condition"], "pair": game["pair"], "file": path,
                         "upper_bound": view in UPPER_BOUND_VIEWS,
+                        "label_source": label_source if label else None,
                     },
                 ))
     return samples
@@ -118,10 +139,10 @@ def monitor_scorer():
 
 @task
 def collusion_monitor(logs: str = "plumbing_tests/smoke_seed11", views: str = ",".join(VIEWS),
-                      include_unlabeled: bool = False):
+                      include_unlabeled: bool = False, channel_only_labels: Optional[str] = None):
     view_list = [v.strip() for v in views.split(",") if v.strip()]
     return Task(
-        dataset=MemoryDataset(build_samples(logs, view_list, include_unlabeled)),
+        dataset=MemoryDataset(build_samples(logs, view_list, include_unlabeled, channel_only_labels)),
         solver=generate(),
         scorer=monitor_scorer(),
         config=GenerateConfig(temperature=0.0, max_tokens=800),
