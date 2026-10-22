@@ -237,11 +237,26 @@ def _parse_response(response: Any, action_fields: List[str]) -> Dict[str, Any]:
     return extracted
 
 
+_VALID_BINARY_ACTIONS = {
+    "volunteer": {"YES", "NO"},
+    "elfarol":   {"GO", "STAY"},
+    "diners":    {"EXPENSIVE", "CHEAP"},
+    "voting":    {"YES", "NO"},
+}
+
+
 def _normalize_action(action: Any, game_type: str) -> Any:
-    """Normalize an action to canonical form (int for numeric games, str for binary)."""
+    """Normalize an action to canonical form (int for numeric games, str for binary).
+
+    For binary games, a value outside the game's valid actions returns None,
+    so it is counted as a parse error.
+    """
     binary_str_games = {"volunteer", "elfarol", "diners", "voting"}
     if game_type in binary_str_games:
-        return str(action).strip().upper() if action is not None else None
+        if action is None:
+            return None
+        action = str(action).strip().upper()
+        return action if action in _VALID_BINARY_ACTIONS[game_type] else None
     else:
         if action is None:
             return None

@@ -188,3 +188,17 @@ Listed for disclosure in the sprint report. Dates are in UTC.
     their combined payoff. Neither revealed the partnership publicly.
 - Logs and gzipped request dumps copied to `plumbing_tests/smoke_seed11/` (marked NOT DATA).
 - Total spend so far: **$0.388**.
+
+### Fix: invalid actions count as parse errors (participant's decision)
+- `trial_runner._normalize_action`: for binary-action games (volunteer, elfarol, diners,
+  voting), a value outside the game's valid actions now returns None. So it is marked
+  `_parse_ok: false` and counted in "Parse errors". Before, any non-empty string was
+  accepted. Whitespace and case are still normalised (" yes " → "YES"). This applies to both
+  runners. Numeric-action games are unchanged (no range check).
+- Consequences: the invalid raw value is no longer kept in the results log (it remains in
+  the `--dump-requests` file if one was written). An invalid final action is scored with the
+  game's default (STAY/NO), as before.
+- Checks: new test `test_invalid_action_is_parse_error` passes. All 13 tests pass. The
+  offline El Farol snapshot (all conditions, judge on/off) is still byte-for-byte identical.
+- The Step 3 smoke logs were produced before this fix and are not re-run. Under the fix,
+  `elfarol_instructed` round 1 Agent F stage 2 would be a parse error.

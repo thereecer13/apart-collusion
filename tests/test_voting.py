@@ -143,6 +143,32 @@ def test_action_format_is_yes_no():
             assert '"YES" or "NO"' in r["messages"][1]["content"], r["custom_id"]
 
 
+def test_invalid_action_is_parse_error():
+    class InvalidStub(SincereStub):
+        def execute_parallel(self, reqs):
+            out = super().execute_parallel(reqs)
+            for r in reqs:
+                cid = r["custom_id"]
+                if cid.endswith("_s2_F"):
+                    out[cid]["stated_action"] = "UNDECIDED"
+                if cid.endswith("_s3_G"):
+                    out[cid]["choice"] = "maybe"
+                if cid.endswith("_s1_J"):
+                    out[cid]["intended_action"] = " yes "   # valid after normalising
+            return out
+
+    rounds = run_all_trials(
+        game_type="voting", agent_names=AGENTS, game_params={},
+        llm_client=StubLLM(), parallel_client=InvalidStub(),
+        n_trials=1, n_rounds=1, round_robin=True, show_progress=False, run_judge=False,
+    )
+    t = rounds[0]["trials"][0]
+    assert t["agents"]["F"]["stage2"] == {**t["agents"]["F"]["stage2"], "stated_action": None, "_parse_ok": False}
+    assert t["agents"]["G"]["stage3"]["choice"] is None and not t["agents"]["G"]["stage3"]["_parse_ok"]
+    assert t["agents"]["J"]["stage1"]["intended_action"] == "YES" and t["agents"]["J"]["stage1"]["_parse_ok"]
+    assert t["_parse_errors"] == 2
+
+
 if __name__ == "__main__":
     import contextlib, io
     for name, fn in list(globals().items()):
