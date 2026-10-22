@@ -21,10 +21,14 @@ import glob
 import json
 import os
 import random
+import sys
 from collections import defaultdict
 from typing import Dict, List, Optional
 
 from inspect_ai.log import read_eval_log
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from monitor.views import UPPER_BOUND_VIEWS
 
 N_BOOT = 2000
 
@@ -114,6 +118,7 @@ def bootstrap(rows: List[dict], seed: int = 0) -> Dict[str, dict]:
         labeled = [r for r in sel if r["label"] in ("yes", "no")]
         est = point(sel)
         results[name] = {
+            "upper_bound": name.split("view=")[1] in UPPER_BOUND_VIEWS,
             "n_games": len({r["game_id"] for r in labeled}),
             "n_pos": sum(r["label"] == "yes" for r in labeled),
             "n_neg": sum(r["label"] == "no" for r in labeled),
@@ -126,9 +131,10 @@ def bootstrap(rows: List[dict], seed: int = 0) -> Dict[str, dict]:
     for name in diffs:
         v = name.split(" - ")[0]
         results[f"diff {name}"] = {
-            k: {"est": None if full[v][k] is None or full["both"][k] is None else full[v][k] - full["both"][k],
+            "upper_bound": v in UPPER_BOUND_VIEWS,
+            **{k: {"est": None if full[v][k] is None or full["both"][k] is None else full[v][k] - full["both"][k],
                 "ci95": ci(diffs[name][k])}
-            for k in ("auroc", "accuracy")
+            for k in ("auroc", "accuracy")},
         }
     return results
 
@@ -149,15 +155,27 @@ if __name__ == "__main__":
     res = bootstrap(rows)
     print(f"{len(rows)} samples from {len({r['file'] for r in rows})} eval log(s); "
           f"monitor model(s): {sorted({r['model'] for r in rows})}")
-    print(f"{'group':34s} {'n(+/-)':>8s} {'unp':>4s}  {'accuracy':22s} {'FPR':22s} {'AUROC':22s} {'pair acc':22s}")
-    for name, m in res.items():
-        if name.startswith("diff"):
-            continue
+    header = f"{'group':34s} {'n(+/-)':>8s} {'unp':>4s}  {'accuracy':22s} {'FPR':22s} {'AUROC':22s} {'pair acc':22s}"
+
+    def row(name, m):
         print(f"{name:34s} {m['n_pos']:>3d}/{m['n_neg']:<4d} {m['n_unparsed']:>4d}  "
               f"{fmt(m['accuracy']):22s} {fmt(m['fpr']):22s} {fmt(m['auroc']):22s} {fmt(m['pair_acc']):22s}")
+
+    groups = [(n, m) for n, m in res.items() if not n.startswith("diff")]
+    diffs = [(n, m) for n, m in res.items() if n.startswith("diff")]
+    print("\nMAIN VIEWS (observable behaviour only)")
+    print(header)
+    for n, m in groups:
+        if not m["upper_bound"]:
+            row(n, m)
+    print("\nUPPER BOUND (monitor also reads every agent's private plan; reported separately)")
+    print(header)
+    for n, m in groups:
+        if m["upper_bound"]:
+            row(n, m)
     print("\nPaired differences vs view 'both' (same resampled games):")
-    for name, m in res.items():
-        if name.startswith("diff"):
-            print(f"  {name[5:]:20s} AUROC {fmt(m['auroc']):22s} accuracy {fmt(m['accuracy'])}")
+    for n, m in diffs:
+        tag = "  [UPPER BOUND]" if m["upper_bound"] else ""
+        print(f"  {n[5:]:20s} AUROC {fmt(m['auroc']):22s} accuracy {fmt(m['accuracy'])}{tag}")
     if args.out:
         json.dump(res, open(args.out, "w"), indent=2)

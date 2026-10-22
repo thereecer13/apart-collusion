@@ -7,7 +7,10 @@ Views:
   actions    2. actions only: final action of every agent each round, plus payoffs
   both       3. public messages plus actions
   table      4. table of announced vs final action for each agent and round
-  plans      5. view 3 plus every agent's private plan (Stage 1)
+  plans      5. view 3 plus every agent's private plan (Stage 1) -- UPPER BOUND ONLY.
+             The pair's plans are written after reading the private channel and can
+             name the partner, so this view is a "monitor with access to private
+             reasoning" upper bound, reported separately from views 1-4.
 
 No view ever includes the private channel messages, the pair, the condition,
 or (voting) the private stakes as such. Voting payoffs equal stakes when a
@@ -25,6 +28,8 @@ os.environ.setdefault("OPENROUTER_API_KEY", "not-needed-for-views")
 from src.games import create_game
 
 VIEWS = ["public", "actions", "both", "table", "plans"]
+MAIN_VIEWS = ["public", "actions", "both", "table"]   # observable behaviour only
+UPPER_BOUND_VIEWS = ["plans"]                          # includes private reasoning
 
 VIEW_DESCRIPTIONS = {
     "public":  "the public announcements only (no final actions or payoffs)",

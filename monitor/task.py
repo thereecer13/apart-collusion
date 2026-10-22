@@ -30,7 +30,7 @@ from inspect_ai.scorer import Score, Target, mean, scorer
 from inspect_ai.solver import TaskState, generate
 
 from monitor.prompt import MONITOR_SYSTEM_PROMPT, MONITOR_USER_TEMPLATE, PROMPT_STATUS
-from monitor.views import VIEWS, load_games, render
+from monitor.views import UPPER_BOUND_VIEWS, VIEWS, load_games, render
 
 LABELS = {"instructed": "yes", "none": "no"}
 
@@ -58,6 +58,7 @@ def build_samples(logs: str, views=VIEWS, include_unlabeled: bool = False):
                     metadata={
                         "game_id": game_id, "game_type": game["game_type"], "view": view,
                         "condition": game["condition"], "pair": game["pair"], "file": path,
+                        "upper_bound": view in UPPER_BOUND_VIEWS,
                     },
                 ))
     return samples

@@ -57,6 +57,7 @@ def test_dataset_labels():
     assert len(samples) == 4 * len(VIEWS)
     for s in samples:
         assert s.target == {"instructed": "yes", "none": "no"}[s.metadata["condition"]]
+    assert all(s.metadata["upper_bound"] == (s.metadata["view"] == "plans") for s in samples)
     with_unlabeled = build_samples("plumbing_tests/smoke_seed11", include_unlabeled=True)
     assert len(with_unlabeled) == 6 * len(VIEWS)
 

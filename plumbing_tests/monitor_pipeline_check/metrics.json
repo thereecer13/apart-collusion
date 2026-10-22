@@ -1,5 +1,6 @@
 {
   "view=actions": {
+    "upper_bound": false,
     "n_games": 4,
     "n_pos": 2,
     "n_neg": 2,
@@ -34,6 +35,7 @@
     }
   },
   "view=both": {
+    "upper_bound": false,
     "n_games": 4,
     "n_pos": 2,
     "n_neg": 2,
@@ -68,6 +70,7 @@
     }
   },
   "view=plans": {
+    "upper_bound": true,
     "n_games": 4,
     "n_pos": 2,
     "n_neg": 2,
@@ -102,6 +105,7 @@
     }
   },
   "view=public": {
+    "upper_bound": false,
     "n_games": 4,
     "n_pos": 2,
     "n_neg": 2,
@@ -136,6 +140,7 @@
     }
   },
   "view=table": {
+    "upper_bound": false,
     "n_games": 4,
     "n_pos": 2,
     "n_neg": 2,
@@ -170,6 +175,7 @@
     }
   },
   "game=elfarol view=actions": {
+    "upper_bound": false,
     "n_games": 2,
     "n_pos": 1,
     "n_neg": 1,
@@ -204,6 +210,7 @@
     }
   },
   "game=elfarol view=both": {
+    "upper_bound": false,
     "n_games": 2,
     "n_pos": 1,
     "n_neg": 1,
@@ -238,6 +245,7 @@
     }
   },
   "game=elfarol view=plans": {
+    "upper_bound": true,
     "n_games": 2,
     "n_pos": 1,
     "n_neg": 1,
@@ -272,6 +280,7 @@
     }
   },
   "game=elfarol view=public": {
+    "upper_bound": false,
     "n_games": 2,
     "n_pos": 1,
     "n_neg": 1,
@@ -306,6 +315,7 @@
     }
   },
   "game=elfarol view=table": {
+    "upper_bound": false,
     "n_games": 2,
     "n_pos": 1,
     "n_neg": 1,
@@ -340,6 +350,7 @@
     }
   },
   "game=voting view=actions": {
+    "upper_bound": false,
     "n_games": 2,
     "n_pos": 1,
     "n_neg": 1,
@@ -374,6 +385,7 @@
     }
   },
   "game=voting view=both": {
+    "upper_bound": false,
     "n_games": 2,
     "n_pos": 1,
     "n_neg": 1,
@@ -408,6 +420,7 @@
     }
   },
   "game=voting view=plans": {
+    "upper_bound": true,
     "n_games": 2,
     "n_pos": 1,
     "n_neg": 1,
@@ -442,6 +455,7 @@
     }
   },
   "game=voting view=public": {
+    "upper_bound": false,
     "n_games": 2,
     "n_pos": 1,
     "n_neg": 1,
@@ -476,6 +490,7 @@
     }
   },
   "game=voting view=table": {
+    "upper_bound": false,
     "n_games": 2,
     "n_pos": 1,
     "n_neg": 1,
@@ -510,6 +525,7 @@
     }
   },
   "diff actions - both": {
+    "upper_bound": false,
     "auroc": {
       "est": 0.125,
       "ci95": [
@@ -526,6 +542,7 @@
     }
   },
   "diff plans - both": {
+    "upper_bound": true,
     "auroc": {
       "est": 0.25,
       "ci95": [
@@ -542,6 +559,7 @@
     }
   },
   "diff public - both": {
+    "upper_bound": false,
     "auroc": {
       "est": -0.25,
       "ci95": [
@@ -558,6 +576,7 @@
     }
   },
   "diff table - both": {
+    "upper_bound": false,
     "auroc": {
       "est": -0.25,
       "ci95": [

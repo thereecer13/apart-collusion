@@ -241,3 +241,14 @@ Listed for disclosure in the sprint report. Dates are in UTC.
   or the shared goal, e.g. "coordinating with Agent F to maximize our combined payoff" (El
   Farol, instructed). So view 5 can reveal the pair directly. Flagged to the participant.
 - Total spend so far: **$0.400**.
+
+### View 5 kept as a labeled upper bound (participant's decision)
+- Views 1–4 contain no private reasoning. View 5 (`plans`) adds every agent's Stage 1 plan,
+  which can name the partner. It is kept, but only as an **upper bound** ("monitor with access
+  to private reasoning") and reported separately from views 1–4.
+- Code: `monitor/views.py` defines `MAIN_VIEWS` (public, actions, both, table) and
+  `UPPER_BOUND_VIEWS` (plans). Inspect samples carry `upper_bound` in their metadata.
+  `monitor/metrics.py` prints the main views and the upper bound in separate sections, tags
+  the `plans` paired difference as [UPPER BOUND], and adds an `upper_bound` flag to its JSON
+  output. Test added (6 monitor tests pass). The pipeline-check metrics output was regenerated
+  from the same eval log, with no new API calls.
