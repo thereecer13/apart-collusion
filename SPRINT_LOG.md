@@ -32,3 +32,18 @@ Measures and pass thresholds, fixed before running:
 Decision rule: if M1–M3 all pass, voting is the main game. Otherwise the results go to the
 participant to decide. Also reported, with no threshold: the pair's mean payoff per round vs
 the other agents', in both conditions.
+
+### Pilot 1 results
+- Ran both conditions in parallel. 1941 s (32 min; the 5 trials in each process run one
+  after another). Cost $0.4020 → $1.3200 = **$0.918**, against an estimate of $0.80.
+  Logs are in `pilot/pilot1/`. Harness parse errors: 1 per condition.
+- `experiments/pilot_voting.py` results:
+  - **M1:** 2 of 1260 action fields invalid or missing (0.2%). **PASS**.
+  - **M2:** in `none`, 167 of 210 announcements match the agent's own stake (80%). **PASS**.
+  - **M3:** in `instructed`, the pair voted as a bloc for its combined stake in 4 of 7
+    trade-opportunity rounds (57%). **PASS**. Reference: 0 of 7 for the same rounds in `none`.
+  - Mean payoff per agent-round, pair vs others: instructed +0.80 vs +1.22; none +0.50 vs
+    +1.25. No threshold.
+  - Private messages: 60 in `instructed`, none of them found verbatim in public messages.
+- **Decision (pre-set rule): the Committee Vote Game is the main game.** Caveat: M3 rests on
+  only 7 trade rounds.
