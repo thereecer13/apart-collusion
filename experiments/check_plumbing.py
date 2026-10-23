@@ -1,13 +1,16 @@
 """
-Plumbing checks for one game run with a private channel condition.
+Plumbing checks for a run with a private channel condition (one or more games).
 
-Uses the results JSON plus the --dump-requests JSONL from the same run.
-Checks parsing, private-message routing and logging, condition prompts,
-voting stakes, and payoffs. It does not look at behaviour.
+Uses the results JSON plus the --dump-requests JSONL (optionally .gz) from the
+same run. Checks each game separately: parsing, private-message routing and
+logging, condition prompts, voting stakes, and payoffs. It does not look at
+behaviour. Parse problems (invalid or missing actions, which the harness counts
+as parse errors) are reported separately from plumbing failures.
 
-Run:  python experiments/check_plumbing.py RESULTS.json REQUESTS.jsonl
+Run:  python experiments/check_plumbing.py RESULTS.json REQUESTS.jsonl[.gz]
 """
 
+import gzip
 import json
 import os
 import re
@@ -36,32 +39,40 @@ def stage_of(cid):
 
 
 def load_requests(path):
-    """Requests in send order, each tagged with its round (a new round starts at the first s1 after a non-s1)."""
-    out, rnd, prev = [], -1, None
-    with open(path) as f:
+    """All requests in send order, as dicts with custom_id, stage, agent and prompts."""
+    opener = gzip.open if path.endswith(".gz") else open
+    out = []
+    with opener(path, "rt") as f:
         for line in f:
             rec = json.loads(line)
             cid = rec["request"]["custom_id"]
-            st = stage_of(cid)
-            if st == "s1" and prev != "s1":
-                rnd += 1
-            prev = st
             msgs = rec["request"]["messages"]
-            out.append({"cid": cid, "stage": st, "agent": focal_agent(cid), "round": rnd,
+            out.append({"cid": cid, "stage": stage_of(cid), "agent": focal_agent(cid),
                         "system": msgs[0]["content"], "user": msgs[1]["content"]})
     return out
 
 
-def check(results_path, requests_path):
-    data = json.load(open(results_path))
-    game_type = data["metadata"]["game_type"]
-    reqs = load_requests(requests_path)
-    rounds = data["rounds"]
-    fails = []
+def tag_rounds(reqs):
+    """Tag one game's requests with their round: a new round starts at the first s1 after a non-s1."""
+    rnd, prev = -1, None
+    for r in reqs:
+        if r["stage"] == "s1" and prev != "s1":
+            rnd += 1
+        prev = r["stage"]
+        r["round"] = rnd
+    return reqs
 
-    def expect(cond, msg):
+
+def check_game(data, tid, reqs):
+    """Checks for one game (trial index tid); reqs = that game's requests only."""
+    game_type = data["metadata"]["game_type"]
+    rounds = [{"round_id": rd["round_id"], "trials": [rd["trials"][tid]]} for rd in data["rounds"]]
+    reqs = tag_rounds(reqs)
+    fails, parse_issues = [], []
+
+    def expect(cond, msg, parse=False):
         if not cond:
-            fails.append(msg)
+            (parse_issues if parse else fails).append(msg)
 
     trial0 = rounds[0]["trials"][0]
     pc0 = trial0["private_channel"]
@@ -77,12 +88,12 @@ def check(results_path, requests_path):
         t = rd["trials"][0]
         for a, ad in t["agents"].items():
             for s, field in fields.items():
-                expect(ad[s]["_parse_ok"], f"r{rd['round_id']+1} {a} {s} parse failed")
-                expect(ad[s][field] in valid, f"r{rd['round_id']+1} {a} {s} invalid action {ad[s][field]!r}")
+                expect(ad[s]["_parse_ok"] and ad[s][field] in valid,
+                       f"r{rd['round_id']+1} {a} {s} invalid/missing action {ad[s][field]!r}", parse=True)
             if "reflection" in ad:
-                expect(ad["reflection"]["_parse_ok"], f"r{rd['round_id']+1} {a} reflection parse failed")
+                expect(ad["reflection"]["_parse_ok"], f"r{rd['round_id']+1} {a} reflection parse failed", parse=True)
         for m in t["private_channel"]["messages"]:
-            expect(m["_parse_ok"] and m["message"].strip(), f"r{rd['round_id']+1} private message parse failed")
+            expect(m["_parse_ok"] and m["message"].strip(), f"r{rd['round_id']+1} private message parse failed", parse=True)
 
     # 2. Private messages: count, routing, visibility in later prompts, separate logging
     all_msgs = [m for rd in rounds for m in rd["trials"][0]["private_channel"]["messages"]]
@@ -128,13 +139,32 @@ def check(results_path, requests_path):
         expect(game.evaluate(t["outcomes"]["choices"]) == t["outcomes"]["payoffs"],
                f"r{rd['round_id']+1} payoffs do not match the rules")
 
-    return condition, pair, len(reqs), len(all_msgs), fails
+    return condition, pair, len(reqs), len(all_msgs), fails, parse_issues
+
+
+def check(results_path, requests_path):
+    """Check every game in a results file. Returns a list of per-game results."""
+    data = json.load(open(results_path))
+    all_reqs = load_requests(requests_path)
+    out = []
+    for tid, t in enumerate(data["rounds"][0]["trials"]):
+        prefix = f"t{t['trial_id']}_"
+        reqs = [r for r in all_reqs if r["cid"].startswith(prefix)]
+        out.append((t["trial_id"],) + check_game(data, tid, reqs))
+    return out
+
+
 
 
 if __name__ == "__main__":
-    condition, pair, n_req, n_msg, fails = check(sys.argv[1], sys.argv[2])
-    print(f"{os.path.basename(sys.argv[1])}: condition={condition} pair={pair} "
-          f"requests={n_req} private_messages={n_msg} -> {'PASS' if not fails else 'FAIL'}")
-    for f in fails[:20]:
-        print("   ", f)
-    sys.exit(1 if fails else 0)
+    any_fail = False
+    for tid, condition, pair, n_req, n_msg, fails, parse_issues in check(sys.argv[1], sys.argv[2]):
+        any_fail |= bool(fails)
+        print(f"{os.path.basename(sys.argv[1])} t{tid}: condition={condition} pair={pair} "
+              f"requests={n_req} private_messages={n_msg} -> {'PASS' if not fails else 'FAIL'}"
+              f" (parse issues: {len(parse_issues)})")
+        for f in fails[:20]:
+            print("   ", f)
+        for f in parse_issues[:5]:
+            print("    parse:", f)
+    sys.exit(1 if any_fail else 0)
