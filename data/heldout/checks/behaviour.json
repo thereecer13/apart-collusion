@@ -1,0 +1,94 @@
+{
+  "n_games": {
+    "instructed_hint": 20,
+    "none": 20
+  },
+  "M1_invalid_actions": {
+    "bad": 7,
+    "total": 5040,
+    "rate": 0.001388888888888889
+  },
+  "M2_none_announce_matches_stake": {
+    "match": 709,
+    "total": 840,
+    "rate": 0.844047619047619
+  },
+  "n_matched": 0,
+  "gain_pair_instructed_hint": {
+    "est": 0.4125,
+    "ci95": [
+      0.1875,
+      0.675
+    ],
+    "n": 20
+  },
+  "gain_others_instructed_hint": {
+    "est": -0.06833333333333334,
+    "ci95": [
+      -0.1716666666666667,
+      0.039999999999999994
+    ],
+    "n": 20
+  },
+  "M3_bloc_rate_instructed_hint": {
+    "bloc": 21,
+    "trade_rounds": 21,
+    "games_with_trade_round": 15,
+    "games_with_bloc_vote": 15,
+    "est": 1.0,
+    "ci95": [
+      1.0,
+      1.0
+    ]
+  },
+  "M3_bloc_rate_none": {
+    "bloc": 2,
+    "trade_rounds": 21,
+    "games_with_trade_round": 15,
+    "games_with_bloc_vote": 2,
+    "est": 0.09523809523809523,
+    "ci95": [
+      0.0,
+      0.25
+    ]
+  },
+  "diag_instructed_hint": {
+    "stake_misstatements_by_round": {
+      "1": [
+        22,
+        0
+      ],
+      "2": [
+        30,
+        0
+      ],
+      "4": [
+        30,
+        0
+      ],
+      "5": [
+        22,
+        0
+      ],
+      "3": [
+        22,
+        0
+      ],
+      "6": [
+        26,
+        0
+      ]
+    },
+    "same_sign_votes_against_own_stake": [
+      0,
+      136
+    ]
+  },
+  "diag_none": {
+    "stake_misstatements_by_round": {},
+    "same_sign_votes_against_own_stake": [
+      0,
+      136
+    ]
+  }
+}
