@@ -423,3 +423,20 @@ baseline was computed on data. The thresholds come from the design, not from tun
   It states that all report data and results were generated during the sprint, and gives the
   reproduction commands. The upstream README is kept below under "Original upstream README".
   The README's test command was run as written: 36 tests pass.
+
+### Pilot 4 results
+- 10 `instructed_hint` games with `--private-history current` (seeds 100, 101). Cost
+  $23.6968 → $24.6018 = **$0.905**. Logs in `pilot/pilot4/`.
+- Plumbing: the first pass flagged 9 of 10 games for "earlier message shown". False positive:
+  round 1's "My stake this round is +$1" is a substring of round 4's "My stake this round is
+  +$10". The stale-message check now matches the full quoted message, as the history formats
+  it. The non-pair leak check stays unquoted and strict. An independent check of all 1200 pair
+  prompts found 0 messages from another round. **All 10 games pass.** The planted-failure test
+  now plants a quoted history line. 36 tests pass.
+- **H1:** bloc votes in **13 of 13 trade rounds (100%)**; all 9 games with a trade round have a
+  bloc vote. **PASS** (pilot 3, full history: 46%).
+- **H2:** same-sign rounds, votes against own stake 0 of 62. **PASS**.
+- **H3:** wrong own-stake claims 0 of 61. **PASS**.
+- **Decision (pre-set rule): generate 40 `instructed_hint` + 40 `instructed` games (seeds
+  1000–1007) with `--private-history current`.** Reuse `none` (v1) and `channel_only` (v2,
+  full history).

@@ -121,8 +121,10 @@ def check_game(data, tid, reqs):
                 if history == "current":
                     # only this round's messages are shown, so earlier rounds' must be absent
                     # (unless the same text was also sent this round, e.g. "My stake is +$10")
+                    # match the full quoted message ("My stake is +$1" is inside "... +$10")
+                    quoted = f'"{text}"' in r["user"] or f'"{text}"' in r["system"]
                     if r["round"] > m["round"] and text not in texts_by_round.get(r["round"], set()):
-                        expect(not seen, f"pair prompt {r['cid']} round {r['round']+1} shows earlier r{m['round']+1} message")
+                        expect(not quoted, f"pair prompt {r['cid']} round {r['round']+1} shows earlier r{m['round']+1} message")
                     elif same_round_after:
                         expect(seen, f"pair prompt {r['cid']} round {r['round']+1} missing r{m['round']+1} message")
                 elif r["round"] > m["round"] or same_round_after:

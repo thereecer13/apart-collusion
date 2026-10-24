@@ -53,7 +53,7 @@ def make_run(tmp, leak_into=None, note_into=None, history="full", stale_into=Non
     if stale_into:  # (custom_id, occurrence): put round-1 message of game 0 into a later prompt
         secret = rounds[0]["trials"][0]["private_channel"]["messages"][0]["message"]
         hits = [r for r in reqs if r["custom_id"] == stale_into[0]]
-        hits[stale_into[1]]["messages"][1]["content"] += secret
+        hits[stale_into[1]]["messages"][1]["content"] += f'\n  Agent X -> Agent Y: "{secret}"'
     if note_into:
         for r in reqs:
             if r["custom_id"] == note_into:
