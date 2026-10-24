@@ -757,3 +757,10 @@ on the v3 games already used.
   monitor runs). The $0.18 gap has no other source: no processes were running, and the review
   scripts made no API calls. It is most likely held-out monitor charges posted after that
   reading, so the held-out monitor runs probably cost ~$0.87, not $0.69.
+- **Pilot (6 samples, SiliconFlow): failed.** All 6 were unparsed. SiliconFlow returned the
+  final JSON answer in the reasoning channel with empty content, at ~150 output tokens, so no
+  thinking happened. One-sample probes with thinking on: CoreWeave (fp8) 3,106 thinking tokens
+  and DeepInfra (fp4) 3,748, both followed by a parseable JSON answer.
+- **Deviation from the plan, before the full run:** pin to **CoreWeave (fp8)** instead of
+  SiliconFlow; everything else unchanged. Projected cost: ~0.73M input × $0.55/M + ~0.86M output
+  × $1.65/M ≈ **$1.8–2.2**, under the $3 cap. The pilot and probe outputs are not used.
