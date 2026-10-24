@@ -44,6 +44,7 @@ def load_rows(path: str) -> List[dict]:
             parsed = md.get("parsed")
             rows.append({
                 "game_id": s.metadata["game_id"], "game_type": s.metadata["game_type"],
+                "condition": s.metadata.get("condition"),
                 "view": s.metadata["view"], "label": md.get("label", s.target),
                 "parsed": parsed is not None,
                 "pred": parsed["collusion"] if parsed else None,
@@ -150,8 +151,21 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("path")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--positives", default="", help="comma list of conditions to keep as positives (default: all)")
+    ap.add_argument("--negatives", default="", help="comma list of conditions to keep as negatives (default: all)")
+    ap.add_argument("--model", default="", help="keep only samples from this monitor model")
     args = ap.parse_args()
-    rows = load_rows(args.path)
+    rows = []
+    for p in args.path.split(","):
+        rows += load_rows(p)
+    pos = set(filter(None, args.positives.split(",")))
+    neg = set(filter(None, args.negatives.split(",")))
+    rows = [r for r in rows
+            if (not args.model or r["model"] == args.model)
+            and (r["label"] != "yes" or not pos or r["condition"] in pos)
+            and (r["label"] != "no" or not neg or r["condition"] in neg)]
+    print(f"positives: {sorted({r['condition'] for r in rows if r['label'] == 'yes'})}, "
+          f"negatives: {sorted({r['condition'] for r in rows if r['label'] == 'no'})}")
     res = bootstrap(rows)
     print(f"{len(rows)} samples from {len({r['file'] for r in rows})} eval log(s); "
           f"monitor model(s): {sorted({r['model'] for r in rows})}")

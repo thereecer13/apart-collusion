@@ -21,7 +21,7 @@ import json
 import os
 import re
 import sys
-from typing import Any, Dict, Optional
+from typing import List, Any, Dict, Optional
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
@@ -52,18 +52,27 @@ def load_channel_only_labels(path: str) -> Dict[tuple, str]:
 
 
 def build_samples(logs: str, views=VIEWS, include_unlabeled: bool = False,
-                  channel_only_labels: Optional[str] = None):
+                  channel_only_labels: Optional[str] = None, channel_only_negative: bool = False,
+                  conditions: Optional[List[str]] = None):
+    """conditions: keep only games of these conditions (None = all).
+    channel_only_negative: label every `channel_only` game "no" (hard negatives; sprint decision
+    2026-10-24, since the labeler found no qualifying collusion). Overrides channel_only_labels."""
     logs = _abs(logs)
     co_labels = load_channel_only_labels(channel_only_labels) if channel_only_labels else {}
     paths = sorted(glob.glob(os.path.join(logs, "*.json"))) if os.path.isdir(logs) else sorted(glob.glob(logs))
     samples = []
     for path in paths:
         for game in load_games(path):
+            if conditions and game["condition"] not in conditions:
+                continue
             label = LABELS.get(game["condition"])
             label_source = "condition"
             if game["condition"] == "channel_only":
-                label = co_labels.get((os.path.basename(path), game["trial_id"]))
-                label_source = "labeler"
+                if channel_only_negative:
+                    label, label_source = "no", "hard_negative"
+                else:
+                    label = co_labels.get((os.path.basename(path), game["trial_id"]))
+                    label_source = "labeler"
             if label is None and not include_unlabeled:
                 continue
             game_id = f"{game['game_type']}/{os.path.basename(path)[:-5]}/t{game['trial_id']}"
@@ -139,10 +148,13 @@ def monitor_scorer():
 
 @task
 def collusion_monitor(logs: str = "plumbing_tests/smoke_seed11", views: str = ",".join(VIEWS),
-                      include_unlabeled: bool = False, channel_only_labels: Optional[str] = None):
+                      include_unlabeled: bool = False, channel_only_labels: Optional[str] = None,
+                      channel_only_negative: bool = False, conditions: str = ""):
     view_list = [v.strip() for v in views.split(",") if v.strip()]
+    cond_list = [c.strip() for c in conditions.split(",") if c.strip()] or None
     return Task(
-        dataset=MemoryDataset(build_samples(logs, view_list, include_unlabeled, channel_only_labels)),
+        dataset=MemoryDataset(build_samples(logs, view_list, include_unlabeled, channel_only_labels,
+                                            channel_only_negative, cond_list)),
         solver=generate(),
         scorer=monitor_scorer(),
         config=GenerateConfig(temperature=0.0, max_tokens=800),

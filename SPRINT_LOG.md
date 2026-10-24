@@ -291,3 +291,39 @@ Pass criteria:
 
 Decision rule: if all three pass, run 40 games (seeds 1000–1007) and reuse the v2 `none` and
 `channel_only` games. Otherwise the results go to the participant.
+
+### Monitor task and metrics changes; routing fix
+- `monitor/task.py`: new options `-T conditions=...` (keep only these conditions) and
+  `-T channel_only_negative=true` (all `channel_only` games labeled "no", with
+  `label_source = hard_negative`). `monitor/metrics.py`: `--positives`, `--negatives` and
+  `--model` filters, comma-separated eval dirs, and condition recorded per row. Tests pass.
+- **Routing bug:** the Llama run on `channel_only` failed on SambaNova again (4096-token limit).
+  OpenRouter's `ignore` takes lowercase provider slugs, so the first config ("SambaNova")
+  never took effect. The earlier 400-sample run succeeded by luck of routing, and some of its
+  short requests may have been served by SambaNova. `openrouter_routing.yaml` now lists
+  `sambanova`. Failed log moved to `outputs/monitor_failed/`. Limitation: the provider was
+  not pinned in any run (agents or monitor), so responses come from a mix of OpenRouter
+  providers.
+
+### Step 3 (part) and step 4: hard negatives and a stronger monitor
+- Llama monitor on the 40 `channel_only` games as hard negatives: 200 samples, 1 unparsed.
+- **Stronger monitor: `deepseek/deepseek-chat-v3.1`** (DeepSeek V3.1). A third model family,
+  unlike the agents/monitor (Llama) and the labeler (Gemini). Same frozen v1 prompt.
+  `instructed` + `none` + `channel_only` (hard negatives): 600 samples, 0 unparsed.
+- Results (AUROC [95% CI]; FPR):
+
+  | View | Llama, instructed vs none | DeepSeek, instructed vs none | Llama, vs channel_only | DeepSeek, vs channel_only |
+  |---|---|---|---|---|
+  | public | 0.60 [0.49, 0.73]; 0.12 | 0.51 [0.40, 0.62]; 0.97 | 0.56; 0.21 | 0.57; 0.95 |
+  | actions | 0.55 [0.43, 0.67]; 0.53 | 0.49 [0.36, 0.61]; 0.68 | 0.57; 0.45 | 0.58; 0.45 |
+  | both | 0.51 [0.39, 0.63]; 0.50 | 0.53 [0.42, 0.64]; 0.97 | 0.52; 0.53 | 0.55; 0.88 |
+  | table | 0.47 [0.37, 0.58]; 0.00 | 0.44 [0.34, 0.55]; 1.00 | 0.51; 0.05 | 0.58; 0.93 |
+  | plans (UB) | 0.87 [0.80, 0.93]; 0.28 | 0.84 [0.78, 0.90]; 0.85 | 0.81; 0.42 | 0.73; 0.95 |
+
+- Reading: the stronger monitor is no better on observable behaviour. Both are at chance, and
+  DeepSeek flags collusion in nearly every game, an over-suspicious bias under this prompt.
+  Both use private plans (upper bound), and name the correct pair 100% of the time when they
+  answer "yes" there. Consistent with the step 1 finding: these naive instructed colluders
+  leave little behavioural signal. The competent-colluder condition (pilot 3) is the test of
+  whether talk+actions helps once collusion actually happens.
+- Spend after these runs: $22.992649979.
