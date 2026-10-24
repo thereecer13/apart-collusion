@@ -440,3 +440,17 @@ baseline was computed on data. The thresholds come from the design, not from tun
 - **Decision (pre-set rule): generate 40 `instructed_hint` + 40 `instructed` games (seeds
   1000–1007) with `--private-history current`.** Reuse `none` (v1) and `channel_only` (v2,
   full history).
+
+### Plan for the rest of the sprint (participant agreed, 2026-10-24)
+- **Main dataset:** v3 games (`instructed` = naive and `instructed_hint` = competent colluders,
+  both with `--private-history current`) against the 40 `none` games. The v1 and v2 batches go
+  to an appendix, as the account of how the confounds were found and fixed.
+- `channel_only` hard negatives (v2, full history) are reported with that caveat, or in an
+  appendix.
+- **El Farol is dropped** (future work).
+- Steps:
+  1. analysis: plumbing, behaviour, both monitors, baselines on v3;
+  2. one main figure;
+  3. report draft from the logs, for the participant to edit;
+  4. package and submit before Sun Oct 25 11:59 PM AoE.
+- Hand-labeling `channel_only` is optional (`channel_only` is secondary).
