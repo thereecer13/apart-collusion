@@ -1,0 +1,30 @@
+positives: ['instructed'], negatives: ['none']
+560 samples from 2 eval log(s); monitor model(s): ['openrouter/meta-llama/llama-3.3-70b-instruct']
+
+MAIN VIEWS (observable behaviour only)
+group                                n(+/-)  unp  accuracy               FPR                    AUROC                  pair acc              
+view=actions                        40/40      0  0.57 [0.47, 0.68]      0.40 [0.25, 0.55]      0.55 [0.44, 0.67]      0.05 [0.00, 0.12]     
+view=both                           40/40      0  0.55 [0.44, 0.66]      0.42 [0.27, 0.57]      0.53 [0.41, 0.65]      0.03 [0.00, 0.08]     
+view=outcomes                       40/40      0  0.47 [0.36, 0.57]      0.20 [0.09, 0.33]      0.47 [0.36, 0.58]      0.00 [0.00, 0.00]     
+view=outcomes_flagged               40/40      0  0.55 [0.44, 0.66]      0.00 [0.00, 0.00]      0.55 [0.45, 0.65]      0.03 [0.00, 0.08]     
+view=public                         40/40      0  0.50 [0.39, 0.60]      0.20 [0.08, 0.33]      0.52 [0.40, 0.64]      0.00 [0.00, 0.00]     
+view=table                          40/40      0  0.49 [0.38, 0.59]      0.03 [0.00, 0.09]      0.47 [0.36, 0.57]      0.00 [0.00, 0.00]     
+game=voting view=actions            40/40      0  0.57 [0.47, 0.68]      0.40 [0.25, 0.55]      0.55 [0.44, 0.67]      0.05 [0.00, 0.12]     
+game=voting view=both               40/40      0  0.55 [0.44, 0.66]      0.42 [0.27, 0.57]      0.53 [0.41, 0.65]      0.03 [0.00, 0.08]     
+game=voting view=outcomes           40/40      0  0.47 [0.36, 0.57]      0.20 [0.09, 0.33]      0.47 [0.36, 0.58]      0.00 [0.00, 0.00]     
+game=voting view=outcomes_flagged   40/40      0  0.55 [0.44, 0.66]      0.00 [0.00, 0.00]      0.55 [0.45, 0.65]      0.03 [0.00, 0.08]     
+game=voting view=public             40/40      0  0.50 [0.39, 0.60]      0.20 [0.08, 0.33]      0.52 [0.40, 0.64]      0.00 [0.00, 0.00]     
+game=voting view=table              40/40      0  0.49 [0.38, 0.59]      0.03 [0.00, 0.09]      0.47 [0.36, 0.57]      0.00 [0.00, 0.00]     
+
+UPPER BOUND (monitor also reads every agent's private plan; reported separately)
+group                                n(+/-)  unp  accuracy               FPR                    AUROC                  pair acc              
+view=plans                          40/40      0  0.89 [0.81, 0.95]      0.23 [0.10, 0.36]      0.89 [0.82, 0.95]      1.00 [1.00, 1.00]     
+game=voting view=plans              40/40      0  0.89 [0.81, 0.95]      0.23 [0.10, 0.36]      0.89 [0.82, 0.95]      1.00 [1.00, 1.00]     
+
+Paired differences vs view 'both' (same resampled games):
+  actions - both       AUROC 0.02 [-0.10, 0.14]     accuracy 0.02 [-0.09, 0.14]
+  outcomes - both      AUROC -0.06 [-0.18, 0.06]    accuracy -0.08 [-0.20, 0.05]
+  outcomes_flagged - both AUROC 0.02 [-0.14, 0.18]     accuracy 0.00 [-0.16, 0.14]
+  plans - both         AUROC 0.36 [0.25, 0.48]      accuracy 0.34 [0.22, 0.45]  [UPPER BOUND]
+  public - both        AUROC -0.01 [-0.16, 0.15]    accuracy -0.05 [-0.20, 0.10]
+  table - both         AUROC -0.06 [-0.23, 0.09]    accuracy -0.06 [-0.21, 0.08]

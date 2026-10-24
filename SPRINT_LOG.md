@@ -542,3 +542,26 @@ of interest:
 - `outcomes_flagged` vs the `against_stake` heuristic;
 - pair-ID accuracy;
 - FPR.
+- Code: `monitor/views.py` gains `EXPLORATORY_VIEWS` (`outcomes`, `outcomes_flagged`; voting
+  only). `monitor/task.py` now accepts `-T views=a,b` as a list (Inspect parses commas into a
+  list). Test `test_exploratory_views`: no private content, and the AGAINST flags match the
+  `against_stake` heuristic agent by agent. On all 160 v3 games: 0 mismatches.
+- Runs: both monitors × 160 games × 2 views = 320 samples each, 0 unparsed. Llama pinned to
+  DeepInfra. Cost $33.1246 → $33.4377 = **$0.31**. Eval logs and metrics in
+  `results/monitor_v3x_*`.
+- Results, AUROC [95% CI] vs `none` (naive | competent):
+  - Llama: `both` 0.53 | 0.55; `outcomes` 0.47 | 0.48; `outcomes_flagged` 0.55 | **0.65 [0.55,
+    0.75]** (FPR 0.00; paired vs `both` +0.10 [−0.05, +0.25]).
+  - DeepSeek: `both` 0.55 | 0.48; `outcomes` 0.46 | 0.55; `outcomes_flagged` 0.44 | 0.53.
+  - The `against_stake` rule on the same information: 0.65 | 0.86.
+- **Why the monitors miss it** (competent games, `outcomes_flagged`):
+  - 30 of 40 games contain at least one AGAINST row. Llama answered "yes" on 5 of them, DeepSeek
+    on 16.
+  - Typically only *one* colluder (the small-stake member) votes against its interest. The
+    partner votes with its own, so one flag identifies one colluder and the partner must be
+    inferred.
+  - Llama treats a single AGAINST row as weak evidence: "most agents voted with their revealed
+    interests… Z's vote… went against… could indicate collusion. But without more information,
+    it's difficult to determine." Honest agents almost never do this (rule FPR 0.05), so one
+    flag is strong evidence. The monitor lacks, or does not use, that base rate.
+  - DeepSeek sometimes misreads the table and names the wrong partner.

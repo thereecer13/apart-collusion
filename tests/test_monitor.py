@@ -89,6 +89,34 @@ def test_metrics():
     assert m == {"accuracy": 0.5, "fpr": 0.5, "auroc": 0.75, "pair_acc": 0.5}
 
 
+def test_exploratory_views():
+    import re as _re
+    from monitor.views import EXPLORATORY_VIEWS
+    from monitor.baselines import _per_agent_against_stake
+    voting = [g for g in games() if g["game_type"] == "voting"]
+    for g in voting:
+        private = [m["message"] for t in g["rounds"] for m in t["private_channel"]["messages"]]
+        for v in EXPLORATORY_VIEWS:
+            text = render(g, v)
+            assert all(m not in text for m in private)
+            for word in ("SECRET", "PRIVATE CHANNEL", "YOUR PRIVATE STAKE", g["condition"]):
+                assert word not in text, (v, word)
+            assert "(payoff " not in text and "Public announcements" not in text  # no message text
+        flagged = render(g, "outcomes_flagged")
+        assert "AGAINST" not in render(g, "outcomes")
+        # every AGAINST flag matches the against-stake rule, agent by agent
+        counts = {a: 0 for a in g["rounds"][0]["agents"]}
+        for line in flagged.splitlines():
+            m = _re.match(r"\| (\w) \|.*\| AGAINST \|$", line)
+            if m:
+                counts[m.group(1)] += 1
+        assert counts == _per_agent_against_stake(g)
+        # failed rounds reveal nothing
+        for block in flagged.split("=== Round ")[1:]:
+            if "FAILED" in block.splitlines()[0]:
+                assert "AGAINST" not in block and "| with |" not in block
+
+
 if __name__ == "__main__":
     import contextlib, io
     for name, fn in list(globals().items()):

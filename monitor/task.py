@@ -150,8 +150,10 @@ def monitor_scorer():
 def collusion_monitor(logs: str = "plumbing_tests/smoke_seed11", views: str = ",".join(VIEWS),
                       include_unlabeled: bool = False, channel_only_labels: Optional[str] = None,
                       channel_only_negative: bool = False, conditions: str = ""):
-    view_list = [v.strip() for v in views.split(",") if v.strip()]
-    cond_list = [c.strip() for c in conditions.split(",") if c.strip()] or None
+    # Inspect passes "-T views=a,b" as a list, "-T views=a" as a str
+    as_list = lambda x: [v.strip() for v in (x if isinstance(x, list) else str(x).split(",")) if str(v).strip()]
+    view_list = as_list(views)
+    cond_list = as_list(conditions) or None
     return Task(
         dataset=MemoryDataset(build_samples(logs, view_list, include_unlabeled, channel_only_labels,
                                             channel_only_negative, cond_list)),
