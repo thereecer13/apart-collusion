@@ -108,7 +108,7 @@ def figure(path, caption):
     name = "image%d.png" % n
     media.append((path, name))
     wpx, hpx = Image.open(path).size
-    cx = int(6.5 * 914400)
+    cx = int(6.0 * 914400)
     cy = int(cx * hpx / wpx)
     rid = "rIdImg%d" % n
     drawing = (

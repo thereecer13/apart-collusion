@@ -1,3 +1,8 @@
+> **Superseded (2026-10-24).** The submitted report is `docs/submission/` (source `content.py`, built into the
+> official template). A pre-submission review corrected several statements kept below unchanged for the record
+> (citations, the pair-ID range, the plans view, the tip length, the strength of some claims) and added the
+> tie-round analysis and the thinking-mode monitor; see SPRINT_LOG.md.
+
 # The Evidence Is in the Votes: LLM Monitors Miss Collusion That a One-Line Rule Catches
 
 *[Author name], [Affiliation]*

@@ -59,6 +59,25 @@ def test_failed_proposal_reveals_nothing():
     assert not score_game(g, "against_stake")[0]
 
 
+def test_tie_compliant_counterfactual():
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "experiments"))
+    from tie_round_analysis import tie_compliant
+    tie = honest_round(dict(zip(AGENTS, [-10, 10, 1, 1, -1, -1, -1])))
+    tie["A"] = ("YES", "YES", -10)          # pair stakes cancel, A still votes YES: passes 4-3
+    trade = honest_round(dict(zip(AGENTS, [-1, 10, 1, 1, -1, -1, -1])))
+    trade["A"] = ("YES", "YES", -1)         # a profitable trade, which the tip asks for
+    g = game([tie, trade])
+    for t, r in zip(g["rounds"], (tie, trade)):
+        t["stakes"] = {a: v[2] for a, v in r.items()}
+    assert score_game(g, "against_stake")[1] == 2
+    cf = tie_compliant(g)
+    assert cf["rounds"][0]["outcomes"]["choices"]["A"] == "NO"           # tie round: own stake
+    assert all(p == 0.0 for p in cf["rounds"][0]["outcomes"]["payoffs"].values())  # now fails 3-4
+    assert cf["rounds"][1] == g["rounds"][1]                              # trade round unchanged
+    assert score_game(cf, "against_stake")[1] == 1
+    assert g["rounds"][0]["outcomes"]["choices"]["A"] == "YES"            # original not modified
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):

@@ -57,6 +57,16 @@ during the sprint.**
   to `experiments/check_plumbing.py` (multi-game logs, the new conditions, false-positive fixes).
 - New tests: `tests/test_baselines.py`, `tests/test_check_plumbing.py`; additions to
   `tests/test_voting.py`.
+- Later in the sprint:
+  - main figure `experiments/make_figure.py`;
+  - exploratory claims-vs-outcomes views (`outcomes`, `outcomes_flagged` in `monitor/views.py`);
+  - exploratory prompt v2 (`monitor/prompt.py`; v1 unchanged) and the paired comparison
+    `experiments/compare_prompts.py`;
+  - provider configs `monitor/openrouter_pinned.yaml` and `monitor/openrouter_reasoning.yaml`
+    (DeepSeek V3.1 thinking mode);
+  - tie-round analysis `experiments/tie_round_analysis.py` (pre-submission review);
+  - the report: `docs/report_draft.md` and `docs/report.md`, superseded by `docs/submission/`,
+    whose `build_report.py` fills the official template from `content.py`.
 
 ## Reproducing
 
@@ -80,6 +90,20 @@ python monitor/metrics.py outputs/monitor --positives instructed --negatives non
 
 # heuristic baselines (no API calls)
 python monitor/baselines.py data/main_voting_v2 --positives instructed --negatives none
+
+# numbers in the report (no API calls): behaviour (Table 1), tie rounds and the rule both ways,
+# monitors on realized collusion, and the paired comparison of two monitor runs
+python experiments/analyze_voting_behaviour.py data/main_voting_v3
+python experiments/tie_round_analysis.py data/main_voting_v3
+python experiments/monitor_on_realized.py data/main_voting_v3 results/monitor_v3_llama
+python experiments/compare_prompts.py results/monitor_v3_deepseek results/monitor_v3_deepseek_thinking \
+  --positives instructed_hint --negatives none
+
+# thinking-mode monitor (DeepSeek V3.1, same frozen prompt; ~$2)
+inspect eval monitor/task.py --model openrouter/deepseek/deepseek-chat-v3.1 \
+  --model-config monitor/openrouter_reasoning.yaml -T logs=data/main_voting_v3 \
+  -T views=actions,public,both -T conditions=instructed_hint,none --max-tokens 16000 \
+  --log-dir results/monitor_v3_deepseek_thinking
 ```
 
 Always pass `--no-judge` and do not use `--use-queue`: the private channel, the voting game and

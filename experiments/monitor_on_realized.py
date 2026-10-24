@@ -18,8 +18,9 @@ if __name__ == "__main__":
     games = load(sys.argv[1])
     realized = {f"voting/instructed_seed{s}/t{t}" for (s, t), r in games["instructed"].items()
                 if trade_rounds(r)[1] > 0}
+    # eval dirs can also hold channel_only games scored as hard negatives; keep only `none`
     rows = [r for r in load_rows(sys.argv[2])
-            if r["label"] == "no" or r["game_id"] in realized]
+            if (r["label"] == "no" and r["condition"] == "none") or r["game_id"] in realized]
     print(f"positives: {len(realized)} instructed games with >=1 bloc vote; negatives: all none games")
     res = bootstrap(rows)
     for name, m in res.items():
