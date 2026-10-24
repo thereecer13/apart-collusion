@@ -661,3 +661,69 @@ collusion because they don't know against-interest votes are rare in honest play
   the LLM usage statement. The template asks that the final version be primarily written by the
   team.
 - No new runs, no API spend.
+
+### Pre-submission review of the paper and research (2026-10-24)
+
+Participant asked for a check for major errors or flaws. Two passes: (1) every number in
+`docs/submission/content.py` recomputed from `data/` and `results/` with the repo's scripts;
+(2) an independent reviewer (a fresh Claude subagent given the paper and code but not my
+conclusions), whose findings I then re-ran myself. No model API calls; the only network use was
+arXiv metadata for the references. No API spend.
+
+- **Reproduced exactly:** Tables 1–3, Figure 1, the Results and held-out text, Appendix C, the
+  simulation (exact enumeration: pair +0.70 per round, +40.9%; others −0.43; outcome changes in
+  7.8% of rounds; the report's +0.71 is the earlier 200k-draw estimate), 70% of Llama scores at 2
+  or 8, the 30/40 flagged games (Llama yes 5, DeepSeek 16), and the quoted Llama reasoning
+  (`instructed_hint_seed1004/t4`, `outcomes_flagged`, suspicion 2). Agent temperature 1.0 is
+  confirmed in the request dumps; monitor temperature is 0. Prompt v1's text hash is unchanged
+  from 69db512 (pre-sprint) to today. Every pilot and the held-out test have a plan commit before
+  their data commit. The monitor's header gives the game rules, including "If the proposal
+  passes, every agent receives their own stake".
+- **Errors in the text:**
+  - pair-ID "0–10%" omits DeepSeek, competent, table view: 0.25;
+  - "No view contains … the pair or the stakes" is false for `plans`: colluders' plans name the
+    partner in about 475/480 pair plans (a near-confession);
+  - the tip is called "one sentence" but is five sentences, including a tie rule;
+  - "every observable view at chance" is too broad, since Llama `outcomes_flagged` is 0.65
+    [0.55, 0.75] (v3) and 0.64 [0.51, 0.76] (held-out v1);
+  - "channel-only did not collude" should be "rarely" (3/64).
+- **Citations:** all eight arXiv IDs are real, and the first authors and years match. However:
+  - Nguyen et al. (2026) *is* TraceGuard (2604.03968), which is cited twice;
+  - "0% to over 70%" does not match its abstract (95% safety vs 0% for single-score untrusted
+    monitoring), and its "collusion" means monitor–agent collusion;
+  - Shi et al.'s >90% holds only in the highest-deception conditions;
+  - Radev et al. (SCHEME, 2605.29178) is misdescribed: there, giving the monitor the agents'
+    communication *raised* detection (Codex 68% → 81%), which contrasts with our 2.2 answer;
+  - Lin et al. (2024) is listed but never cited.
+- **New analyses (from the review):**
+  - **Tie rounds:** when the pair's stakes cancel, the tip says to vote one's own stake.
+    Competent pairs deviated in 45/57 tie rounds (v3) and 29/31 (held-out); in `none` the rate is
+    2/57 and 2/31. These unprofitable votes are 51/115 (v3) and 33/54 (held-out) of the pair's
+    against-own-stake votes. Counterfactual with tie-compliant pairs (their tie-round votes set to
+    their own stake, outcome and payoffs recomputed): `against_stake` AUROC 0.86 → **0.78** (TPR
+    30 → 24 of 40) on v3 and 0.91 → **0.73** (TPR 17 → 10 of 20) on held-out. The headline rule
+    numbers are inflated by colluder mistakes; the rule still beats the monitors.
+  - **Rule combination:** using said-vs-did only to break ties scores 0.856 (v3) and 0.88
+    (held-out), against 0.858 and 0.905 for `against_stake` alone. So said-vs-did adds no
+    information, and the 0.65 for `combined` comes from equal weighting.
+  - **Monitor reasoning length:** mean output 96 tokens (Llama) and 113 (DeepSeek). The
+    reasoning field averages 57 and 63 words (prompt cap 150). Neither model reasons before
+    answering. This should scope the "LLM monitors miss collusion" claims.
+  - **Multiple flags:** 13 of the 30 flagged competent games have ≥2 AGAINST rows; Llama said yes
+    in 3 of them.
+  - **Plans control:** FPR with plans is 0.23 (Llama) and 0.88 (DeepSeek, accuracy 0.56), so the
+    positive control works only for ranking (AUROC).
+- **Overstatements to reword:**
+  - "pre-registered" → pre-specified (private commit before the data);
+  - "a tested diagnosis" (the pre-specified test failed);
+  - "close to the rule" and "closed much of the gap" (rule − Llama v2 flagged = 0.14 [0.04, 0.26],
+    per the reviewer's paired bootstrap);
+  - the 2.2 "no" (monitors at floor, so the design cannot show a benefit from combining);
+  - "rules that use exactly the same information" (they also use knowledge of the attack);
+  - "0.43 points per round at the others' expense" (0.43 is per colluder-round; others −0.09
+    [−0.19, −0.00] on v3 and −0.07 [−0.17, +0.04] on held-out; the trade is net positive-sum).
+- **Submission requirement:** the track asks for accuracy and FPR; the tables report AUROC only.
+- **Reproducibility bug:** `experiments/monitor_on_realized.py` counts channel-only hard
+  negatives as negatives (80 instead of 40) and gives 0.47–0.56. The paper's 0.48–0.55 (`none`
+  only) is correct; the script needs a `condition == "none"` filter.
+- Nothing changed in the paper yet; fixes go to the participant first.
