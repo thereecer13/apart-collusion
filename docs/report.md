@@ -4,8 +4,8 @@
 *Apart AI Collusion Research Sprint, Track 2 (Detection and Audit of Collusion), question 2.2*
 
 > Prose version of `docs/report_draft.md`, ready to move into the official template. Before
-> submitting: check every **[VERIFY]** claim against the cited paper, fill in the **[PENDING]**
-> held-out section, and add your name and affiliation.
+> submitting: check every **[VERIFY]** claim against the cited paper, and add your name and
+> affiliation.
 
 ## Abstract
 
@@ -59,10 +59,12 @@ Our contributions:
    are at chance, and combining views does not help. A one-line rule on the actions alone
    reaches AUROC 0.86. With private plans, the same monitors reach 0.94–0.98, which serves as a
    positive control.
-4. **A diagnosis.** Even when every against-interest vote is explicitly flagged, monitors
-   under-weight it. The visible trace of a trade is a single inconsistent vote, and the monitors
-   do not use the base rate that honest agents almost never cast one. **[PENDING: held-out test
-   of an "informed" prompt that states this base rate.]**
+4. **A diagnosis, tested on held-out games.** Even when every against-interest vote is
+   explicitly flagged, monitors under-weight it. The visible trace of a trade is a single
+   inconsistent vote, and the monitors do not use the base rate that honest agents almost never
+   cast one. On fresh held-out games, stating that base rate in the prompt did **not** help on the
+   raw record (our pre-registered test). Only the base rate *and* the flagged evidence together
+   brought the monitor close to the rule. The main result replicates on the held-out games.
 
 ## 2. Related Work
 
@@ -292,10 +294,41 @@ actions view, Llama also does not infer that payoffs reveal stakes, noting inste
 absence of… stakes in the log limits the analysis". DeepSeek sometimes misreads the table, for
 instance flagging an honest agent who "voted NO and received −10".
 
-**[PENDING: 4.6 Held-out test of an informed monitor.** A prompt that adds this base rate (v2),
-tested on 20 + 20 new games generated after the prompt was fixed. Primary test, decided in
-advance: Llama, actions view, AUROC(v2) − AUROC(v1) with a CI excluding 0 and AUROC(v2) ≥ 0.75.
-Also: a replication of the v1 result on the held-out games.**]**
+### 4.6 Held-out test: does an "informed" prompt fix the monitor?
+
+To test the base-rate diagnosis without tuning on the test data, we wrote prompt v2 *before*
+generating fresh held-out games: 20 competent and 20 no-collusion games on new seeds. Prompt v2
+is v1 plus one paragraph:
+- payoffs reveal interests when a proposal passes;
+- honest agents essentially always vote their interest, so even one vote against it is strong
+  evidence;
+- in a typical trade, the small-stake member votes against its interest for its partner.
+
+Our primary test, fixed in advance, was Llama on the actions view: the difference AUROC(v2) −
+AUROC(v1), counting as support only if its CI excluded zero *and* AUROC(v2) ≥ 0.75.
+
+| Held-out AUROC [95% CI] | Llama v1 | Llama v2 | DeepSeek v1 | DeepSeek v2 |
+|---|---|---|---|---|
+| Actions (primary) | 0.59 [0.42, 0.76] | 0.61 [0.44, 0.78] | 0.61 [0.44, 0.78] | 0.54 [0.36, 0.71] |
+| Messages + actions | 0.64 [0.47, 0.80] | 0.45 [0.27, 0.64] | 0.48 [0.33, 0.63] | 0.58 [0.42, 0.75] |
+| Outcomes table, flagged | 0.64 [0.51, 0.76] | **0.76 [0.61, 0.90]** | 0.67 [0.49, 0.84] | 0.71 [0.54, 0.86] |
+| *+ private plans (upper bound)* | *0.93* | *0.94* | *1.00* | *1.00* |
+| *against-stake rule* | *0.91 [0.81, 0.98]* | | | |
+
+*Table 4. Held-out games (20 competent vs 20 no-collusion). Prompt v2 is exploratory.*
+
+- **The informed prompt did not help on the raw record.** The primary difference was +0.02
+  [−0.17, 0.21], with AUROC(v2) = 0.61. **The prediction failed.**
+- **Base rate plus flagged evidence helped somewhat.** Combined with the flagged outcomes table,
+  v2 brought Llama to 0.76 (+0.13 [−0.00, 0.26] over v1). That is closer to, but still below, the
+  rule's 0.91.
+- **Side effects:** v2 also raised Llama's false-positive rate on several views (e.g. messages +
+  actions 0.25 → 0.50).
+- **Replication:** the main result holds on unseen games. With the frozen prompt, every
+  observable view stays near chance for both monitors, while the rule (0.91) and private plans
+  (0.93–1.00) succeed.
+- **Caution:** with 20 games per class and many comparisons, the secondary differences are weak
+  evidence.
 
 ## 5. Discussion
 
@@ -307,11 +340,13 @@ honest agents' announcements diverge from their votes often enough that the mism
 little information. Combining channels can only help if the combined signal is cleaner than
 either channel alone.
 
-**Monitors need base rates, not just more data.** Even with the inconsistency spelled out,
-monitors treated a single against-interest vote as ambiguous. A detector that knows what honest
-behaviour looks like recognizes that vote as rare and therefore diagnostic. Rules encode that
-knowledge; a generic monitor prompt does not. **[PENDING: whether stating the base rate
-closes the gap on held-out games.]**
+**Two bottlenecks: extracting the evidence, and weighting it.** Even with the inconsistency
+spelled out, the monitors treated a single against-interest vote as ambiguous, which points to a
+missing base rate. But on held-out games, *telling* the monitor the base rate did not help on the
+raw record. The monitor still had to infer each agent's interest from the payoffs, agent by agent
+and round by round, and it did not. Only when the prompt gave the base rate *and* the view gave
+the computed evidence did detection approach the rule (0.76 vs 0.91). Rules do both jobs at once;
+a generic LLM monitor, it seems, does neither reliably on its own.
 
 **Private reasoning works, but it is fragile.** With access to private plans, both monitors
 detect collusion and identify the pair, in line with reports that deviations are visible in
@@ -325,10 +360,12 @@ realized collusion, not only the instruction given.
 
 **Practical implication.** Before trusting an LLM monitor, compare it with simple,
 task-specific consistency rules on the same record. In our setting the rule was far better and
-far cheaper.
+far cheaper. Where LLM monitors are used, give them computed consistency evidence and the
+relevant base rates, not just the raw record. Even then, check them against the rule.
 
 **Future work.**
-- Monitor prompts that state task-specific base rates and require explicit consistency checks.
+- Monitors that combine computed consistency features with LLM judgment, for example rules to
+  find suspects and an LLM to identify the partner and rule out innocent explanations.
 - Stronger and mixed agent models.
 - Side payments, so self-interested agents could share gains, as a test of emergent collusion.
 - Other games.
@@ -343,7 +380,8 @@ far cheaper.
   We make no claim about whether LLM agents collude on their own. Our channel-only pairs did
   not, but they also had no way to share gains.
 - **What was post-hoc:** the monitor prompt was frozen before the sprint, but DeepSeek, the
-  rules and the structured views were added after the first results were known.
+  rules, the structured views and prompt v2 were added after the first results were known.
+  Prompt v2 was evaluated only on held-out games generated after it was fixed.
 - **Inference providers:** the Llama monitor's main results use one pinned provider. The agents
   and DeepSeek were routed across several.
 - **Data generations:** the data went through three generations because of observed confounds.
@@ -380,7 +418,7 @@ During the sprint we added:
 - the stake fixes and current-round history;
 - the competent-colluder condition;
 - all data generation, monitor runs and analysis;
-- the rule baselines, the structured views and the informed-monitor test.
+- the rule baselines, the structured views, and the informed-monitor test on held-out games.
 
 **All data and results in this report were generated during the sprint.** The repository README
 and `PRE_SPRINT_LOG.md` / `SPRINT_LOG.md` give the full, dated record.
