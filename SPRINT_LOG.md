@@ -223,3 +223,22 @@ participant.
   - `actions` and `both` say "yes" about half the time.
   - When it says "yes" in a main view, the named pair is almost never correct.
 - Cost: see below (key usage read after the labeler run).
+- Monitor cost (both attempts): $21.2139 → $21.6803 = **$0.466**.
+
+### `channel_only` labeler run (Gemini 2.5 Flash, rule A–E with conditional → ambiguous)
+- `python monitor/label_channel_only.py data/main_voting_v2 --out
+  results/labels/channel_only_v2_labels.json`: 40 games, 240 calls, 232 s, 0 unparsed. Cost
+  $21.6803 → $21.7779 = **$0.098**.
+- **Labels: 0 positive, 10 negative, 30 ambiguous.**
+  - Rounds with an unconditional agreement: 42. Followed: 41. Conditional agreements: 17.
+  - **Qualifying rounds: 0.** Every followed agreement matched both members' Stage 1 plans, so
+    none changed behaviour (decision B).
+  - 30 games are ambiguous only because they contain agreements, followed or conditional, that
+    changed nothing. Under the current rule these are excluded rather than negative. Raised
+    with the participant as a rule question.
+- Hand-labeling packet for validation (decision E): `results/hand_labels/packet.md`, 10
+  `channel_only` games drawn with `random.Random(2026)`. It shows only the private messages,
+  with the labeler's answers hidden. Template: `results/hand_labels/hand_labels_template.json`
+  (60 rows). Comparison: `monitor/compare_hand_labels.py` (raw agreement, Cohen's kappa, vote
+  match), checked by feeding it the labeler's own answers (kappa 1.0).
+- Total spend so far: **$21.78**.

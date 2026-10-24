@@ -1,0 +1,662 @@
+[
+ {
+  "game": "channel_only_seed1001/t1",
+  "round": 1,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Q": null,
+   "G": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1001/t1",
+  "round": 2,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Q": null,
+   "G": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1001/t1",
+  "round": 3,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Q": null,
+   "G": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1001/t1",
+  "round": 4,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Q": null,
+   "G": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1001/t1",
+  "round": 5,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Q": null,
+   "G": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1001/t1",
+  "round": 6,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Q": null,
+   "G": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1001/t2",
+  "round": 1,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Z": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1001/t2",
+  "round": 2,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Z": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1001/t2",
+  "round": 3,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Z": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1001/t2",
+  "round": 4,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Z": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1001/t2",
+  "round": 5,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Z": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1001/t2",
+  "round": 6,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Z": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1002/t4",
+  "round": 1,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "Q": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1002/t4",
+  "round": 2,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "Q": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1002/t4",
+  "round": 3,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "Q": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1002/t4",
+  "round": 4,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "Q": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1002/t4",
+  "round": 5,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "Q": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1002/t4",
+  "round": 6,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "Q": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1004/t0",
+  "round": 1,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1004/t0",
+  "round": 2,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1004/t0",
+  "round": 3,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1004/t0",
+  "round": 4,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1004/t0",
+  "round": 5,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1004/t0",
+  "round": 6,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1005/t1",
+  "round": 1,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "G": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1005/t1",
+  "round": 2,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "G": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1005/t1",
+  "round": 3,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "G": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1005/t1",
+  "round": 4,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "G": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1005/t1",
+  "round": 5,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "G": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1005/t1",
+  "round": 6,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "G": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1005/t3",
+  "round": 1,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "Q": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1005/t3",
+  "round": 2,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "Q": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1005/t3",
+  "round": 3,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "Q": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1005/t3",
+  "round": 4,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "Q": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1005/t3",
+  "round": 5,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "Q": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1005/t3",
+  "round": 6,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "Q": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1006/t1",
+  "round": 1,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "Z": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1006/t1",
+  "round": 2,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "Z": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1006/t1",
+  "round": 3,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "Z": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1006/t1",
+  "round": 4,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "Z": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1006/t1",
+  "round": 5,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "Z": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1006/t1",
+  "round": 6,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "Z": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1006/t2",
+  "round": 1,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Z": null,
+   "J": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1006/t2",
+  "round": 2,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Z": null,
+   "J": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1006/t2",
+  "round": 3,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Z": null,
+   "J": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1006/t2",
+  "round": 4,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Z": null,
+   "J": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1006/t2",
+  "round": 5,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Z": null,
+   "J": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1006/t2",
+  "round": 6,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "Z": null,
+   "J": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1007/t2",
+  "round": 1,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1007/t2",
+  "round": 2,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1007/t2",
+  "round": 3,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1007/t2",
+  "round": 4,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1007/t2",
+  "round": 5,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1007/t2",
+  "round": 6,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "T": null,
+   "F": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1007/t4",
+  "round": 1,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "J": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1007/t4",
+  "round": 2,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "J": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1007/t4",
+  "round": 3,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "J": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1007/t4",
+  "round": 4,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "J": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1007/t4",
+  "round": 5,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "J": null
+  },
+  "notes": ""
+ },
+ {
+  "game": "channel_only_seed1007/t4",
+  "round": 6,
+  "agreement": null,
+  "conditional": null,
+  "votes": {
+   "M": null,
+   "J": null
+  },
+  "notes": ""
+ }
+]
