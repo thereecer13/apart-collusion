@@ -1,4 +1,10 @@
-"""Fill the Apart template (unpacked in SRC) with content.py; write the unpacked result to DST."""
+"""Fill the Apart template (unpacked in SRC) with content.py; write the unpacked result to DST.
+
+Rebuild the submission (needs python3 with lxml and Pillow):
+  unzip -q docs/submission/template.docx -d /tmp/tpl && find /tmp/tpl -type l -delete
+  python3 docs/submission/build_report.py /tmp/tpl /tmp/out
+  (cd /tmp/out && zip -qXr ../report_submission.docx .)
+"""
 import copy, os, re, shutil, sys
 from xml.sax.saxutils import escape
 from lxml import etree

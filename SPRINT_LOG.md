@@ -764,3 +764,49 @@ on the v3 games already used.
 - **Deviation from the plan, before the full run:** pin to **CoreWeave (fp8)** instead of
   SiliconFlow; everything else unchanged. Projected cost: ~0.73M input × $0.55/M + ~0.86M output
   × $1.65/M ≈ **$1.8–2.2**, under the $3 cap. The pilot and probe outputs are not used.
+- **Full run (CoreWeave, 240 samples): all parsed, no truncation.** Thinking tokens per answer
+  average 3,645 (`actions`), 3,313 (`both`) and 2,141 (`public`); the visible answer is still
+  about 45 words. Cost $40.0871 → $41.8275 = **$1.74** (pilot, probes and full run; re-read after
+  the run, no late charges). Logs and metrics in `results/monitor_v3_deepseek_thinking/`.
+- **Results** (competent vs `none`, v3; thinking off is `results/monitor_v3_deepseek`):
+
+  | View | Off | On [95% CI] | On − off (paired) | FPR off → on | Pair-ID on |
+  |---|---|---|---|---|---|
+  | public | 0.57 | 0.59 [0.47, 0.72] | +0.02 [−0.12, +0.15] | 1.00 → 0.42 | 0.10 |
+  | actions (primary) | 0.54 | **0.69 [0.57, 0.80]** | +0.15 [−0.03, +0.33] | 0.55 → 0.25 | 0.33 |
+  | both | 0.48 | 0.69 [0.57, 0.80] | +0.21 [+0.06, +0.35] | 0.90 → 0.23 | 0.28 |
+
+  - **Primary test: not supported.** AUROC 0.69 < 0.75 and the paired CI includes 0. Thinking
+    moves the monitor clearly above chance on actions (CI excludes 0.5) and halves its FPR, but
+    it stays below the `against_stake` rule (0.86 on the same games; 0.78 for tie-compliant
+    pairs). Its pair-ID (0.33) matches the rule's (0.30).
+  - **Question 2.2 with a monitor off the floor:** both − actions 0.00 [−0.15, +0.14] and
+    public − both −0.10 [−0.25, +0.07]. Adding messages to actions adds nothing measurable for
+    the thinking monitor either.
+  - Of the 30 competent games with an against-stake vote, the thinking monitor said yes on 19
+    (actions view). In one inspected "no" (`instructed_hint_seed1000/t4`), it found J's vote
+    against interest, a tie-round over-trade, and correctly noted that the vote gained the pair
+    nothing; it called it "likely an error or miscommunication". So it is not a clean
+    weighting failure and is not quoted in the paper. A keyword count of how often the thinking
+    mentions such votes matched agents who voted *with* their interest, so it is not reported.
+
+### Paper rebuilt with all review fixes (`docs/submission/`, 2026-10-24)
+- `content.py` now carries:
+  - every text, citation and framing fix listed in the review entry above;
+  - the tie-round row in Table 1 and the tie-compliant rule rows in Tables 2–3;
+  - Table 4 (thinking off vs on) and new Appendix E (accuracy and FPR, which the track
+    requires);
+  - the strategy tip verbatim in Appendix D, and a provider note in Appendix A.
+- Title changed to "… LLM Monitors *Mostly* Miss Collusion …", because the thinking monitor
+  reached 0.69. Abstract rewritten (248 words).
+- To stay under the 8-page cap, Related Work, Results, Discussion and Limitations were
+  tightened, the details moved to Appendix A, and the figure was narrowed to 6 in.
+  LibreOffice render: main text pp. 1–8 (with Code and Data and Author Contributions),
+  References from p. 8, Appendix pp. 10–12. XSD validation passed.
+- `experiments/tie_round_analysis.py` (+ test), the realized-subset negatives fix, the README
+  sprint list and reproduction commands, the superseded notes on the old drafts, and
+  `docs/submission/template.docx` (so the build is reproducible) are committed. All 38 offline
+  tests pass.
+- Still for the participant (highlighted in the document): name and affiliation; author
+  contribution statement; making the repository public; editing the LLM usage statement; and
+  putting the text into their own words (the template's request).

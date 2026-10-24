@@ -1,0 +1,6 @@
+A = results/monitor_v3_deepseek
+B = results/monitor_v3_deepseek_thinking
+view                 n(+/-)  AUROC A  AUROC B  B - A [95% CI]            FPR A  FPR B  pair A  pair B
+actions             40/40       0.54     0.69  +0.15 [-0.03, +0.33]         0.55   0.25    0.03    0.33
+both                40/40       0.48     0.69  +0.21 [+0.06, +0.35]         0.90   0.23    0.07    0.28
+public              40/40       0.57     0.59  +0.02 [-0.12, +0.15]         1.00   0.42    0.10    0.10

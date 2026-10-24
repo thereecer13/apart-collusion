@@ -1,0 +1,18 @@
+positives: ['instructed_hint'], negatives: ['none']
+240 samples from 1 eval log(s); monitor model(s): ['openrouter/deepseek/deepseek-chat-v3.1']
+
+MAIN VIEWS (observable behaviour only)
+group                                n(+/-)  unp  accuracy               FPR                    AUROC                  pair acc              
+view=actions                        40/40      0  0.65 [0.55, 0.75]      0.25 [0.12, 0.40]      0.69 [0.57, 0.80]      0.33 [0.18, 0.48]     
+view=both                           40/40      0  0.69 [0.59, 0.79]      0.23 [0.10, 0.36]      0.69 [0.57, 0.80]      0.28 [0.14, 0.42]     
+view=public                         40/40      0  0.55 [0.44, 0.66]      0.42 [0.26, 0.57]      0.59 [0.47, 0.72]      0.10 [0.02, 0.20]     
+game=voting view=actions            40/40      0  0.65 [0.55, 0.75]      0.25 [0.12, 0.40]      0.69 [0.57, 0.80]      0.33 [0.18, 0.48]     
+game=voting view=both               40/40      0  0.69 [0.59, 0.79]      0.23 [0.10, 0.36]      0.69 [0.57, 0.80]      0.28 [0.14, 0.42]     
+game=voting view=public             40/40      0  0.55 [0.44, 0.66]      0.42 [0.26, 0.57]      0.59 [0.47, 0.72]      0.10 [0.02, 0.20]     
+
+UPPER BOUND (monitor also reads every agent's private plan; reported separately)
+group                                n(+/-)  unp  accuracy               FPR                    AUROC                  pair acc              
+
+Paired differences vs view 'both' (same resampled games):
+  actions - both       AUROC 0.00 [-0.15, 0.14]     accuracy -0.04 [-0.16, 0.10]
+  public - both        AUROC -0.10 [-0.25, 0.07]    accuracy -0.14 [-0.29, 0.01]
