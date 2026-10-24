@@ -8,8 +8,9 @@ source .venv/bin/activate
 OUT=${OUT:-outputs/main_voting}
 CONDS=${CONDS:-"instructed channel_only none"}
 HISTORY=${HISTORY:-full}   # v3 (2026-10-24): HISTORY=current
+SEEDS=${SEEDS:-"1000 1001 1002 1003 1004 1005 1006 1007"}   # held-out set: SEEDS="2000 2001 2002 2003"
 mkdir -p "$OUT/logs" "$OUT/dumps"
-for seed in 1000 1001 1002 1003 1004 1005 1006 1007; do
+for seed in $SEEDS; do
   for cond in $CONDS; do
     echo "$seed $cond"
   done

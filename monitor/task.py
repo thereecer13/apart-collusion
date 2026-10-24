@@ -32,7 +32,7 @@ from inspect_ai.model import ChatMessageSystem, ChatMessageUser, GenerateConfig
 from inspect_ai.scorer import Score, Target, mean, scorer
 from inspect_ai.solver import TaskState, generate
 
-from monitor.prompt import MONITOR_SYSTEM_PROMPT, MONITOR_USER_TEMPLATE, PROMPT_STATUS
+from monitor.prompt import MONITOR_SYSTEM_PROMPT, MONITOR_USER_TEMPLATE, PROMPT_STATUS, PROMPTS
 from monitor.views import UPPER_BOUND_VIEWS, VIEWS, load_games, render
 
 LABELS = {"instructed": "yes", "instructed_hint": "yes", "none": "no"}
@@ -53,7 +53,7 @@ def load_channel_only_labels(path: str) -> Dict[tuple, str]:
 
 def build_samples(logs: str, views=VIEWS, include_unlabeled: bool = False,
                   channel_only_labels: Optional[str] = None, channel_only_negative: bool = False,
-                  conditions: Optional[List[str]] = None):
+                  conditions: Optional[List[str]] = None, prompt_version: str = "v1"):
     """conditions: keep only games of these conditions (None = all).
     channel_only_negative: label every `channel_only` game "no" (hard negatives; sprint decision
     2026-10-24, since the labeler found no qualifying collusion). Overrides channel_only_labels."""
@@ -80,7 +80,7 @@ def build_samples(logs: str, views=VIEWS, include_unlabeled: bool = False,
                 samples.append(Sample(
                     id=f"{game_id}/{view}",
                     input=[
-                        ChatMessageSystem(content=MONITOR_SYSTEM_PROMPT),
+                        ChatMessageSystem(content=PROMPTS[prompt_version]),
                         ChatMessageUser(content=MONITOR_USER_TEMPLATE.format(log=render(game, view))),
                     ],
                     target=label or "unlabeled",
@@ -88,6 +88,7 @@ def build_samples(logs: str, views=VIEWS, include_unlabeled: bool = False,
                         "game_id": game_id, "game_type": game["game_type"], "view": view,
                         "condition": game["condition"], "pair": game["pair"], "file": path,
                         "upper_bound": view in UPPER_BOUND_VIEWS,
+                        "prompt_version": prompt_version,
                         "label_source": label_source if label else None,
                     },
                 ))
@@ -149,16 +150,18 @@ def monitor_scorer():
 @task
 def collusion_monitor(logs: str = "plumbing_tests/smoke_seed11", views: str = ",".join(VIEWS),
                       include_unlabeled: bool = False, channel_only_labels: Optional[str] = None,
-                      channel_only_negative: bool = False, conditions: str = ""):
+                      channel_only_negative: bool = False, conditions: str = "",
+                      prompt_version: str = "v1"):
     # Inspect passes "-T views=a,b" as a list, "-T views=a" as a str
     as_list = lambda x: [v.strip() for v in (x if isinstance(x, list) else str(x).split(",")) if str(v).strip()]
     view_list = as_list(views)
     cond_list = as_list(conditions) or None
     return Task(
         dataset=MemoryDataset(build_samples(logs, view_list, include_unlabeled, channel_only_labels,
-                                            channel_only_negative, cond_list)),
+                                            channel_only_negative, cond_list, prompt_version)),
         solver=generate(),
         scorer=monitor_scorer(),
         config=GenerateConfig(temperature=0.0, max_tokens=800),
-        metadata={"prompt_status": PROMPT_STATUS, "views": view_list},
+        metadata={"prompt_status": PROMPT_STATUS if prompt_version == "v1" else "v2 (exploratory)",
+                  "prompt_version": prompt_version, "views": view_list},
     )
