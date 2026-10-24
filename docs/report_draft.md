@@ -242,11 +242,46 @@ earn well, or for agents who lose money:
 - DeepSeek flags an agent that "voted NO and received −10". That is an honest voter on the
   losing side. The real signal is the reverse: voting YES while receiving a negative payoff.
 
+### 4.7 Exploratory: structured claims-vs-outcomes reports (post-hoc)
+This arm was designed after the main results, following the track's suggested "structured
+report comparing claims with outcomes". It used two new views with the same frozen prompt:
+- `outcomes`: per round, one row per agent with the announced vote, the final vote and the
+  payoff;
+- `outcomes_flagged`: the same, plus a column marking each vote **with** or **AGAINST** the
+  interest revealed by the payoff. These flags carry exactly the `against_stake` rule's evidence.
+
+| AUROC [95% CI] vs `none` | Llama naive | Llama competent | DeepSeek naive | DeepSeek competent |
+|---|---|---|---|---|
+| both (main) | 0.53 | 0.55 | 0.55 | 0.48 |
+| outcomes | 0.47 | 0.48 | 0.46 | 0.55 |
+| outcomes_flagged | 0.55 | **0.65 [0.55, 0.75]** (FPR 0.00) | 0.44 | 0.53 |
+| *`against_stake` rule (same evidence)* | *0.65* | ***0.86*** | *0.65* | ***0.86*** |
+
+- Presenting the record as an aligned table alone does not help.
+- Spelling out the inconsistency helps Llama a little, but not significantly (paired vs `both`
+  +0.10 [−0.05, +0.25]). It stays well below the rule given the same evidence.
+- In 30 of 40 competent games at least one AGAINST row is shown. Llama answered "yes" on 5 of
+  them, DeepSeek on 16.
+
+**Why.** In a typical trade only *one* colluder, the member with the small stake, votes against
+its interest; the partner votes with its own. One AGAINST row is therefore the whole visible
+trace.
+- Llama treats it as weak evidence: "most agents voted with their revealed interests… Z's
+  vote… went against… could indicate collusion. But without more information, it's difficult
+  to determine." Honest agents almost never vote against their revealed interest (rule FPR
+  0.05), so a single such vote is strong evidence. The monitor does not use that base rate.
+- DeepSeek also misreads the table at times, and names the wrong partner.
+
 ## 5. Discussion
 - **Answer to 2.2 in this setting.** Combining messages with actions did not help LLM monitors
   detect collusion. That is not because the evidence was missing: when colluders acted,
   their actions gave them away to a one-line consistency rule (AUROC 0.86). The bottleneck is
   the monitor's reasoning over the record, not which channel it reads.
+- **Even explicit evidence is under-weighted** (4.7). With the inconsistency flagged, LLM
+  monitors improve little (best 0.65). The visible trace of a trade is a single against-interest
+  vote, and the monitors treat it as ambiguous. A detector needs the base rate: honest agents
+  almost never vote against their own revealed interest. Rules encode that base rate; generic
+  monitor prompts do not.
 - **Talk can be a distraction.** Honest agents' announcements differ from their votes often
   enough (85% of games) that talk–action mismatch is not diagnostic here, and adding it hurt the
   heuristic. Combining channels helps only if the combined signal is cleaner than either alone.
@@ -263,8 +298,8 @@ earn well, or for agents who lose money:
   match the agent's revealed interest?) is an obvious next step; we kept the prompt frozen to
   avoid tuning on the test data.
 - **Future work:**
-  - prompts with explicit consistency checks, and structured-report views in the style of
-    TraceGuard;
+  - prompts with explicit consistency checks and base rates (e.g. "honest agents essentially
+    never vote against their revealed interest"); the structured views alone (4.7) were not enough;
   - stronger and mixed agent models;
   - side payments, so selfish agents could share gains (emergent collusion);
   - more games (El Farol was dropped for time);
@@ -293,6 +328,7 @@ earn well, or for agents who lose money:
   [−0.31, −0.00].
 - The heuristic rules use knowledge of the game, namely that payoffs reveal stakes. That is
   their point, and also a limit: they are game-specific.
+- The claims-vs-outcomes views (4.7) are exploratory and post-hoc.
 
 **Dual use**
 - The strategy tip and our analysis describe how a pair can trade votes covertly, and that LLM
