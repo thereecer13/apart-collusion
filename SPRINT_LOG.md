@@ -591,3 +591,6 @@ collusion because they don't know against-interest votes are rare in honest play
     `against_stake` heuristic.
 - n = 20 vs 20, so CIs will be wide.
 - `run_main_voting.sh` takes `SEEDS` (default 1000–1007).
+- Held-out attempt 1: the container restarted about 25 min in, before any run finished, so
+  nothing was saved. Lost **$2.29** ($33.4377 → $35.7270). Relaunched unchanged (same seeds, same
+  design).
