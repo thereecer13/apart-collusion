@@ -641,3 +641,23 @@ collusion because they don't know against-interest votes are rare in honest play
   vs 0.91), and that combination was a secondary comparison. This suggests two bottlenecks:
   extracting the evidence from the record (inferring interests from payoffs, agent by agent),
   and weighting it. Either one alone is not enough.
+
+### Submission template filled (`docs/submission/`, 2026-10-24)
+
+- Filled the official Apart submission template (DOCX) with a condensed version of
+  `docs/report.md`: `docs/submission/report_submission.docx`, plus a LibreOffice-rendered preview
+  PDF. The content lives in `docs/submission/content.py` and `build_report.py` inserts it into the
+  template, keeping its title block, abstract box, heading styles and fonts.
+- Removed the "How to use this template" box and all guidance text. Single author cell. Tables 1–3,
+  Figure 1 (`results/figures/main_figure.png`), Appendices A–D (limitations and dual use, provenance,
+  pilots table, monitor prompt).
+- Validated with the docx skill's XSD validator (passed).
+- **Length:** title page plus about 6 pages of main text (Intro to Conclusion, pp. 2–7), then
+  Code/Data and References (p. 8), Appendix (pp. 9–10). The template recommends 4 pages
+  excluding references and appendix, so the main text is over that guide.
+- **Still to do by the participant (highlighted yellow in the document):** author name and
+  affiliation; author contribution statement; reference titles to verify; the Related Work
+  verification note; the "Kale et al., 2025 — VERIFY" citation; make the repository public; edit
+  the LLM usage statement. The template asks that the final version be primarily written by the
+  team.
+- No new runs, no API spend.
