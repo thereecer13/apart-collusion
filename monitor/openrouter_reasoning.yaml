@@ -1,0 +1,11 @@
+# DeepSeek V3.1 with thinking mode on, for the reasoning-monitor test (SPRINT_LOG.md 2026-10-24):
+#   --model openrouter/deepseek/deepseek-chat-v3.1 --model-config monitor/openrouter_reasoning.yaml
+# reasoning_enabled is an Inspect OpenRouter model arg; it sends reasoning: {enabled: true}.
+# Pinned to one fp8 provider so that quantization or provider mix is not a confound;
+# require_parameters keeps requests on providers that honour the reasoning parameter.
+reasoning_enabled: true
+provider:
+  only:
+    - siliconflow
+  allow_fallbacks: false
+  require_parameters: true

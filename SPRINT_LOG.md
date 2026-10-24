@@ -727,3 +727,33 @@ arXiv metadata for the references. No API spend.
   negatives as negatives (80 instead of 40) and gives 0.47–0.56. The paper's 0.48–0.55 (`none`
   only) is correct; the script needs a `condition == "none"` filter.
 - Nothing changed in the paper yet; fixes go to the participant first.
+
+### Reasoning-monitor test (plan written before running, 2026-10-24)
+Participant's decision, following the review. Tests whether the monitors fail because they give
+short verdicts: their reasoning field averages about 60 words (cap 150), and neither thinks
+before answering. **Exploratory and post-hoc:** designed after the main results and the review,
+on the v3 games already used.
+- **Monitor:** DeepSeek V3.1 (`deepseek/deepseek-chat-v3.1`) with thinking mode on (OpenRouter
+  `reasoning: {enabled: true}`, `monitor/openrouter_reasoning.yaml`), pinned to SiliconFlow
+  (fp8), `require_parameters: true`. Same frozen prompt v1 and views, temperature 0,
+  `--max-tokens 16000` (thinking counts toward it). The main DeepSeek run had thinking off, so
+  the comparison isolates thinking. (It was not pinned to one provider, which is a residual
+  difference.)
+- **Data:** v3 competent (`instructed_hint`) vs `none`, 40 + 40 games. Views: `actions`
+  (primary), `public`, `both`.
+- **Primary (decided now):** AUROC on `actions`, thinking on vs off, as a paired bootstrap over
+  the same games against `results/monitor_v3_deepseek`. Short reasoning counts as **supported** as
+  the bottleneck if the paired CI excludes 0 and AUROC(thinking) ≥ 0.75 (the held-out test's
+  bar).
+- **Secondary, no thresholds:**
+  - `public` and `both`: does combining help a monitor that is off the floor? (paired both −
+    actions, both − public);
+  - FPR, accuracy, pair-ID, thinking tokens;
+  - comparison with the `against_stake` rule (0.86 actual; 0.78 if the pair had followed the tie
+    rule).
+- **Pilot first:** 6 samples (1 competent + 1 `none` game × 3 views) to check parsing and measure
+  tokens. Full run only if the projected cost is under $3 (expected ~$1–2).
+- **Key usage before:** $40.0871. The last logged reading was $39.9055 (after the held-out
+  monitor runs). The $0.18 gap has no other source: no processes were running, and the review
+  scripts made no API calls. It is most likely held-out monitor charges posted after that
+  reading, so the held-out monitor runs probably cost ~$0.87, not $0.69.
