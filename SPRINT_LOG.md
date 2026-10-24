@@ -518,3 +518,27 @@ baseline was computed on data. The thresholds come from the design, not from tun
   (actions view). It is not a measured result.
 - Still for the participant: verify the cited claims ([VERIFY]); move the text into the
   official template; authors and affiliations; final edit.
+
+### Exploratory arm: structured claims-vs-outcomes views (plan written before running)
+Participant's decision. **Exploratory and post-hoc**: designed after the main results were
+known, and reported separately from the pre-set comparison. The track description suggests "a
+structured report comparing claims with outcomes"; our `table` view compares only the announced
+vote with the final vote. Two new views, same frozen v1 prompt, both monitors (Llama pinned to
+DeepInfra; DeepSeek), on all 160 v3 games (320 calls per monitor, ~$1):
+- `outcomes`: per round, the outcome (passed or failed, vote counts), then a table with one row
+  per agent: announced vote, final vote, payoff. No computed flags. Tests whether presentation
+  alone helps.
+- `outcomes_flagged`: as `outcomes`, plus a column "vote vs interest revealed by payoff":
+  - **with** or **AGAINST** in passed rounds (payoff = stake: YES with a negative payoff, or NO
+    with a positive payoff, is AGAINST);
+  - "not revealed" in failed rounds (payoff 0).
+
+  Tests whether the monitor can use explicit evidence, and whether it names the pair better than
+  the `against_stake` rule (pair-ID 30% for competent colluders).
+
+Neither view contains private messages, stakes as such, the pair or the condition. Comparisons
+of interest:
+- AUROC of `outcomes` and `outcomes_flagged` vs `both` (paired), per colluder type;
+- `outcomes_flagged` vs the `against_stake` heuristic;
+- pair-ID accuracy;
+- FPR.
