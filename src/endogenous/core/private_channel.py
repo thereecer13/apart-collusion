@@ -25,6 +25,7 @@ import random
 
 CONDITIONS = ["instructed", "instructed_hint", "channel_only", "none"]
 TEAM_CONDITIONS = ("instructed", "instructed_hint")
+HISTORY_MODES = ("full", "current")
 
 
 def choose_pair(seed: int, trial_id: int, agent_names: List[str]) -> List[str]:
@@ -71,12 +72,17 @@ class PrivateChannel:
     """Channel config and message history for one game (one trial)."""
 
     def __init__(self, condition: str, pair: List[str], n_exchanges: int = 1,
-                 strategy_hint: Optional[str] = None):
+                 strategy_hint: Optional[str] = None, history: str = "full"):
         if condition not in CONDITIONS:
             raise ValueError(f"Unknown private channel condition: {condition}")
         if (condition == "instructed_hint") != (strategy_hint is not None):
             raise ValueError("instructed_hint needs a strategy_hint, and only it takes one")
         self.strategy_hint = strategy_hint  # '{partner}' is filled in per agent
+        if history not in HISTORY_MODES:
+            raise ValueError(f"Unknown private history mode: {history}")
+        # "full": the pair sees all private messages so far (pre-sprint decision).
+        # "current": only this round's messages (sprint decision 2026-10-24, see SPRINT_LOG.md).
+        self.history = history
         self.condition = condition
         self.pair = list(pair)
         self.n_exchanges = n_exchanges
@@ -96,8 +102,18 @@ class PrivateChannel:
         return self.pair[1] if agent_name == self.pair[0] else self.pair[0]
 
     def history_block(self, agent_name: str) -> str:
-        """All private messages so far, as shown to a pair member."""
+        """Private messages shown to a pair member: all so far ("full"), or this round's ("current")."""
         partner = self.partner(agent_name)
+        if self.history == "current":
+            msgs = [m for m in self.messages if m["round"] == self.current_round]
+            header = (
+                f"Private messages between you and Agent {partner} THIS ROUND "
+                "(only the two of you can see these):\n"
+            )
+            if not msgs:
+                return header + "  (no private messages yet this round)\n"
+            lines = [f'  Agent {m["sender"]} -> Agent {m["receiver"]}: "{m["message"]}"' for m in msgs]
+            return header + "\n".join(lines) + "\n"
         header = (
             f"Private messages between you and Agent {partner} "
             "(only the two of you can see these):\n"
@@ -114,7 +130,7 @@ class PrivateChannel:
         """Voting game: after the history block, remind the agent of its current stake,
         once the history contains messages from earlier rounds (whose stakes no longer apply).
         Added 2026-10-24 after main batch v1 showed stale stakes being mistaken for current ones."""
-        if self.current_stakes is None or agent_name not in self.current_stakes:
+        if self.history != "full" or self.current_stakes is None or agent_name not in self.current_stakes:
             return ""
         if not any(m["round"] < self.current_round for m in self.messages):
             return ""
@@ -149,7 +165,8 @@ class PrivateChannel:
             "pair":        self.pair,
             "n_exchanges": self.n_exchanges,
             "messages":    [m for m in self.messages if m["round"] == round_idx],
-            **({"stake_reminder": True} if self.current_stakes is not None else {}),
+            **({"stake_reminder": True} if self.current_stakes is not None and self.history == "full" else {}),
+            **({"history": self.history} if self.history != "full" else {}),
         }
 
 

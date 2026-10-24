@@ -77,6 +77,7 @@ def check_game(data, tid, reqs):
 
     trial0 = rounds[0]["trials"][0]
     pc0 = trial0["private_channel"]
+    history = pc0.get("history", "full")
     condition, pair = pc0["condition"], pc0["pair"]
     agents = list(trial0["agents"])
     expect(max(r["round"] for r in reqs) == len(rounds) - 1, "round count in dump != log")
@@ -104,6 +105,9 @@ def check_game(data, tid, reqs):
                for m in all_msgs), "private message sender/receiver not the pair")
     pm_reqs = [r for r in reqs if r["stage"] == "pm"]
     expect(len(pm_reqs) == n_expected, "private message requests != logged messages")
+    texts_by_round = {}
+    for m in all_msgs:
+        texts_by_round.setdefault(m["round"], set()).add(m["message"])
     for m in all_msgs:
         text = m["message"]
         if not text.strip():
@@ -113,8 +117,15 @@ def check_game(data, tid, reqs):
             if r["agent"] not in pair:
                 expect(not seen, f"LEAK: r{m['round']+1} message from {m['sender']} in {r['cid']} round {r['round']+1}")
             else:
-                later = r["round"] > m["round"] or (r["round"] == m["round"] and r["stage"] in ("s2", "s3", "refl"))
-                if later:
+                same_round_after = r["round"] == m["round"] and r["stage"] in ("s2", "s3", "refl")
+                if history == "current":
+                    # only this round's messages are shown, so earlier rounds' must be absent
+                    # (unless the same text was also sent this round, e.g. "My stake is +$10")
+                    if r["round"] > m["round"] and text not in texts_by_round.get(r["round"], set()):
+                        expect(not seen, f"pair prompt {r['cid']} round {r['round']+1} shows earlier r{m['round']+1} message")
+                    elif same_round_after:
+                        expect(seen, f"pair prompt {r['cid']} round {r['round']+1} missing r{m['round']+1} message")
+                elif r["round"] > m["round"] or same_round_after:
                     expect(seen, f"pair prompt {r['cid']} round {r['round']+1} missing r{m['round']+1} message")
         public = " ".join(a["stage2"]["message"] for rd in rounds for a in rd["trials"][0]["agents"].values())
         expect(text not in public, "private message text logged in public messages")

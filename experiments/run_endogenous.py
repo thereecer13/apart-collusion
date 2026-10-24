@@ -199,6 +199,10 @@ def main():
         help="[Private channel] A-then-B message exchanges per round (default: 1)"
     )
     parser.add_argument(
+        "--private-history", choices=["full", "current"], default="full",
+        help="[Private channel] Pair sees all private messages so far (full, default) or only this round's (current)"
+    )
+    parser.add_argument(
         "--seed", type=int, default=0,
         help="Seed for choosing the private-channel pair and the voting-game stakes (default: 0)"
     )
@@ -377,6 +381,7 @@ def main():
             agent_models=agent_models,
             private_channel=args.private_channel,
             private_exchanges=args.private_exchanges,
+            private_history=args.private_history,
             seed=args.seed,
             run_judge=not args.no_judge,
         )
@@ -401,6 +406,8 @@ def main():
             "n_exchanges": args.private_exchanges,
             "seed":        args.seed,
         }
+        if args.private_history != "full":
+            analysis["metadata"]["private_channel"]["history"] = args.private_history
 
     save_results(
         rounds=rounds,

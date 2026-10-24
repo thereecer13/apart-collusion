@@ -21,14 +21,27 @@ import test_voting as V
 import check_plumbing as C
 
 
-def make_run(tmp, leak_into=None, note_into=None):
-    client = V.SincereStub()
+class UniqueStub(V.SincereStub):
+    """Private messages unique per call (custom_ids repeat every round)."""
+    n = 0
+
+    def execute_parallel(self, reqs):
+        out = super().execute_parallel(reqs)
+        for r in reqs:
+            if "_pm" in r["custom_id"]:
+                UniqueStub.n += 1
+                out[r["custom_id"]] = {"message": f"SECRET<{r['custom_id']}#{UniqueStub.n}>"}
+        return out
+
+
+def make_run(tmp, leak_into=None, note_into=None, history="full", stale_into=None):
+    client = UniqueStub()
     with contextlib.redirect_stdout(io.StringIO()):
         rounds = V.run_all_trials(
             game_type="voting", agent_names=V.AGENTS, game_params={},
             llm_client=V.StubLLM(), parallel_client=client, n_trials=2, n_rounds=3,
             round_robin=True, show_progress=False, private_channel="instructed", seed=7,
-            run_judge=False,
+            run_judge=False, private_history=history,
         )
     reqs = client.requests
     if leak_into:
@@ -37,6 +50,10 @@ def make_run(tmp, leak_into=None, note_into=None):
             if r["custom_id"] == leak_into:
                 r["messages"][1]["content"] += secret
                 break
+    if stale_into:  # (custom_id, occurrence): put round-1 message of game 0 into a later prompt
+        secret = rounds[0]["trials"][0]["private_channel"]["messages"][0]["message"]
+        hits = [r for r in reqs if r["custom_id"] == stale_into[0]]
+        hits[stale_into[1]]["messages"][1]["content"] += secret
     if note_into:
         for r in reqs:
             if r["custom_id"] == note_into:
@@ -72,6 +89,17 @@ def test_team_note_in_wrong_system_prompt_is_caught():
         outsider = next(a for a in V.AGENTS if a not in choose_pair(7, 0, V.AGENTS))
         out = C.check(*make_run(tmp, note_into=f"t0_s2_{outsider}"))
         assert any("SECRET TEAM note wrong" in f for f in out[0][5]) and not out[1][5]
+
+
+def test_current_history_pass_and_stale_message_caught():
+    from src.endogenous.core.private_channel import choose_pair
+    a = choose_pair(7, 0, V.AGENTS)[0]
+    with tempfile.TemporaryDirectory() as tmp:
+        out = C.check(*make_run(tmp, history="current"))
+        assert all(not o[5] for o in out), [o[5] for o in out]
+    with tempfile.TemporaryDirectory() as tmp:
+        out = C.check(*make_run(tmp, history="current", stale_into=(f"t0_s3_{a}", 2)))
+        assert any("shows earlier r1 message" in f for f in out[0][5]), out[0][5]
 
 
 if __name__ == "__main__":

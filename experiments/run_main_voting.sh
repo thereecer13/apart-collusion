@@ -7,6 +7,7 @@ cd "$(dirname "$0")/.."
 source .venv/bin/activate
 OUT=${OUT:-outputs/main_voting}
 CONDS=${CONDS:-"instructed channel_only none"}
+HISTORY=${HISTORY:-full}   # v3 (2026-10-24): HISTORY=current
 mkdir -p "$OUT/logs" "$OUT/dumps"
 for seed in 1000 1001 1002 1003 1004 1005 1006 1007; do
   for cond in $CONDS; do
@@ -22,7 +23,7 @@ done | xargs -P 12 -L 1 bash -c '
   rm -f '"$OUT"'/dumps/$tag.jsonl
   python experiments/run_endogenous.py --game voting --agents 7 --trials 5 --rounds 6 \
     --model meta-llama/llama-3.3-70b-instruct --round-robin --no-judge \
-    --private-channel $cond --seed $seed --output-dir '"$OUT"' --run-suffix $tag \
+    --private-channel $cond --private-history '"$HISTORY"' --seed $seed --output-dir '"$OUT"' --run-suffix $tag \
     --dump-requests '"$OUT"'/dumps/$tag.jsonl > '"$OUT"'/logs/$tag.out 2>&1
   echo "finished $tag exit=$?"
 '

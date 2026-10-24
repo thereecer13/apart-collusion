@@ -207,6 +207,37 @@ def test_instructed_hint_only_adds_tip_to_pair():
             assert sys_h == sys_i and "STRATEGY TIP" not in sys_h
 
 
+def test_current_history_shows_only_this_round():
+    client = SincereStub()
+    rounds = run_all_trials(
+        game_type="voting", agent_names=AGENTS, game_params={},
+        llm_client=StubLLM(), parallel_client=client, n_trials=2, n_rounds=3,
+        round_robin=True, show_progress=False, private_channel="instructed_hint", seed=7,
+        run_judge=False, private_history="current",
+    )
+    for tid in range(2):
+        pair = choose_pair(7, tid, AGENTS)
+        trial_reqs = [r for r in client.requests if r["custom_id"].startswith(f"t{tid}_")]
+        per_round = len(trial_reqs) // 3
+        for rd in rounds:
+            t = rd["trials"][tid]
+            assert t["private_channel"]["history"] == "current" and "stake_reminder" not in t["private_channel"]
+            chunk = trial_reqs[rd["round_id"] * per_round:(rd["round_id"] + 1) * per_round]
+            for r in chunk:
+                user = r["messages"][1]["content"]
+                secrets = re.findall(r"SECRET<(t\d+_pm\d+_\w)>", user)
+                assert "Your stake for THIS round's proposal" not in user
+                if agent_of(r) not in pair:
+                    assert not secrets and "Private messages" not in user
+                    continue
+                assert user.startswith("Private messages between you and Agent")
+                # only this round's messages: there are exactly 2 per round, A then B
+                if any(x in r["custom_id"] for x in ("_s2_", "_s3_", "_refl_")):
+                    assert len(secrets) == 2, (r["custom_id"], secrets)
+                if "_s1_" in r["custom_id"]:
+                    assert not secrets and "(no private messages yet this round)" in user
+
+
 if __name__ == "__main__":
     import contextlib, io
     for name, fn in list(globals().items()):

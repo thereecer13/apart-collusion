@@ -343,3 +343,42 @@ Decision rule: if all three pass, run 40 games (seeds 1000–1007) and reuse the
   stake", or read +$10 as +$1), or fell back on its own stake. So the failures are in
   execution, not in willingness to trade.
 - Decision rule: H1 failed, so the results go to the participant.
+
+### Why pairs lose track of the partner's stake, and the fix: current-round history only
+- Diagnosis (pilot 3 dumps): the pair's prompts list all private messages with round labels,
+  but **no prompt says which round is current**. The stake reminder ("stakes mentioned in
+  [earlier] messages no longer apply") sits right after a list that includes the current
+  round, so agents also dismissed the partner's current stake. Example, seed 101 game 1 round 4:
+  Agent T's prompt showed "Round 4, Agent Q -> Agent T: My stake is +$10", and T answered
+  "since I don't know Agent Q's current stake… I vote NO". The first stake fix caused part of this.
+- Participant's decision: **drop the history.** In the team conditions every round is
+  self-contained (the right vote depends only on this round's two stakes), so the history is
+  not needed. This reverses, for the voting runs from here on, the pre-sprint decision that the
+  pair sees the full history. `channel_only` is **not** regenerated (it keeps full history;
+  noted as a difference).
+- Code:
+  - New `--private-history {full,current}`, default `full`, so existing runs reproduce.
+  - In `current` mode, the pair's prompts show only this round's messages, under the header
+    "Private messages between you and Agent X THIS ROUND", and the stake reminder is off.
+  - Logs record `"history": "current"` in the trial's `private_channel` record and run metadata.
+  - `channel.current_round` is now set every round for any channel; in `full` mode it is used
+    only by the reminder.
+  - The launcher takes `HISTORY=current`.
+- Checker: in `current` mode, an earlier round's message must not appear in a later prompt,
+  unless the same text was also sent that round. Messages like "My stake is +$10" repeat.
+- Tests: `test_current_history_shows_only_this_round` and
+  `test_current_history_pass_and_stale_message_caught`. The checker test stub now writes
+  round-unique messages. All 33 tests pass. The offline snapshot (El Farol all conditions,
+  voting off/none, voting non-pair) is still byte-for-byte identical, and the pilot 3 logs
+  still pass the checker.
+
+### Pilot 4: `instructed_hint` with current-round history (plan written before running)
+Same as pilot 3 (seeds 100 and 101 × 5 trials, 6 rounds) but with `--private-history current`.
+~$1. Not data. Same criteria:
+- **H1:** bloc votes in ≥ 50% of trade rounds.
+- **H2:** same-sign rounds, votes against own stake ≤ 6%.
+- **H3:** wrong own-stake claims ≤ 5%.
+
+Decision rule: if all three pass, generate 40 `instructed_hint` and 40 `instructed` games
+(seeds 1000–1007) with `--private-history current`, and reuse `none` (v1) and `channel_only`
+(v2). Otherwise the results go to the participant.

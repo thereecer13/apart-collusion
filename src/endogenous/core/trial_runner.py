@@ -1058,6 +1058,7 @@ def run_all_trials(
     agent_models: Optional[Dict[str, str]] = None,
     private_channel: Optional[str] = None,
     private_exchanges: int = 1,
+    private_history: str = "full",
     seed: int = 0,
     run_judge: bool = True,
 ) -> List[Dict[str, Any]]:
@@ -1117,7 +1118,8 @@ def run_all_trials(
                 if game_type != "voting":
                     raise ValueError("instructed_hint is only defined for the voting game")
                 hint = VOTE_TRADE_HINT
-            channels[tid] = PrivateChannel(private_channel, pair, private_exchanges, strategy_hint=hint)
+            channels[tid] = PrivateChannel(private_channel, pair, private_exchanges, strategy_hint=hint,
+                                           history=private_history)
             print(f"  Trial {tid}: private channel '{private_channel}', pair {pair[0]} & {pair[1]}")
 
     all_rounds = []
@@ -1138,7 +1140,8 @@ def run_all_trials(
                 trial_params = dict(game_params, stakes=draw_stakes(seed, trial_id, round_idx, agent_names))
                 if channels[trial_id] is not None and channels[trial_id].active:
                     channels[trial_id].current_stakes = trial_params["stakes"]
-                    channels[trial_id].current_round = round_idx
+            if channels[trial_id] is not None:
+                channels[trial_id].current_round = round_idx
             result = run_trial(
                 trial_id=trial_id,
                 game_type=game_type,
