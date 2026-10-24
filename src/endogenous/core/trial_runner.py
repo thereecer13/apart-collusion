@@ -1130,6 +1130,9 @@ def run_all_trials(
             trial_params = game_params
             if game_type == "voting":
                 trial_params = dict(game_params, stakes=draw_stakes(seed, trial_id, round_idx, agent_names))
+                if channels[trial_id] is not None and channels[trial_id].active:
+                    channels[trial_id].current_stakes = trial_params["stakes"]
+                    channels[trial_id].current_round = round_idx
             result = run_trial(
                 trial_id=trial_id,
                 game_type=game_type,

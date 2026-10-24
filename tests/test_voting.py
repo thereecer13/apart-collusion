@@ -169,6 +169,27 @@ def test_invalid_action_is_parse_error():
     assert t["_parse_errors"] == 2
 
 
+def test_stake_reminder_for_pair_only():
+    rounds, reqs = run("instructed")
+    for tid in range(2):
+        pair = choose_pair(7, tid, AGENTS)
+        trial_reqs = [r for r in reqs if r["custom_id"].startswith(f"t{tid}_")]
+        per_round = len(trial_reqs) // 3
+        for rd in rounds:
+            stakes = rd["trials"][tid]["stakes"]
+            assert rd["trials"][tid]["private_channel"]["stake_reminder"] is True
+            chunk = trial_reqs[rd["round_id"] * per_round:(rd["round_id"] + 1) * per_round]
+            for r in chunk:
+                user = r["messages"][1]["content"]
+                has = "Your stake for THIS round's proposal is" in user
+                assert has == (agent_of(r) in pair and rd["round_id"] > 0), (r["custom_id"], rd["round_id"])
+                if has:
+                    s = stakes[agent_of(r)]
+                    assert f"proposal is {'+$' + str(s) if s > 0 else '-$' + str(-s)}." in user
+    rounds, _ = run("none")
+    assert all("stake_reminder" not in t["private_channel"] for rd in rounds for t in rd["trials"])
+
+
 if __name__ == "__main__":
     import contextlib, io
     for name, fn in list(globals().items()):

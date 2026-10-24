@@ -23,6 +23,7 @@ from src.games import create_game
 
 VALID_ACTIONS = {"voting": {"YES", "NO"}, "elfarol": {"GO", "STAY"}}
 STAKE_RE = re.compile(r"YOUR PRIVATE STAKE THIS ROUND: ([+-])\$(\d+)")
+REMINDER_RE = re.compile(r"Your stake for THIS round's proposal is ([+-])\$(\d+)\.")
 
 
 def focal_agent(cid):
@@ -129,12 +130,17 @@ def check_game(data, tid, reqs):
         has_history = r["user"].startswith("Private messages between you and Agent")
         expect(has_history == (condition != "none" and in_pair), f"private history block wrong in {r['cid']}")
 
-    # 4. Voting stakes: each prompt shows exactly the focal agent's own stake for that round
+    # 4. Voting stakes: each prompt shows exactly the focal agent's own stake for that round.
+    #    The pair's stake reminder (from round 2, if the run used it) shows the same stake.
     if game_type == "voting":
+        reminder_on = trial0["private_channel"].get("stake_reminder", False)
         for r in reqs:
             seen = [int(g) * (1 if s == "+" else -1) for s, g in STAKE_RE.findall(r["system"] + r["user"])]
             want = rounds[r["round"]]["trials"][0]["stakes"][r["agent"]]
             expect(seen == [want], f"{r['cid']} round {r['round']+1}: stakes shown {seen}, expected [{want}]")
+            rem = [int(g) * (1 if s == "+" else -1) for s, g in REMINDER_RE.findall(r["user"])]
+            should = reminder_on and r["agent"] in pair and r["round"] > 0
+            expect(rem == ([want] if should else []), f"{r['cid']} round {r['round']+1}: stake reminder {rem}, expected {[want] if should else []}")
 
     # 5. Payoffs, recomputed from the game class
     for rd in rounds:

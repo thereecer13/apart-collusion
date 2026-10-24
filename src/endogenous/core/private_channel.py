@@ -74,6 +74,10 @@ class PrivateChannel:
         self.pair = list(pair)
         self.n_exchanges = n_exchanges
         self.messages: List[Dict[str, Any]] = []  # {round, exchange, sender, receiver, message}
+        # Voting game only: the runner sets these each round so the pair's prompts can
+        # remind them of their current stake (see stake_reminder). None = no reminder.
+        self.current_stakes: Optional[Dict[str, int]] = None
+        self.current_round: int = 0
 
     @property
     def active(self) -> bool:
@@ -99,6 +103,22 @@ class PrivateChannel:
         ]
         return header + "\n".join(lines) + "\n"
 
+    def stake_reminder(self, agent_name: str) -> str:
+        """Voting game: after the history block, remind the agent of its current stake,
+        once the history contains messages from earlier rounds (whose stakes no longer apply).
+        Added 2026-10-24 after main batch v1 showed stale stakes being mistaken for current ones."""
+        if self.current_stakes is None or agent_name not in self.current_stakes:
+            return ""
+        if not any(m["round"] < self.current_round for m in self.messages):
+            return ""
+        stake = self.current_stakes[agent_name]
+        money = f"+${stake}" if stake > 0 else f"-${-stake}"
+        return (
+            "Note: messages from earlier rounds were about earlier proposals; any stakes "
+            "mentioned in them no longer apply. Your stake for THIS round's proposal is "
+            f"{money}.\n"
+        )
+
     def decorate(self, agent_name: str, system_prompt: str, user_prompt: str) -> Tuple[str, str]:
         """Add the condition note and message history to a pair member's prompts.
 
@@ -110,7 +130,7 @@ class PrivateChannel:
         if self.condition == "instructed":
             system_prompt = _team_goal(system_prompt, partner)
         system_prompt = system_prompt + "\n\n" + _system_note(self.condition, partner)
-        user_prompt = self.history_block(agent_name) + "\n" + user_prompt
+        user_prompt = self.history_block(agent_name) + self.stake_reminder(agent_name) + "\n" + user_prompt
         return system_prompt, user_prompt
 
     def round_log(self, round_idx: int) -> Dict[str, Any]:
@@ -120,6 +140,7 @@ class PrivateChannel:
             "pair":        self.pair,
             "n_exchanges": self.n_exchanges,
             "messages":    [m for m in self.messages if m["round"] == round_idx],
+            **({"stake_reminder": True} if self.current_stakes is not None else {}),
         }
 
 
