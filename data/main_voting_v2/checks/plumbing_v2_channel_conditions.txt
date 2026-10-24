@@ -1,0 +1,126 @@
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1000.json t0: condition=channel_only pair=['Z', 'F'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1000.json t1: condition=channel_only pair=['F', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1000.json t2: condition=channel_only pair=['F', 'M'] requests=390 private_messages=12 -> PASS (parse issues: 6)
+    parse: r1 M stage2 invalid/missing action None
+    parse: r2 M stage2 invalid/missing action None
+    parse: r3 F stage2 invalid/missing action None
+    parse: r3 M stage2 invalid/missing action None
+    parse: r3 Q stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1000.json t3: condition=channel_only pair=['G', 'F'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1000.json t4: condition=channel_only pair=['J', 'F'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1001.json t0: condition=channel_only pair=['F', 'Q'] requests=390 private_messages=12 -> PASS (parse issues: 8)
+    parse: r1 F stage2 invalid/missing action None
+    parse: r2 F stage2 invalid/missing action None
+    parse: r2 Z stage2 invalid/missing action None
+    parse: r3 F stage2 invalid/missing action None
+    parse: r4 F stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1001.json t1: condition=channel_only pair=['Q', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1001.json t2: condition=channel_only pair=['Z', 'F'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1001.json t3: condition=channel_only pair=['Q', 'Z'] requests=390 private_messages=12 -> PASS (parse issues: 2)
+    parse: r2 F stage2 invalid/missing action None
+    parse: r3 J stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1001.json t4: condition=channel_only pair=['F', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r6 J stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1002.json t0: condition=channel_only pair=['T', 'Q'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1002.json t1: condition=channel_only pair=['T', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1002.json t2: condition=channel_only pair=['M', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1002.json t3: condition=channel_only pair=['Z', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1002.json t4: condition=channel_only pair=['T', 'Q'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1003.json t0: condition=channel_only pair=['F', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1003.json t1: condition=channel_only pair=['Z', 'M'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1003.json t2: condition=channel_only pair=['Q', 'M'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1003.json t3: condition=channel_only pair=['F', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1003.json t4: condition=channel_only pair=['Z', 'M'] requests=390 private_messages=12 -> PASS (parse issues: 4)
+    parse: r2 M stage2 invalid/missing action None
+    parse: r3 M stage2 invalid/missing action None
+    parse: r3 T stage2 invalid/missing action None
+    parse: r3 Z stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1004.json t0: condition=channel_only pair=['M', 'F'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1004.json t1: condition=channel_only pair=['T', 'Z'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1004.json t2: condition=channel_only pair=['F', 'T'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r1 private message parse failed
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1004.json t3: condition=channel_only pair=['F', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1004.json t4: condition=channel_only pair=['Z', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r3 J stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1005.json t0: condition=channel_only pair=['Z', 'T'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1005.json t1: condition=channel_only pair=['T', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r4 Z stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1005.json t2: condition=channel_only pair=['F', 'M'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1005.json t3: condition=channel_only pair=['T', 'Q'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1005.json t4: condition=channel_only pair=['M', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1006.json t0: condition=channel_only pair=['J', 'Z'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1006.json t1: condition=channel_only pair=['M', 'Z'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1006.json t2: condition=channel_only pair=['Z', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1006.json t3: condition=channel_only pair=['Z', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1006.json t4: condition=channel_only pair=['T', 'Q'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1007.json t0: condition=channel_only pair=['M', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1007.json t1: condition=channel_only pair=['J', 'Q'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1007.json t2: condition=channel_only pair=['T', 'F'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r5 J stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1007.json t3: condition=channel_only pair=['Q', 'T'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r5 J stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_channel_only_seed1007.json t4: condition=channel_only pair=['M', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1000.json t0: condition=instructed pair=['Z', 'F'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1000.json t1: condition=instructed pair=['F', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 7)
+    parse: r2 G stage2 invalid/missing action None
+    parse: r4 F stage2 invalid/missing action None
+    parse: r5 G stage2 invalid/missing action None
+    parse: r5 J stage2 invalid/missing action None
+    parse: r5 Z stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1000.json t2: condition=instructed pair=['F', 'M'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r5 J stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1000.json t3: condition=instructed pair=['G', 'F'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1000.json t4: condition=instructed pair=['J', 'F'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1001.json t0: condition=instructed pair=['F', 'Q'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1001.json t1: condition=instructed pair=['Q', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 6)
+    parse: r3 G stage2 invalid/missing action None
+    parse: r4 Q stage2 invalid/missing action None
+    parse: r5 G stage2 invalid/missing action None
+    parse: r6 F stage2 invalid/missing action None
+    parse: r6 G stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1001.json t2: condition=instructed pair=['Z', 'F'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1001.json t3: condition=instructed pair=['Q', 'Z'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r6 G stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1001.json t4: condition=instructed pair=['F', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r6 T stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1002.json t0: condition=instructed pair=['T', 'Q'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1002.json t1: condition=instructed pair=['T', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r2 Q stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1002.json t2: condition=instructed pair=['M', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r3 G stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1002.json t3: condition=instructed pair=['Z', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1002.json t4: condition=instructed pair=['T', 'Q'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1003.json t0: condition=instructed pair=['F', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1003.json t1: condition=instructed pair=['Z', 'M'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1003.json t2: condition=instructed pair=['Q', 'M'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1003.json t3: condition=instructed pair=['F', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1003.json t4: condition=instructed pair=['Z', 'M'] requests=390 private_messages=12 -> PASS (parse issues: 3)
+    parse: r6 F stage2 invalid/missing action None
+    parse: r6 T stage2 invalid/missing action None
+    parse: r6 Z stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1004.json t0: condition=instructed pair=['M', 'F'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1004.json t1: condition=instructed pair=['T', 'Z'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r2 Q stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1004.json t2: condition=instructed pair=['F', 'T'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1004.json t3: condition=instructed pair=['F', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r4 Z stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1004.json t4: condition=instructed pair=['Z', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1005.json t0: condition=instructed pair=['Z', 'T'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1005.json t1: condition=instructed pair=['T', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r2 Q stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1005.json t2: condition=instructed pair=['F', 'M'] requests=390 private_messages=12 -> PASS (parse issues: 1)
+    parse: r5 Q stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1005.json t3: condition=instructed pair=['T', 'Q'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1005.json t4: condition=instructed pair=['M', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1006.json t0: condition=instructed pair=['J', 'Z'] requests=390 private_messages=12 -> PASS (parse issues: 2)
+    parse: r2 Z stage2 invalid/missing action None
+    parse: r5 F stage2 invalid/missing action None
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1006.json t1: condition=instructed pair=['M', 'Z'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1006.json t2: condition=instructed pair=['Z', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1006.json t3: condition=instructed pair=['Z', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1006.json t4: condition=instructed pair=['T', 'Q'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1007.json t0: condition=instructed pair=['M', 'G'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1007.json t1: condition=instructed pair=['J', 'Q'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1007.json t2: condition=instructed pair=['T', 'F'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1007.json t3: condition=instructed pair=['Q', 'T'] requests=390 private_messages=12 -> PASS (parse issues: 0)
+meta-llama_llama-3.3-70b-instruct_endogenous_main_instructed_seed1007.json t4: condition=instructed pair=['M', 'J'] requests=390 private_messages=12 -> PASS (parse issues: 0)

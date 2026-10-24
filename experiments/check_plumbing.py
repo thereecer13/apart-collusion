@@ -106,6 +106,8 @@ def check_game(data, tid, reqs):
     expect(len(pm_reqs) == n_expected, "private message requests != logged messages")
     for m in all_msgs:
         text = m["message"]
+        if not text.strip():
+            continue  # empty message (already a parse issue); "" would match every prompt
         for r in reqs:
             seen = text in r["user"] or text in r["system"]
             if r["agent"] not in pair:

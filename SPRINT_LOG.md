@@ -171,3 +171,22 @@ participant.
 - `run_main_voting.sh` now skips runs whose results file exists and restarts unfinished runs
   from scratch, clearing their dump first. A future restart then loses only the runs in
   progress.
+- Second attempt: 16 runs (`instructed`, `channel_only` × seeds 1000–1007), all exit 0, 3985 s
+  (66 min). Cost $13.6658 → $21.2049 = **$7.54** (estimate ~$7.4).
+- Plumbing: **all 80 games pass**, including the reminder check. The first pass flagged one
+  false "leak" (`channel_only` seed 1004 game 2): agent T's round-1 private message was empty
+  (a parse failure), and an empty string matches every prompt. The checker now skips empty
+  messages in the leak check; they are already counted as parse issues.
+- Data: `data/main_voting_v2/` holds the v2 `instructed` and `channel_only` games, the 40 v1
+  `none` games (unchanged prompts, so reused), dumps, and checks.
+- Behaviour, v2 (`checks/behaviour.json`):
+  - **Stake confusion fixed:** wrong own-stake claims in `instructed` private messages: 0 of
+    431 (v1: 11%). Same-sign rounds, pair votes against own stake: 2 of 238 (1%; v1: 18%).
+    `channel_only`: 1% and 0%.
+  - **M1:** 65 of 15120 actions invalid (0.4%). **M2:** `none` 86% (same games as v1).
+  - **M3:** bloc votes in **12 of 64 trade rounds (19%, CI 8–31%)** vs 1 of 64 (2%) in `none`.
+  - **Collusion gain (matched): pair +0.10 per agent-round (CI +0.02 to +0.18); others −0.01
+    (CI −0.04 to +0.01).**
+- Reading: with the confusion removed, collusion now pays the pair a small positive amount. But
+  instructed pairs trade votes in only about 1 in 5 trade rounds, so collusion is weakly visible
+  in actions. Rounds where trading pays are about 27% of all rounds (64 of 240).
