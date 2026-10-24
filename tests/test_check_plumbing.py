@@ -21,7 +21,7 @@ import test_voting as V
 import check_plumbing as C
 
 
-def make_run(tmp, leak_into=None):
+def make_run(tmp, leak_into=None, note_into=None):
     client = V.SincereStub()
     with contextlib.redirect_stdout(io.StringIO()):
         rounds = V.run_all_trials(
@@ -36,6 +36,11 @@ def make_run(tmp, leak_into=None):
         for r in reqs:
             if r["custom_id"] == leak_into:
                 r["messages"][1]["content"] += secret
+                break
+    if note_into:
+        for r in reqs:
+            if r["custom_id"] == note_into:
+                r["messages"][0]["content"] += "\n\nSECRET TEAM: planted"
                 break
     res, dump = os.path.join(tmp, "res.json"), os.path.join(tmp, "dump.jsonl")
     json.dump({"metadata": {"game_type": "voting"}, "rounds": rounds}, open(res, "w"))
@@ -59,6 +64,14 @@ def test_leak_in_second_game_is_caught():
         out = C.check(*make_run(tmp, leak_into=f"t1_s3_{outsider}"))
         assert not out[0][5]
         assert any("LEAK" in f for f in out[1][5]), out[1][5]
+
+
+def test_team_note_in_wrong_system_prompt_is_caught():
+    with tempfile.TemporaryDirectory() as tmp:
+        from src.endogenous.core.private_channel import choose_pair
+        outsider = next(a for a in V.AGENTS if a not in choose_pair(7, 0, V.AGENTS))
+        out = C.check(*make_run(tmp, note_into=f"t0_s2_{outsider}"))
+        assert any("SECRET TEAM note wrong" in f for f in out[0][5]) and not out[1][5]
 
 
 if __name__ == "__main__":

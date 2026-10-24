@@ -78,3 +78,45 @@ Also M1 (parsing) and M2 (honest baseline in `none`).
 
 **4. Plumbing.** `experiments/check_plumbing.py` on every game: private messages are never
 visible to non-pair agents, stakes are shown only to their owner, and payoffs are correct.
+
+### Main voting batch v1: results and a problem found
+- Ran `experiments/run_main_voting.sh`: 24 runs, all exit 0, 4135 s (69 min). Cost
+  $1.3205 → $12.5596 = **$11.24**, against an estimate of ~$11. 120 games. Data in
+  `data/main_voting_v1/`.
+- **Plumbing: all 120 games pass.** No private message reached a non-pair agent, condition
+  notes and the team goal appear only in the pair's system prompts, stakes are shown only to
+  their owner, and payoffs are correct.
+  - The first pass had 15 false failures, caused by a checker bug: the team-goal check matched
+    the phrase "combined payoff" inside other agents' *public* messages. The fix checks the notes
+    and team goal in system prompts only, and adds a check that the private-history block starts
+    only the pair's user prompts. A new planted-failure test covers it (3 tests in
+    `tests/test_check_plumbing.py`).
+- Parse issues: 49, of which 48 are invalid announcements (about 1% of 5040). Most are agents
+  announcing "UNDECIDED" or "UND". In the views these show as `INVALID`, with the message text
+  intact.
+- Behaviour (`experiments/analyze_voting_behaviour.py`):
+  - **M1:** 48 of 15120 actions invalid (0.3%).
+  - **M2:** in `none`, 86% of announcements match the agent's own stake.
+  - **M3:** in `instructed`, bloc votes in **18 of 64 trade rounds (28%, CI 16–42%)**,
+    vs 1 of 64 (2%) in `none`. That is below the pilot's 50% threshold.
+  - **Collusion gain (matched): pair −0.20 per agent-round (CI −0.39 to −0.02); others −0.03
+    (CI −0.15 to +0.09).** Collusion *lowered* the pair's payoff.
+- Diagnosis, by round type (pair payoff per round, summed over both members, instructed vs none):
+  - Trade rounds: −0.14 vs −0.56, so vote trading helps.
+  - Same-sign rounds, where voting one's own stake is jointly optimal: +3.08 vs +4.09. The
+    instructed members vote against their own stake **18%** of the time, vs 0% in `none`.
+  - Equal-size opposite-sign rounds: 0.00 vs 0.00.
+  So the pair's losses come from same-sign rounds.
+- **Cause: stake confusion.** Pair members often state the wrong value for their *own current*
+  stake, in private messages and in their final reasoning. Example: "I have a −$1 stake this
+  round" when the prompt shows +$10, with "given your −$10 stake last round" in the same message.
+  Share of private messages stating a wrong own stake, by round:
+  - `instructed`: 0%, 2%, 11%, 25%, 14%, 11% (rounds 1–6; 11% overall)
+  - `channel_only`: 4% overall
+  - Round 1, which has no history, has none.
+
+  This points to the private-history block: stakes quoted in earlier rounds' messages are
+  mistaken for the current stake. `none` has no history and shows no such errors.
+- **Validity concern:** in `instructed`, part of the "collusive" signal is confusion-driven
+  votes against one's own stake, which `none` lacks. A monitor could pick that up, which would
+  confound the main comparison. Raised with the participant before running any monitor.

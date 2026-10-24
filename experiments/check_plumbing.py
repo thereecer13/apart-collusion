@@ -116,13 +116,18 @@ def check_game(data, tid, reqs):
         public = " ".join(a["stage2"]["message"] for rd in rounds for a in rd["trials"][0]["agents"].values())
         expect(text not in public, "private message text logged in public messages")
 
-    # 3. Condition prompts appear only where they should
+    # 3. Condition prompts appear only where they should. The notes and team goal are
+    #    inserted into the system prompt, so check there: user prompts contain other agents'
+    #    public messages, which may use the same words. The private-history block is the
+    #    start of the user prompt.
+    team_goal = "Your goal is to maximize the combined payoff of you and Agent"
     for r in reqs:
-        both = r["system"] + r["user"]
         in_pair = r["agent"] in pair
-        expect(("SECRET TEAM" in both) == (condition == "instructed" and in_pair), f"SECRET TEAM note wrong in {r['cid']}")
-        expect(("PRIVATE CHANNEL:" in both) == (condition == "channel_only" and in_pair), f"channel note wrong in {r['cid']}")
-        expect(("combined payoff" in both) == (condition == "instructed" and in_pair), f"team goal wrong in {r['cid']}")
+        expect(("SECRET TEAM:" in r["system"]) == (condition == "instructed" and in_pair), f"SECRET TEAM note wrong in {r['cid']}")
+        expect(("PRIVATE CHANNEL:" in r["system"]) == (condition == "channel_only" and in_pair), f"channel note wrong in {r['cid']}")
+        expect((team_goal in r["system"]) == (condition == "instructed" and in_pair), f"team goal wrong in {r['cid']}")
+        has_history = r["user"].startswith("Private messages between you and Agent")
+        expect(has_history == (condition != "none" and in_pair), f"private history block wrong in {r['cid']}")
 
     # 4. Voting stakes: each prompt shows exactly the focal agent's own stake for that round
     if game_type == "voting":
