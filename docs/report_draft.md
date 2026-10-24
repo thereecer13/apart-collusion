@@ -348,9 +348,30 @@ Mirror the README section:
 All data and results were generated during the sprint.
 
 ## Appendix C: Earlier data generations and pilots
-- Pilots 1–4: criteria, results and decisions (from `SPRINT_LOG.md`).
-- v1 (full history), v2 (reminder) and v3 (current-round history): behaviour tables, the
-  diagnosis, and the v2 monitor results.
+Every pilot had pass criteria committed before it ran (see `SPRINT_LOG.md` for the full record,
+costs and commands). All pilots used seeds 100–101; main data used seeds 1000–1007.
+
+| Step | What changed | Key result | Decision |
+|---|---|---|---|
+| Pilot 1 (10 games) | Choose the main game | Invalid actions 0.2%; honest announcements in `none` 80%; naive bloc votes 4 of 7 trade rounds | Voting is the main game (all criteria passed) |
+| **v1** main batch (120 games) | Full private history | Naive bloc votes 28%; wrong own-stake claims 11%; pair votes against own stake in same-sign rounds 18% (vs 0% in `none`); **collusion lowered the pair's payoff** (−0.20 [−0.39, −0.02]) | Confound found (stale stakes from history); data not used for the main results |
+| Pilot 2 (10 games) | Stake reminder after the history | Wrong stake claims 0%; same-sign against-stake 0% | Fix accepted |
+| **v2** (80 regenerated games) | Reminder | Naive bloc votes 19%; gain +0.10 [+0.02, +0.18]. Llama monitor at chance (AUROC 0.47–0.60) and DeepSeek too; `against_stake` 0.61 | Only 9 of 40 naive games showed any vote trading, so a "competent colluder" condition was added |
+| Pilot 3 (10 games) | Strategy tip (`instructed_hint`), full history | Bloc votes 46% (threshold 50%: **fail**). Agents dismissed the partner's *current* stake: the prompts never state the current round, and the reminder said earlier stakes "no longer apply" | Show only the current round's private messages |
+| Pilot 4 (10 games) | Tip + current-round history | Bloc votes 13 of 13; stake errors 0% | Generate v3 |
+| **v3** (80 new + 80 reused games) | Main data | See Section 4 | Main results |
+
+**Data reuse.** The `none` games have no private channel, and none of the fixes changes their
+prompts. This was checked by byte-for-byte comparison of offline request snapshots before and
+after each change. So the 40 v1 `none` games are used in every comparison. `channel_only`
+(v2, full history) serves only as hard negatives.
+
+**Plumbing.** Every game in every batch was checked with `experiments/check_plumbing.py`
+against its full request dump. Three checker false positives were found and fixed along the way,
+each caught by a planted-failure test:
+- a phrase matched inside public messages;
+- an empty message, which matches every prompt;
+- a stake value that was a substring of another ("+$1" inside "+$10").
 
 ## References
 - Shi et al. 2026. arXiv:2607.05132.
