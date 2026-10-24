@@ -14,10 +14,16 @@ for seed in 1000 1001 1002 1003 1004 1005 1006 1007; do
   done
 done | xargs -P 12 -L 1 bash -c '
   seed=$0; cond=$1; tag=main_${cond}_seed${seed}
+  # Resume support: skip runs that already finished; restart unfinished ones from scratch
+  # (the harness only writes results at the end, and dumps append).
+  if [ -f '"$OUT"'/voting/7agents/meta-llama_llama-3.3-70b-instruct_endogenous_${tag}.json ]; then
+    echo "skip $tag (done)"; exit 0
+  fi
+  rm -f '"$OUT"'/dumps/$tag.jsonl
   python experiments/run_endogenous.py --game voting --agents 7 --trials 5 --rounds 6 \
     --model meta-llama/llama-3.3-70b-instruct --round-robin --no-judge \
     --private-channel $cond --seed $seed --output-dir '"$OUT"' --run-suffix $tag \
     --dump-requests '"$OUT"'/dumps/$tag.jsonl > '"$OUT"'/logs/$tag.out 2>&1
   echo "finished $tag exit=$?"
 '
-gzip -f "$OUT"/dumps/*.jsonl
+gzip -f "$OUT"/dumps/*.jsonl 2>/dev/null || true

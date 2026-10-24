@@ -163,3 +163,11 @@ participant.
 - M3 (no threshold): bloc votes in 3 of 13 trade rounds (23%, CI 0–50%).
 - **Decision (pre-set rule): regenerate `instructed` and `channel_only` for seeds 1000–1007,
   and reuse the v1 `none` games.**
+
+### Main voting batch v2 (regenerating `instructed` and `channel_only`)
+- First attempt: the container restarted about 35 min in, killing all runs. The harness only
+  writes results at the end of a run, so nothing was usable. Lost **$0.148** ($13.5182 →
+  $13.6658). Partial files deleted.
+- `run_main_voting.sh` now skips runs whose results file exists and restarts unfinished runs
+  from scratch, clearing their dump first. A future restart then loses only the runs in
+  progress.
