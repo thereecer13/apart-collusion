@@ -398,3 +398,28 @@ detectors. Each uses only what the matching monitor view shows, scored like the 
 Note: these rules were designed after the LLM-monitor results were known, but before any
 baseline was computed on data. The thresholds come from the design, not from tuning. Tests:
 `tests/test_baselines.py` (3 hand-built games).
+- Results on main voting v2 (AUROC [95% CI]; FPR), `instructed` vs `none`:
+  - `against_stake` **0.61 [0.54, 0.69]; 0.05**
+  - `co_vote` 0.49 [0.38, 0.60]; 0.23
+  - `said_vs_did` 0.36 [0.25, 0.49]; 0.85
+  - `combined` 0.39 [0.26, 0.52]; 0.85
+
+  Against `channel_only` hard negatives the pattern is the same (`against_stake` 0.63
+  [0.55, 0.70]; FPR 0.03). Output in `results/baselines/`.
+- Reading: one simple rule on the actions view (votes against one's own revealed payoff)
+  beats both LLM monitors on every main view, with a CI that excludes chance and a low FPR. So
+  the actions view contains usable evidence that the LLM monitors do not exploit.
+  `said_vs_did` falls *below* chance because honest agents change from their announcement more
+  often than colluders do. Invalid announcements (e.g. "UNDECIDED") count as changes, which
+  inflates this.
+
+### README provenance section (sprint rule: mark preexisting work)
+- `README.md` now opens with the project summary and a three-layer provenance section, built
+  from the git history:
+  1. upstream starter code (commit `8b3ab8f`, unmodified LLM-Trust-Breaking `fd11aca`);
+  2. preexisting work by this project before the sprint (`8b3ab8f..cb47c04`, Oct 21–22);
+  3. new sprint work (after `cb47c04`).
+
+  It states that all report data and results were generated during the sprint, and gives the
+  reproduction commands. The upstream README is kept below under "Original upstream README".
+  The README's test command was run as written: 36 tests pass.

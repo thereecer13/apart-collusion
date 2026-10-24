@@ -1,3 +1,94 @@
+# Does combining what agents say with what they do help a monitor detect collusion?
+
+Project for the **Apart AI Collusion Research Sprint** (Oct 23–25, 2026), Track 2 (Detection and
+Audit of Collusion), question 2.2. Seven LLM agents play a repeated committee-vote game. In some
+games, two of them collude through a hidden private channel. LLM monitors and simple heuristic
+baselines see different views of each game (public talk, actions, both, a said-vs-did table, and
+an upper-bound view that adds private plans) and must say whether a colluding pair is present and
+which agents it is.
+
+## Provenance: what is preexisting and what is new
+
+The sprint rules ask that all work done before the sprint be marked as preexisting. There are
+three layers. The full dated record is in [`PRE_SPRINT_LOG.md`](PRE_SPRINT_LOG.md) (before the
+sprint) and [`SPRINT_LOG.md`](SPRINT_LOG.md) (during the sprint).
+
+### 1. Upstream starter code (not ours)
+Imported unmodified in commit `8b3ab8f` from
+[Jerick-1380/LLM-Trust-Breaking](https://github.com/Jerick-1380/LLM-Trust-Breaking) at commit
+`fd11aca` (Shi et al. 2026, "When Agents Lie"). This includes the three-stage harness
+(private plan → public announcement → final action → reflection), the six original games, and
+the analyzer. The upstream repo has no LICENSE file. The upstream README is kept below, under
+"Original upstream README".
+
+### 2. Preexisting work by this project, written before the sprint (Oct 21–22, 2026)
+Commits `8b3ab8f..cb47c04`. No research data was generated before the sprint, only small
+plumbing tests (in `plumbing_tests/`, marked NOT DATA).
+- **Private channel** between two agents, with conditions `instructed`, `channel_only` and
+  `none`: new `src/endogenous/core/private_channel.py`; changes to
+  `src/endogenous/core/trial_runner.py` and `experiments/run_endogenous.py` (flags
+  `--private-channel`, `--private-exchanges`, `--seed`, `--no-judge`, `--dump-requests`).
+- **Committee Vote Game** (`--game voting`): new `src/games/voting.py`; changes to
+  `src/games/__init__.py` and `src/endogenous/core/prompt_builders.py` (per-agent private
+  stakes).
+- A fix in `trial_runner.py`: invalid actions count as parse errors.
+- **Monitor pipeline in Inspect**: `monitor/views.py`, `monitor/prompt.py` (monitor prompt
+  frozen as v1 before the sprint), `monitor/task.py`, `monitor/metrics.py`; the `channel_only`
+  labeler `monitor/label_channel_only.py`.
+- Plumbing checker `experiments/check_plumbing.py`; docs in `docs/`; tests in `tests/`
+  (`test_private_channel.py`, `test_voting.py`, `test_monitor.py`, `test_labeler.py`,
+  `render_*.py`).
+
+### 3. New work during the sprint (Oct 23–25, 2026)
+Commits after `cb47c04`. **All games and monitor results used in the report were generated
+during the sprint.**
+- Pilots that chose the main game and tested fixes; the main data batches (`data/`); the monitor
+  runs (`results/`).
+- **Stake reminder**, `--private-history current`, and the "competent colluder" condition
+  `instructed_hint`: changes to `src/endogenous/core/private_channel.py`,
+  `src/endogenous/core/trial_runner.py`, `src/games/voting.py` and
+  `experiments/run_endogenous.py`.
+- Analysis and run scripts: `experiments/analyze_voting_behaviour.py`,
+  `experiments/pilot_voting.py`, `experiments/monitor_on_realized.py`,
+  `experiments/run_main_voting.sh`.
+- Heuristic baselines `monitor/baselines.py`; hand-label comparison
+  `monitor/compare_hand_labels.py`; OpenRouter routing `monitor/openrouter_routing.yaml`.
+- Changes to `monitor/task.py` and `monitor/metrics.py` (condition filters, hard negatives) and
+  to `experiments/check_plumbing.py` (multi-game logs, the new conditions, false-positive fixes).
+- New tests: `tests/test_baselines.py`, `tests/test_check_plumbing.py`; additions to
+  `tests/test_voting.py`.
+
+## Reproducing
+
+```bash
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt -r monitor/requirements.txt
+export OPENROUTER_API_KEY=...          # agents and monitors run via OpenRouter
+
+# offline tests (no API calls)
+for t in private_channel voting monitor labeler check_plumbing baselines; do python tests/test_$t.py; done
+
+# one game: 7 agents, 6 rounds, voting game, competent colluders, current-round private history
+python experiments/run_endogenous.py --game voting --agents 7 --trials 1 --rounds 6 \
+  --model meta-llama/llama-3.3-70b-instruct --round-robin --no-judge \
+  --private-channel instructed_hint --private-history current --seed 1000
+
+# monitor (frozen v1 prompt) on a folder of game logs; then metrics by view
+inspect eval monitor/task.py --model openrouter/meta-llama/llama-3.3-70b-instruct \
+  --model-config monitor/openrouter_routing.yaml -T logs=data/main_voting_v2 --log-dir outputs/monitor
+python monitor/metrics.py outputs/monitor --positives instructed --negatives none
+
+# heuristic baselines (no API calls)
+python monitor/baselines.py data/main_voting_v2 --positives instructed --negatives none
+```
+
+Always pass `--no-judge` and do not use `--use-queue`: the private channel, the voting game and
+`--no-judge` are implemented only in the non-queued runner.
+
+---
+
+# Original upstream README
+
 ## Overview
 
 This research framework measures how large language models engage in **strategic deception** (promise-breaking) and how **trust evolves** when models repeatedly deceive each other across 10 rounds of strategic games.
