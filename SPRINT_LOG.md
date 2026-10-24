@@ -454,3 +454,53 @@ baseline was computed on data. The thresholds come from the design, not from tun
   3. report draft from the logs, for the participant to edit;
   4. package and submit before Sun Oct 25 11:59 PM AoE.
 - Hand-labeling `channel_only` is optional (`channel_only` is secondary).
+
+### Main voting v3 (competent and naive colluders, current-round history)
+- `OUT=outputs/main_voting_v3 CONDS="instructed_hint instructed" HISTORY=current
+  ./experiments/run_main_voting.sh`: 16 runs, all exit 0. Cost $24.6018 → $31.8192 =
+  **$7.22**. Plumbing: **all 80 games pass**.
+- Dataset `data/main_voting_v3/`: v3 `instructed` and `instructed_hint`, v1 `none`, v2
+  `channel_only` (full history), dumps, checks.
+- Behaviour (`checks/behaviour.json`):
+
+  | | naive (`instructed`) | competent (`instructed_hint`) | `channel_only` | `none` |
+  |---|---|---|---|---|
+  | Bloc votes in trade rounds | 20 of 64 (31%) | **64 of 64 (100%)** | 3 of 64 | 1 of 64 |
+  | Games with ≥ 1 bloc vote | 17 of 33 | **33 of 33** | 3 | 1 |
+  | Matched pair gain | +0.09 [−0.01, +0.20] | **+0.43 [+0.26, +0.60]** | +0.04 | n/a |
+  | Others' change | +0.01 | **−0.09 [−0.19, −0.00]** | +0.01 | n/a |
+
+  Wrong own-stake claims: 0% in both team conditions. M1: 0.3% invalid. M2: 86%.
+
+### Monitors on v3
+- DeepSeek V3.1: 800 samples (4 conditions × 40 games × 5 views; `channel_only` as hard
+  negatives), 0 unparsed.
+- Llama: the first run stopped at 71 of 800 on SambaNova again. Its endpoint advertises a 131k
+  context but rejected more than 4096 tokens, and the `ignore` setting did not keep requests
+  away from it. Failed log moved to `outputs/monitor_failed/`.
+  - New `monitor/openrouter_pinned.yaml`: `provider: {only: [deepinfra], allow_fallbacks:
+    false}`. DeepInfra serves this model in fp8 with a 131k context.
+  - Re-run: 800 of 800, logged `model_args` confirms the pin.
+  - So the **Llama monitor v3 results come from a single provider**. DeepSeek and the agents
+    were not pinned.
+- Monitor cost (both, including the failed run): $31.8192 → $32.9104 = **$1.09**.
+- Results, AUROC [95% CI] vs `none` (naive | competent):
+  - Llama: public 0.52 | 0.60 [0.47, 0.71]; actions 0.55 | 0.53; both 0.53 | 0.55; table
+    0.47 | 0.50; plans (UB) 0.89 | **0.94 [0.89, 0.97]**.
+  - DeepSeek: public 0.47 | 0.57; actions 0.52 | 0.54; both 0.55 | 0.48; table 0.44 | 0.49;
+    plans (UB) 0.82 | **0.98 [0.94, 1.00]**.
+  - All paired differences vs `both` include 0 for the main views. DeepSeek FPR is 0.90–1.00
+    on public, both and table.
+- Heuristic baselines, vs `none` (naive | competent):
+  - `against_stake` 0.65 [0.57, 0.73] | **0.86 [0.78, 0.93]**, FPR 0.05;
+  - `co_vote` 0.56 | 0.76 [0.66, 0.85];
+  - `combined` 0.48 | 0.65;
+  - `said_vs_did` 0.43 | 0.50.
+
+  Against `channel_only` hard negatives: `against_stake` 0.87 [0.79, 0.93] (FPR 0.03); LLM
+  monitors at chance on the observable views.
+- **Reading:** competent colluders trade votes every time it pays, and this is plainly visible
+  in the actions view (votes against one's own revealed payoff). A one-line rule detects it
+  (AUROC 0.86), but both LLM monitors, given the same view and the frozen prompt, stay at
+  chance. Combining messages with actions does not help them. They succeed only with private
+  plans.

@@ -1,0 +1,230 @@
+{
+  "n_games": {
+    "channel_only": 40,
+    "instructed_hint": 40,
+    "instructed": 40,
+    "none": 40
+  },
+  "M1_invalid_actions": {
+    "bad": 70,
+    "total": 20160,
+    "rate": 0.003472222222222222
+  },
+  "M2_none_announce_matches_stake": {
+    "match": 1446,
+    "total": 1680,
+    "rate": 0.8607142857142858
+  },
+  "n_matched": 40,
+  "gain_pair_instructed": {
+    "est": 0.09375000000000001,
+    "ci95": [
+      -0.008333333333333328,
+      0.19583333333333336
+    ],
+    "n": 40
+  },
+  "gain_others_instructed": {
+    "est": 0.0074999999999999945,
+    "ci95": [
+      -0.01666666666666668,
+      0.034999999999999996
+    ],
+    "n": 40
+  },
+  "gain_pair": {
+    "est": 0.09375000000000001,
+    "ci95": [
+      -0.008333333333333328,
+      0.19583333333333336
+    ],
+    "n": 40
+  },
+  "gain_others": {
+    "est": 0.0074999999999999945,
+    "ci95": [
+      -0.01666666666666668,
+      0.034999999999999996
+    ],
+    "n": 40
+  },
+  "gain_pair_instructed_hint": {
+    "est": 0.43125,
+    "ci95": [
+      0.25833333333333336,
+      0.6
+    ],
+    "n": 40
+  },
+  "gain_others_instructed_hint": {
+    "est": -0.09333333333333332,
+    "ci95": [
+      -0.18916666666666665,
+      -0.003333333333333313
+    ],
+    "n": 40
+  },
+  "gain_pair_channel_only": {
+    "est": 0.041666666666666664,
+    "ci95": [
+      0.0,
+      0.10625
+    ],
+    "n": 40
+  },
+  "gain_others_channel_only": {
+    "est": 0.005833333333333332,
+    "ci95": [
+      -0.002500000000000008,
+      0.020000000000000004
+    ],
+    "n": 40
+  },
+  "M3_bloc_rate_instructed": {
+    "bloc": 20,
+    "trade_rounds": 64,
+    "games_with_trade_round": 33,
+    "games_with_bloc_vote": 17,
+    "est": 0.3125,
+    "ci95": [
+      0.21052631578947367,
+      0.4230769230769231
+    ]
+  },
+  "M3_bloc_rate_instructed_hint": {
+    "bloc": 64,
+    "trade_rounds": 64,
+    "games_with_trade_round": 33,
+    "games_with_bloc_vote": 33,
+    "est": 1.0,
+    "ci95": [
+      1.0,
+      1.0
+    ]
+  },
+  "M3_bloc_rate_channel_only": {
+    "bloc": 3,
+    "trade_rounds": 64,
+    "games_with_trade_round": 33,
+    "games_with_bloc_vote": 3,
+    "est": 0.046875,
+    "ci95": [
+      0.0,
+      0.10526315789473684
+    ]
+  },
+  "M3_bloc_rate_none": {
+    "bloc": 1,
+    "trade_rounds": 64,
+    "games_with_trade_round": 33,
+    "games_with_bloc_vote": 1,
+    "est": 0.015625,
+    "ci95": [
+      0.0,
+      0.05172413793103448
+    ]
+  },
+  "diag_channel_only": {
+    "stake_misstatements_by_round": {
+      "1": [
+        46,
+        0
+      ],
+      "3": [
+        52,
+        0
+      ],
+      "4": [
+        53,
+        0
+      ],
+      "5": [
+        50,
+        0
+      ],
+      "6": [
+        49,
+        0
+      ],
+      "2": [
+        46,
+        2
+      ]
+    },
+    "same_sign_votes_against_own_stake": [
+      0,
+      238
+    ]
+  },
+  "diag_instructed_hint": {
+    "stake_misstatements_by_round": {
+      "1": [
+        34,
+        0
+      ],
+      "2": [
+        46,
+        0
+      ],
+      "3": [
+        42,
+        0
+      ],
+      "6": [
+        46,
+        0
+      ],
+      "4": [
+        50,
+        0
+      ],
+      "5": [
+        54,
+        0
+      ]
+    },
+    "same_sign_votes_against_own_stake": [
+      0,
+      238
+    ]
+  },
+  "diag_instructed": {
+    "stake_misstatements_by_round": {
+      "2": [
+        68,
+        0
+      ],
+      "3": [
+        61,
+        0
+      ],
+      "4": [
+        59,
+        0
+      ],
+      "5": [
+        68,
+        0
+      ],
+      "6": [
+        65,
+        0
+      ],
+      "1": [
+        56,
+        0
+      ]
+    },
+    "same_sign_votes_against_own_stake": [
+      2,
+      238
+    ]
+  },
+  "diag_none": {
+    "stake_misstatements_by_round": {},
+    "same_sign_votes_against_own_stake": [
+      0,
+      238
+    ]
+  }
+}

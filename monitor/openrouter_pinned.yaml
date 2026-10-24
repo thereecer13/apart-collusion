@@ -1,0 +1,9 @@
+# Pin OpenRouter to one inference provider for monitor runs (used from 2026-10-24, v3 data):
+#   --model-config monitor/openrouter_pinned.yaml
+# The SambaNova endpoint advertises 131k context but rejected inputs > 4096 tokens, and
+# `ignore` did not keep requests away from it. Pinning also makes runs reproducible.
+# DeepInfra serves llama-3.3-70b-instruct in fp8 with a 131k context.
+provider:
+  only:
+    - deepinfra
+  allow_fallbacks: false
