@@ -504,3 +504,17 @@ baseline was computed on data. The thresholds come from the design, not from tun
   (AUROC 0.86), but both LLM monitors, given the same view and the frozen prompt, stay at
   chance. Combining messages with actions does not help them. They succeed only with private
   plans.
+
+### Report draft v1 (`docs/report_draft.md`)
+- Abstract (249 words), title options, results tables (4.1 manipulation check, 4.2 main AUROC
+  table and heuristics, 4.3 the 2.2 paired differences, 4.4 errors and calibration, 4.5
+  robustness, 4.6 illustrative monitor reasoning), discussion, and updated limitations.
+- All numbers come from `results/` and `data/main_voting_v3/checks/`. Two transcription errors
+  were caught and fixed before committing: the plans-over-both gain range, and the plans AUROC
+  range.
+- New number computed for 4.5: on the 17 naive games with realized collusion vs `none`, LLM
+  monitors 0.48–0.55 on the observable views; `against_stake` 0.80 [0.67, 0.92].
+- Illustrative monitor reasoning in 4.6 is quoted from 2 sampled competent games per monitor
+  (actions view). It is not a measured result.
+- Still for the participant: verify the cited claims ([VERIFY]); move the text into the
+  official template; authors and affiliations; final edit.
