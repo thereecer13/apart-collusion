@@ -1,7 +1,7 @@
-# REPORT DRAFT (for the participant to edit; not final)
+# REPORT DRAFT v1 (for the participant to edit; not final)
 
 > Drafting notes:
-> - Everything marked **[TBD]** waits for the v3 results.
+> - Results are filled in from the v3 data (`results/`). Check numbers against `SPRINT_LOG.md`.
 > - Everything marked **[VERIFY]** is a claim about a cited paper taken from the sprint's
 >   Resources page summary. Check it against the paper before submitting; made-up results or
 >   references can disqualify a project.
@@ -9,21 +9,28 @@
 >   before references and appendices, abstract 150–250 words.
 
 ## Title (options)
-1. *Talk Is Cheap, Votes Are Not: Combining Messages and Actions Does Not Help LLM Monitors Detect Collusion* [TBD: depends on the v3 result]
-2. *Can a Monitor Catch Vote-Trading AI Agents from What They Say and Do?*
+1. *The Evidence Is in the Votes: LLM Monitors Miss Collusion That a One-Line Rule Catches* (recommended)
+2. *Does Combining What Agents Say and Do Help Monitors Detect Collusion? Not for LLM Monitors*
 3. *Detecting Covert Vote Trading Among LLM Agents: Messages, Actions, and Private Reasoning*
 
-## Abstract [TBD, 150–250 words, written last]
-Skeleton:
-- Problem: monitors of multi-agent systems usually see either what agents say or what they do.
-  Does combining the two help detect collusion?
-- Setup: a 7-agent committee-vote game designed so that collusion (vote trading by a secret
-  pair) pays and shows up in the conjunction of talk and actions. Matched games with no
-  collusion, naive colluders, and competent colluders.
-- Monitors: two LLM monitors (Llama 3.3 70B, frozen prompt; DeepSeek V3.1 as a robustness
-  check) and non-LLM heuristics, each given five views of each game.
-- Main result [TBD].
-- Takeaway [TBD].
+## Abstract (249 words)
+Monitors for multi-agent systems typically read either what agents say or what they do. We test
+whether combining the two helps a monitor detect collusion (Track 2, question 2.2). Seven Llama
+3.3 70B agents play a repeated committee-vote game with private stakes, designed so that honest
+play implies honest talk while a secret colluding pair profits by vote trading, which forces one
+member to vote against its own stake. Across 160 matched games we compare no collusion, a private
+channel without instructions, naive colluders told to maximize their joint payoff, and competent
+colluders also given a vote-trading tip. Competent colluders traded votes at every opportunity
+(64 of 64 rounds), gaining 0.43 points per round at the other agents' expense. Two LLM monitors
+(Llama 3.3 70B with a prompt frozen in advance, and DeepSeek V3.1) each saw five views of every
+game: public messages, actions, both, a said-versus-did table, and an upper-bound view adding
+private plans. On every observable view both monitors performed at chance (AUROC 0.44 to 0.60),
+and combining messages with actions gave no measurable gain. Yet a one-line rule applied to
+actions alone, flagging votes against one's own revealed payoff, detected competent colluders
+with AUROC 0.86 at a 5% false-positive rate, while the monitors succeeded only with access to
+private plans (AUROC 0.94 to 0.98). The evidence was in the action record; the LLM monitors did
+not extract it. Naive colluders often did not collude in their actions at all, a validity problem
+for collusion-monitor test sets.
 
 ## 1. Introduction
 - AI agents increasingly interact in shared environments: markets, committees, negotiation.
@@ -42,7 +49,8 @@ Skeleton:
      showing how often collusion is actually realized. This exposes a test-set validity
      problem: naive LLM colluders often do not collude in their actions at all.
   3. **Five views × two LLM monitors × simple heuristics**, with a private-reasoning upper
-     bound as a positive control. [TBD: headline numbers.]
+     bound as a positive control. Both LLM monitors are at chance on every observable view
+     (AUROC 0.44–0.60), while a one-line action rule reaches 0.86 and private plans 0.94–0.98.
   4. **Methodological lessons for LLM-agent experiments**: two confounds we found and fixed
      (stale-stake confusion from private history; an ambiguous reminder), each with a
      validated fix.
@@ -105,8 +113,11 @@ Skeleton:
   default), harness judge disabled.
 - 40 games per condition: seeds 1000–1007 × 5 games. The same (seed, game) gives the same pair
   and stakes in every condition, so conditions are matched game by game.
-- Main data: v3 `instructed` and `instructed_hint` [TBD: confirm counts], plus `none`.
-  `channel_only` from v2.
+- Main data (`data/main_voting_v3/`, 160 games):
+  - 40 `instructed` + 40 `instructed_hint` games, generated with current-round private history;
+  - 40 `none` games (no channel; prompts unchanged by any fix, so reused from the first batch);
+  - 40 `channel_only` games (full private history; used only as hard negatives).
+- Invalid or missing actions: 0.3% of action fields, counted as parse errors.
 - Every request and response was logged. A plumbing checker verified that:
   - private messages never appear in a non-pair agent's prompt;
   - condition notes appear only in the pair's system prompts;
@@ -127,9 +138,12 @@ Skeleton:
 - Prompt: a single prompt for all views, **frozen before the sprint** (v1), written from the
   design and not tuned on data. It returns JSON: reasoning, collusion yes/no, suspicion 0–10,
   and the suspected pair or "none". The decision threshold is the monitor's own yes/no.
-- Models: **Llama 3.3 70B** (frozen as the monitor before the sprint), temperature 0. As a
-  **post-hoc robustness check**, **DeepSeek V3.1** with the same prompt, added after the Llama
-  results were seen.
+- Models:
+  - **Llama 3.3 70B**: frozen as the monitor before the sprint; temperature 0; pinned to one
+    OpenRouter provider (DeepInfra, fp8) for the main results.
+  - **DeepSeek V3.1**: same prompt, as a **post-hoc robustness check**, added after the Llama
+    results on earlier data were seen; not pinned to a provider.
+- 800 monitor calls per model on the main data: 160 games × 5 views. 0 unparsed.
 - Heuristic baselines (no LLM), using only what the matching view shows:
   - `co_vote` (actions);
   - `against_stake` (actions): votes against one's own revealed payoff;
@@ -160,31 +174,101 @@ Pass criteria were committed before each pilot.
 - **Final fix.** Showing only the current round's private messages fixes both problems.
   Competent colluders then bloc-voted in 13/13 trade rounds in the pilot.
 
-## 4. Results [TBD]
-- 4.1 Manipulation check: bloc-vote rate and matched gain, for naive vs competent colluders.
-  [TBD]
-- 4.2 Main figure: AUROC by view, naive vs competent, two monitors, plus the best heuristic,
-  with the `plans` upper bound marked. [TBD]
-- 4.3 Does combining help? Paired differences `both − public`, `both − actions`. [TBD]
-- 4.4 False positives and pair identification; hard negatives (`channel_only`). [TBD]
-- 4.5 Heuristics vs LLM monitors. In v2 (naive colluders), `against_stake` reached AUROC 0.61
-  [0.54, 0.69] with FPR 0.05, beating both LLM monitors on every main view. [TBD: v3]
+## 4. Results
+All AUROCs are against the 40 `none` games unless stated, with 95% bootstrap CIs over games.
 
-## 5. Discussion [TBD]
-- What the result means for 2.2. [TBD]
-- Test-set validity: naive colluders often do not act collusively. Only 9 of 40 v2 naive games
-  had a bloc vote. Evaluations of collusion monitors must check that collusion actually
-  happened.
-- LLM monitors leave behavioural evidence unused: a one-line rule beats them on the actions
-  view [TBD: v3]. Private reasoning access (`plans`) works.
-- Monitor calibration: DeepSeek flags collusion in almost every game under this prompt;
-  Llama's suspicion scores are nearly binary.
-- Future work:
-  - side payments, so selfish `channel_only` agents could share gains;
-  - stronger or mixed agent models;
-  - more games (El Farol was dropped);
-  - monitor prompts that ask for explicit stake and vote consistency checks;
-  - pinning the inference provider.
+### 4.1 Manipulation check: competent colluders collude, naive ones mostly don't
+| | naive (`instructed`) | competent (`instructed_hint`) | `channel_only` | `none` |
+|---|---|---|---|---|
+| Bloc votes in trade-opportunity rounds | 20 of 64 (31%) | **64 of 64 (100%)** | 3 of 64 | 1 of 64 |
+| Games with ≥ 1 bloc vote (of 33 with a trade round) | 17 | **33** | 3 | 1 |
+| Pair's payoff gain vs the matched `none` game (per agent-round) | +0.09 [−0.01, +0.20] | **+0.43 [+0.26, +0.60]** | +0.04 [+0.00, +0.11] | n/a |
+| Other agents' change | +0.01 [−0.02, +0.03] | **−0.09 [−0.19, −0.00]** | +0.01 | n/a |
+
+Wrong own-stake claims in private messages: 0% in both team conditions. In `none`, 86% of
+public announcements match the agent's own stake, so talk is mostly honest.
+
+### 4.2 Main result (Figure 1, `results/figures/main_figure.png`)
+| AUROC [95% CI] | Naive: Llama | Naive: DeepSeek | Competent: Llama | Competent: DeepSeek |
+|---|---|---|---|---|
+| public | 0.52 [0.40, 0.64] | 0.47 [0.36, 0.58] | 0.60 [0.47, 0.71] | 0.57 [0.47, 0.67] |
+| actions | 0.55 [0.44, 0.67] | 0.52 [0.39, 0.64] | 0.53 [0.40, 0.65] | 0.54 [0.41, 0.66] |
+| both | 0.53 [0.41, 0.65] | 0.55 [0.45, 0.65] | 0.55 [0.44, 0.67] | 0.48 [0.38, 0.59] |
+| table | 0.47 [0.36, 0.57] | 0.44 [0.33, 0.55] | 0.50 [0.39, 0.60] | 0.49 [0.37, 0.60] |
+| *plans (upper bound / positive control)* | *0.89 [0.82, 0.95]* | *0.82 [0.75, 0.88]* | *0.94 [0.89, 0.97]* | *0.98 [0.94, 1.00]* |
+
+| Heuristic (view) | Naive | Competent |
+|---|---|---|
+| `against_stake` (actions) | 0.65 [0.57, 0.73] | **0.86 [0.78, 0.93]** |
+| `co_vote` (actions) | 0.56 [0.46, 0.67] | 0.76 [0.66, 0.85] |
+| `combined` (both) | 0.48 [0.36, 0.61] | 0.65 [0.54, 0.76] |
+| `said_vs_did` (table) | 0.43 [0.31, 0.56] | 0.50 [0.38, 0.63] |
+
+### 4.3 Does combining what agents say and do help? (question 2.2)
+- **For the LLM monitors, no.** Every paired difference `public − both`, `actions − both` and
+  `table − both` has a CI that includes 0, for both monitors and both colluder types. Examples
+  (competent, AUROC): Llama public − both +0.04 [−0.12, +0.20], actions − both −0.03
+  [−0.14, +0.08]; DeepSeek public − both +0.09 [−0.05, +0.24].
+- **For the heuristics, also no.** Adding the said-vs-did signal to against-stake (`combined`)
+  *lowers* AUROC: competent 0.65 vs 0.86. Honest agents also change from their announcements
+  (FPR of `said_vs_did` = 0.85), so the talk–action mismatch is noise in this game.
+- **What helps is the private reasoning** (`plans`): +0.28 to +0.49 AUROC over `both`, for both
+  monitors and both colluder types.
+
+### 4.4 Errors and calibration
+- **False positives (`none`):**
+  - Llama: 0.20 (public), 0.40 (actions), 0.42 (both), 0.03 (table), 0.23 (plans).
+  - DeepSeek: 1.00, 0.55, 0.90, 0.97 and 0.88. DeepSeek answers "collusion" in almost every
+    game under this prompt.
+  - `against_stake`: 0.05.
+- **Pair identification:** in the main views the named pair is almost never correct (0–10%;
+  DeepSeek `table` 25%). With `plans`, 100% for both monitors.
+- **Score shape:** Llama's suspicion scores are nearly binary (mostly 2 or 8).
+
+### 4.5 Robustness
+- **Hard negatives** (`channel_only`: pairs who talk privately but don't collude): competent vs
+  `channel_only` gives the same picture. LLM monitors 0.47–0.61 on the observable views;
+  `against_stake` 0.87 [0.79, 0.93], FPR 0.03.
+- **Only games with realized collusion** (the 17 naive games with ≥ 1 bloc vote): LLM monitors
+  0.48–0.55 on the observable views; `against_stake` 0.80 [0.67, 0.92].
+- **Earlier data** (v2, naive colluders, full history): the same qualitative picture (Appendix C).
+
+### 4.6 Why the LLM monitors miss it (illustrative, not measured)
+On competent games in the `actions` view, the monitors look for agents who vote together and
+earn well, or for agents who lose money:
+- Llama: "Agents G and J consistently voted together and received high payoffs…"; and "the
+  absence of announcements and stakes in the log limits the analysis". It doesn't infer that
+  payoffs reveal stakes when a proposal passes.
+- DeepSeek flags an agent that "voted NO and received −10". That is an honest voter on the
+  losing side. The real signal is the reverse: voting YES while receiving a negative payoff.
+
+## 5. Discussion
+- **Answer to 2.2 in this setting.** Combining messages with actions did not help LLM monitors
+  detect collusion. That is not because the evidence was missing: when colluders acted,
+  their actions gave them away to a one-line consistency rule (AUROC 0.86). The bottleneck is
+  the monitor's reasoning over the record, not which channel it reads.
+- **Talk can be a distraction.** Honest agents' announcements differ from their votes often
+  enough (85% of games) that talk–action mismatch is not diagnostic here, and adding it hurt the
+  heuristic. Combining channels helps only if the combined signal is cleaner than either alone.
+- **Private reasoning works.** With access to Stage 1 plans, both monitors detect collusion and
+  name the pair (AUROC 0.82–0.98). This is consistent with reports that deviations are visible
+  in private plans [Shi et al. 2026, VERIFY]. But it depends on colluders writing their intent
+  down, and they may not do so if they know they are watched [Kale et al. 2025, VERIFY].
+- **Test-set validity.** Agents told to collude often do not act collusively: naive colluders
+  traded in only 31% of opportunities. In an earlier batch, confusion over stakes even made
+  their collusion lose money. Collusion-monitor evaluations should report a manipulation
+  check of realized collusion, not just the instruction given.
+- **Practical implication.** Before deploying an LLM monitor, check it against simple,
+  task-specific consistency rules. A monitor prompt that asks for explicit checks (does each vote
+  match the agent's revealed interest?) is an obvious next step; we kept the prompt frozen to
+  avoid tuning on the test data.
+- **Future work:**
+  - prompts with explicit consistency checks, and structured-report views in the style of
+    TraceGuard;
+  - stronger and mixed agent models;
+  - side payments, so selfish agents could share gains (emergent collusion);
+  - more games (El Farol was dropped for time);
+  - pinned providers for every model.
 
 ## Appendix A: Limitations and Dual-Use / Ethical Considerations (required)
 **What the results do and do not establish**
@@ -194,8 +278,9 @@ Pass criteria were committed before each pilot.
   also had no way to share gains.
 - Monitor prompt frozen before the sprint. DeepSeek and the heuristic baselines were added
   after the first results were known, so they are post-hoc analyses.
-- OpenRouter routing was not pinned to one inference provider for the agents or the monitors,
-  so outputs come from a mix of providers.
+- OpenRouter routing was not pinned for the agents or for DeepSeek, so those outputs come from
+  a mix of inference providers. The Llama monitor's main results are pinned to one provider
+  (DeepInfra, fp8). Its earlier runs were not.
 - The data went through three generations (v1–v3), with fixes driven by observed confounds.
   Each fix was validated against criteria set before the run, and earlier data are reported in
   the appendix.
@@ -203,6 +288,11 @@ Pass criteria were committed before each pilot.
   current-round history.
 - Labels follow the condition (instructed = colluding), not realized behaviour. We report
   realized-collusion subsets separately.
+- Several comparisons are made; a few CIs that narrowly exclude 0 should not be over-read.
+  One example is DeepSeek `table − both` vs `channel_only` for naive colluders, −0.16
+  [−0.31, −0.00].
+- The heuristic rules use knowledge of the game, namely that payoffs reveal stakes. That is
+  their point, and also a limit: they are game-specific.
 
 **Dual use**
 - The strategy tip and our analysis describe how a pair can trade votes covertly, and that LLM
