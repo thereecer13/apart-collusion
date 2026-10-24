@@ -13,7 +13,7 @@
 2. *Does Combining What Agents Say and Do Help Monitors Detect Collusion? Not for LLM Monitors*
 3. *Detecting Covert Vote Trading Among LLM Agents: Messages, Actions, and Private Reasoning*
 
-## Abstract (249 words)
+## Abstract (245 words)
 Monitors for multi-agent systems typically read either what agents say or what they do. We test
 whether combining the two helps a monitor detect collusion (Track 2, question 2.2). Seven Llama
 3.3 70B agents play a repeated committee-vote game with private stakes, designed so that honest
@@ -29,8 +29,8 @@ and combining messages with actions gave no measurable gain. Yet a one-line rule
 actions alone, flagging votes against one's own revealed payoff, detected competent colluders
 with AUROC 0.86 at a 5% false-positive rate, while the monitors succeeded only with access to
 private plans (AUROC 0.94 to 0.98). The evidence was in the action record; the LLM monitors did
-not extract it. Naive colluders often did not collude in their actions at all, a validity problem
-for collusion-monitor test sets.
+not extract it. Even with every against-interest vote explicitly flagged, the best monitor reached
+only AUROC 0.65.
 
 ## 1. Introduction
 - AI agents increasingly interact in shared environments: markets, committees, negotiation.
