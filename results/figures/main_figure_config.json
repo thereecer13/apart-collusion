@@ -1,0 +1,6 @@
+{"panels": [
+  {"title": "Naive colluders (team goal only)", "positives": ["instructed"], "logs": "data/main_voting_v3",
+   "llama": ["results/monitor_v3_llama"], "deepseek": ["results/monitor_v3_deepseek"]},
+  {"title": "Competent colluders (team goal + strategy tip)", "positives": ["instructed_hint"], "logs": "data/main_voting_v3",
+   "llama": ["results/monitor_v3_llama"], "deepseek": ["results/monitor_v3_deepseek"]}
+]}

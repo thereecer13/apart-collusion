@@ -1,0 +1,6 @@
+positives: ['instructed'], negatives: ['channel_only']
+baseline                     n(+/-)  accuracy               FPR                    AUROC                  pair acc              
+baseline:against_stake      40/40    0.66 [0.56, 0.76]      0.03 [0.00, 0.08]      0.66 [0.59, 0.74]      0.07 [0.00, 0.17]     
+baseline:co_vote            40/40    0.55 [0.44, 0.66]      0.20 [0.09, 0.33]      0.56 [0.46, 0.67]      0.03 [0.00, 0.08]     
+baseline:combined           40/40    0.51 [0.40, 0.62]      0.88 [0.77, 0.97]      0.52 [0.40, 0.65]      0.05 [0.00, 0.12]     
+baseline:said_vs_did        40/40    0.51 [0.40, 0.62]      0.88 [0.77, 0.97]      0.47 [0.35, 0.60]      0.05 [0.00, 0.12]     
