@@ -1,0 +1,6 @@
+# OpenRouter routing for monitor runs (pass with: --model-config monitor/openrouter_routing.yaml).
+# SambaNova serves llama-3.3-70b-instruct with a 4096-token context, too short for 6-round
+# game records (up to ~8k tokens); see SPRINT_LOG.md 2026-10-24.
+provider:
+  ignore:
+    - SambaNova

@@ -190,3 +190,36 @@ participant.
 - Reading: with the confusion removed, collusion now pays the pair a small positive amount. But
   instructed pairs trade votes in only about 1 in 5 trade rounds, so collusion is weakly visible
   in actions. Rounds where trading pays are about 27% of all rounds (64 of 240).
+
+### Monitor run on main voting v2 (analysis plan item 1)
+- First attempt stopped at 223 of 400 samples. OpenRouter routed some requests to SambaNova,
+  which serves this model with a 4096-token context, and the longest 6-round game records are
+  about 8k tokens. Partial log set aside (`outputs/monitor_failed/`, not used).
+- Fix: new `monitor/openrouter_routing.yaml` (`provider: {ignore: [SambaNova]}`), passed with
+  `--model-config`. The eval log records `model_args: {'provider': {'ignore': ['SambaNova']}}`.
+  Note: the agents' game requests were not pinned to a provider either; OpenRouter chose
+  per request.
+- Run: `inspect eval monitor/task.py --model openrouter/meta-llama/llama-3.3-70b-instruct
+  --model-config monitor/openrouter_routing.yaml -T logs=data/main_voting_v2 --max-connections
+  20`. 400 samples (40 `instructed` + 40 `none` × 5 views), 2 min, 1.47M tokens, 0 unparsed.
+  Results in `results/monitor_main_v2/`.
+- **Results (95% bootstrap CIs over games):**
+
+  | View | Accuracy | FPR | AUROC | Pair-ID |
+  |---|---|---|---|---|
+  | public | 0.53 [0.41, 0.64] | 0.12 [0.03, 0.23] | 0.60 [0.49, 0.73] | 0.00 |
+  | actions | 0.53 [0.41, 0.64] | 0.53 [0.37, 0.68] | 0.55 [0.43, 0.67] | 0.05 [0.00, 0.13] |
+  | both | 0.50 [0.39, 0.61] | 0.50 [0.34, 0.66] | 0.51 [0.39, 0.63] | 0.00 |
+  | table | 0.51 [0.40, 0.61] | 0.00 [0.00, 0.00] | 0.47 [0.37, 0.58] | 0.00 |
+  | *plans (upper bound)* | 0.86 [0.79, 0.94] | 0.28 [0.14, 0.41] | 0.87 [0.80, 0.93] | 1.00 |
+
+  Paired AUROC differences vs `both`: public +0.09 [−0.06, +0.25], actions +0.04 [−0.08, +0.15],
+  table −0.04 [−0.20, +0.12]; plans (upper bound) +0.35 [+0.24, +0.48].
+- Reading: on observable behaviour the monitor is **at or near chance in every view, and
+  combining talk and actions does not help**. With access to private plans it detects well and
+  always names the right pair when it says "yes". Response behaviour:
+  - Suspicion is nearly binary (mostly 2 or 8), which limits AUROC resolution.
+  - `table` almost always answers "no" (1 of 80 "yes").
+  - `actions` and `both` say "yes" about half the time.
+  - When it says "yes" in a main view, the named pair is almost never correct.
+- Cost: see below (key usage read after the labeler run).
