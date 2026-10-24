@@ -594,3 +594,13 @@ collusion because they don't know against-interest votes are rare in honest play
 - Held-out attempt 1: the container restarted about 25 min in, before any run finished, so
   nothing was saved. Lost **$2.29** ($33.4377 → $35.7270). Relaunched unchanged (same seeds, same
   design).
+
+### Report prose version (`docs/report.md`)
+- Prose version of the bullet draft, ready for the template, with figure and table captions.
+  Units are now explicit: the simulation figures are per round for the whole pair (+0.71) and
+  for all other agents (−0.43); the measured gains are per agent-round.
+- Two claims checked against the data and corrected: pair-ID in observable views is 0–10% except
+  DeepSeek's table view (25%); Llama's suspicion scores are 70% either 2 or 8 (v3), not "nearly
+  binary".
+- Placeholders remain for the held-out informed-monitor test, the [VERIFY] references, and the
+  author name.
