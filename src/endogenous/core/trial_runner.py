@@ -1111,7 +1111,13 @@ def run_all_trials(
     if private_channel is not None:
         for tid in range(n_trials):
             pair = choose_pair(seed, tid, agent_names)
-            channels[tid] = PrivateChannel(private_channel, pair, private_exchanges)
+            hint = None
+            if private_channel == "instructed_hint":
+                from src.games.voting import VOTE_TRADE_HINT
+                if game_type != "voting":
+                    raise ValueError("instructed_hint is only defined for the voting game")
+                hint = VOTE_TRADE_HINT
+            channels[tid] = PrivateChannel(private_channel, pair, private_exchanges, strategy_hint=hint)
             print(f"  Trial {tid}: private channel '{private_channel}', pair {pair[0]} & {pair[1]}")
 
     all_rounds = []

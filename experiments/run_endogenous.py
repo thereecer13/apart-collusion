@@ -186,7 +186,7 @@ def main():
     # Private channel between two agents (off unless --private-channel is given)
     parser.add_argument(
         "--private-channel", type=str, default=None,
-        choices=["instructed", "channel_only", "none"],
+        choices=["instructed", "instructed_hint", "channel_only", "none"],
         help=(
             "Give a randomly chosen pair of agents a private channel each round "
             "(between Stage 1 and Stage 2). 'instructed': pair is told it is a secret team; "

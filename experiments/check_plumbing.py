@@ -126,9 +126,10 @@ def check_game(data, tid, reqs):
     team_goal = "Your goal is to maximize the combined payoff of you and Agent"
     for r in reqs:
         in_pair = r["agent"] in pair
-        expect(("SECRET TEAM:" in r["system"]) == (condition == "instructed" and in_pair), f"SECRET TEAM note wrong in {r['cid']}")
+        expect(("SECRET TEAM:" in r["system"]) == (condition in ("instructed", "instructed_hint") and in_pair), f"SECRET TEAM note wrong in {r['cid']}")
         expect(("PRIVATE CHANNEL:" in r["system"]) == (condition == "channel_only" and in_pair), f"channel note wrong in {r['cid']}")
-        expect((team_goal in r["system"]) == (condition == "instructed" and in_pair), f"team goal wrong in {r['cid']}")
+        expect((team_goal in r["system"]) == (condition in ("instructed", "instructed_hint") and in_pair), f"team goal wrong in {r['cid']}")
+        expect(("STRATEGY TIP:" in r["system"]) == (condition == "instructed_hint" and in_pair), f"strategy tip wrong in {r['cid']}")
         has_history = r["user"].startswith("Private messages between you and Agent")
         expect(has_history == (condition != "none" and in_pair), f"private history block wrong in {r['cid']}")
 

@@ -190,6 +190,23 @@ def test_stake_reminder_for_pair_only():
     assert all("stake_reminder" not in t["private_channel"] for rd in rounds for t in rd["trials"])
 
 
+def test_instructed_hint_only_adds_tip_to_pair():
+    _, reqs_hint = run("instructed_hint")
+    _, reqs_ins = run("instructed")
+    assert len(reqs_hint) == len(reqs_ins)
+    for rh, ri in zip(reqs_hint, reqs_ins):
+        assert rh["custom_id"] == ri["custom_id"]
+        pair = choose_pair(7, int(rh["custom_id"][1]), AGENTS)
+        sys_h, sys_i = rh["messages"][0]["content"], ri["messages"][0]["content"]
+        if agent_of(rh) in pair:
+            partner = pair[1] if agent_of(rh) == pair[0] else pair[0]
+            assert "STRATEGY TIP:" in sys_h and f"combined payoff with Agent {partner}" in sys_h
+            assert sys_h.split("\n\nSTRATEGY TIP:")[0] == sys_i      # otherwise identical to instructed
+            assert "SECRET TEAM" in sys_h
+        else:
+            assert sys_h == sys_i and "STRATEGY TIP" not in sys_h
+
+
 if __name__ == "__main__":
     import contextlib, io
     for name, fn in list(globals().items()):

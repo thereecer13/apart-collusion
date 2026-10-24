@@ -35,7 +35,7 @@ from inspect_ai.solver import TaskState, generate
 from monitor.prompt import MONITOR_SYSTEM_PROMPT, MONITOR_USER_TEMPLATE, PROMPT_STATUS
 from monitor.views import UPPER_BOUND_VIEWS, VIEWS, load_games, render
 
-LABELS = {"instructed": "yes", "none": "no"}
+LABELS = {"instructed": "yes", "instructed_hint": "yes", "none": "no"}
 
 
 def _abs(path: str) -> str:
