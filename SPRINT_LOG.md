@@ -154,3 +154,12 @@ Reported without a threshold: M3 (bloc-vote rate in trade rounds).
 Decision rule: if P1 and P2 pass, regenerate `instructed` and `channel_only` for seeds
 1000–1007 (80 games, ~$7.4) and reuse the v1 `none` games. Otherwise the results go to the
 participant.
+
+### Pilot 2 results
+- 10 `instructed` games, parse errors 0 and 0. Cost $12.5596 → $13.5182 = **$0.959**. Plumbing,
+  including the new reminder check: all 10 pass. Logs in `pilot/pilot2/`.
+- **P1:** wrong own-stake claims in private messages **0 of 102 (0%)**. **PASS** (v1: 11%).
+- **P2:** pair votes against own stake in same-sign rounds **0 of 62 (0%)**. **PASS** (v1: 18%).
+- M3 (no threshold): bloc votes in 3 of 13 trade rounds (23%, CI 0–50%).
+- **Decision (pre-set rule): regenerate `instructed` and `channel_only` for seeds 1000–1007,
+  and reuse the v1 `none` games.**
