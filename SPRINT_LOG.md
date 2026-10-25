@@ -810,3 +810,23 @@ on the v3 games already used.
 - Still for the participant (highlighted in the document): name and affiliation; author
   contribution statement; making the repository public; editing the LLM usage statement; and
   putting the text into their own words (the template's request).
+
+### Why messages add nothing over actions (2026-10-25, offline, no API calls)
+Participant's question. Counts from the v3 games, computed with ad-hoc queries over
+`data/main_voting_v3` (stage2 `stated_action` and `message`, stage3 `choice`, round `stakes`):
+- Said-vs-did per agent-round:
+  - `none`: 235/1667 (14%);
+  - competent games: pair members 79/475 (17%), other agents 144/1193 (12%).
+- The 64 competent trading votes (against own stake, in trade rounds): 41 were announced as the
+  vote then cast, and 23 announced the own-stake side and then switched.
+- Public messages naming a given agent:
+  - competent games: pair member names partner 14/475 (3%); other agents name a random agent
+    33/1193 (3%);
+  - `none`: 19/477 (4%) and 27/1190 (2%).
+- Stake talk in public messages:
+  - competent trading votes: no message gives a stake amount; 31/64 mention "stake" at all;
+  - `none` pair members in trade-opportunity rounds: 102/128 mention "stake", and 2 contain "$".
+- Reading: the collusion signal is in the votes, which the actions view already contains. The
+  talk mostly mirrors the vote, mismatch is common in honest play, and the partnership and the
+  real stakes stay out of public messages. So messages add text without independent signal.
+  These are rough text counts; they are not in the paper.
