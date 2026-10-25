@@ -64,7 +64,8 @@ during the sprint.**
     `experiments/compare_prompts.py`;
   - provider configs `monitor/openrouter_pinned.yaml` and `monitor/openrouter_reasoning.yaml`
     (DeepSeek V3.1 thinking mode);
-  - tie-round analysis `experiments/tie_round_analysis.py` (pre-submission review);
+  - tie-round analysis `experiments/tie_round_analysis.py` (pre-submission review), and
+    `experiments/talk_counterfactual.py` (what talk could add: the best case for stated stakes);
   - the report: `docs/report_draft.md` and `docs/report.md`, superseded by `docs/submission/`,
     whose `build_report.py` fills the official template from `content.py`.
 
@@ -95,6 +96,7 @@ python monitor/baselines.py data/main_voting_v2 --positives instructed --negativ
 # monitors on realized collusion, and the paired comparison of two monitor runs
 python experiments/analyze_voting_behaviour.py data/main_voting_v3
 python experiments/tie_round_analysis.py data/main_voting_v3
+python experiments/talk_counterfactual.py data/main_voting_v3
 python experiments/monitor_on_realized.py data/main_voting_v3 results/monitor_v3_llama
 python experiments/compare_prompts.py results/monitor_v3_deepseek results/monitor_v3_deepseek_thinking \
   --positives instructed_hint --negatives none

@@ -870,3 +870,28 @@ only). Paired bootstrap over games, competent vs `none`:
   worth the remaining budget. Recommended instead: reframe 2.2 as a boundary condition, use this
   bound as evidence, and list stake disclosure as future work (it would need roughly 80+ games
   per class).
+
+### Paper reframed around the boundary result for 2.2 (2026-10-25, no API calls)
+Participant's decision, after the variant check above.
+- New script `experiments/talk_counterfactual.py` (+ test `test_truthful_talk_sees_failed_rounds`;
+  39 tests pass) reproduces the numbers logged above:
+  - the trading-vote split (v3: 19/14 passed, 22/9 failed; held-out 6/4 and 5/6);
+  - said-vs-did rates;
+  - honest slips by round outcome;
+  - the best case for truthful stated stakes: v3 +0.10 [+0.03, +0.18]; held-out +0.03 [−0.06,
+    +0.14].
+- Paper (`content.py`):
+  - abstract, intro and contributions now lead with action-based detection. They present 2.2 as
+    a boundary result: this collusion needs no public lie, so talk adds nothing, and would add at
+    most +0.10 even if it revealed every stake;
+  - the Results 2.2 paragraph gives the 41/64 trades announced as cast, honest switching (14%)
+    and the best-case bound;
+  - the Discussion gives the scope;
+  - Limitations: "answers 2.2 only for collusion that leaves its trace in actions";
+  - the first Future Work item is a game where collusion requires public deception (~80 games
+    per class);
+  - new Appendix F with Table F1;
+  - abstract 249 words; two claims softened to hypotheses ("We expect combining to help only
+    where…").
+- Text tightened to stay within 8 pages. LibreOffice render: main text pp. 1–8 with ~4 lines
+  spare on p. 8; References p. 9; Appendix pp. 10–13. XSD validation passed.

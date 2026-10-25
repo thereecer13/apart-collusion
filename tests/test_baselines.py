@@ -78,6 +78,17 @@ def test_tie_compliant_counterfactual():
     assert g["rounds"][0]["outcomes"]["choices"]["A"] == "YES"            # original not modified
 
 
+def test_truthful_talk_sees_failed_rounds():
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "experiments"))
+    from talk_counterfactual import score_actions, score_truthful_talk
+    r = honest_round(dict(zip(AGENTS, [1, -10, -1, -1, 1, 1, 1])))
+    r["A"] = ("YES", "NO", 1)               # +1 stake, votes NO: the proposal fails 3-4, payoffs all 0
+    g = game([r])
+    g["rounds"][0]["stakes"] = {a: v[2] for a, v in r.items()}
+    assert score_actions(g) == 0             # hidden from the actions view
+    assert score_truthful_talk(g) == 1       # visible if the stake had been stated
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):

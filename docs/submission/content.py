@@ -6,19 +6,19 @@ TITLE = "The Evidence Is in the Votes: LLM Monitors Mostly Miss Collusion That a
 
 ABSTRACT = (
     "Monitors for multi-agent systems typically read either what agents say or what they do. We test whether "
-    "combining the two helps a monitor detect collusion. Seven Llama 3.3 70B agents play a repeated committee-vote "
-    "game with private stakes, where honest play implies honest talk and a secret colluding pair profits by vote "
-    "trading, which forces one member to vote against its own stake. Across 160 matched games we compare no "
-    "collusion, a private channel without instructions, naive colluders told to maximize their joint payoff, and "
-    "competent colluders also given a vote-trading tip. Competent colluders traded at every opportunity (64 of 64), "
-    "each gaining 0.43 points per round, and also traded where it gained nothing. Two LLM monitors with a prompt "
-    "frozen in advance (Llama 3.3 70B and DeepSeek V3.1) saw public messages, actions, both, a said-versus-did table, "
-    "and an upper-bound view adding private plans. On each of the four observable views both were indistinguishable from chance "
-    "(AUROC 0.44 to 0.60), and combining messages with actions gave no measurable gain. A one-line rule on actions "
-    "alone, flagging votes against one's revealed payoff, detected competent colluders with AUROC 0.86 at a 5% "
-    "false-positive rate (0.78 had they not over-traded; 0.91 on held-out games), while the monitors succeeded only "
-    "with private plans (0.94 to 0.98). With its thinking mode on, DeepSeek rose to 0.69 on actions, still below the "
-    "rule, and adding messages still did not help. The evidence is in the votes, and these LLM monitors extract "
+    "combining the two helps a monitor detect collusion. Seven Llama 3.3 70B agents play a committee-vote "
+    "game with private stakes, in which a secret colluding pair profits by vote trading: one member votes against its "
+    "own small stake to secure its partner's large one. Across 160 matched games we compare no collusion, a private "
+    "channel without instructions, naive colluders told to maximize their joint payoff, and competent colluders also "
+    "given a vote-trading tip. Competent colluders traded at every opportunity (64 of 64), each gaining 0.43 points "
+    "per round, and also traded where it gained nothing. Two LLM monitors with a prompt frozen in advance (Llama 3.3 "
+    "70B and DeepSeek V3.1) saw public messages, actions, both, a said-versus-did table, and an upper-bound view adding "
+    "private plans. On each of the four observable views both were indistinguishable from chance (AUROC 0.44 to 0.60), "
+    "while a one-line rule on actions, flagging votes against one's revealed payoff, reached 0.86 at a 5% "
+    "false-positive rate (0.78 had colluders not over-traded). The monitors succeeded only with private plans (0.94 "
+    "to 0.98); with thinking on, DeepSeek rose to 0.69. Adding messages never helped monitors or rules: the collusion "
+    "needed no public lie, and even talk revealing every true stake would add at most 0.10. We expect combining to "
+    "help only where collusion forces public deception; here the evidence is in the votes, and LLM monitors extract "
     "little of it."
 )
 
@@ -32,27 +32,26 @@ SECTIONS["1. Introduction"] = [
           "plausible hypothesis is that the *combination* is most informative, because a colluder may have to say one "
           "thing and do another. Track 2 of this sprint asks the question directly: does combining what agents say "
           "with what they do improve detection?"),
-    ("p", "We test it in a setting built so that the answer could be yes. In our Committee Vote Game, honest play "
-          "makes truthful announcements and stake-following votes the natural baseline, while a colluding pair profits "
-          "by *vote trading*: one member votes against its own small stake to secure its partner's large one. We "
-          "generate matched games with and without colluders, give two LLM monitors five views of each game (one also "
-          "with its thinking mode on), and compare them with simple non-LLM rules."),
+    ("p", "We test it in a Committee Vote Game in which a colluding pair profits by *vote trading*: one member votes "
+          "against its own small stake to secure its partner's large one. Honest play makes truthful announcements and "
+          "stake-following votes the natural baseline, but announcements are cheap talk, so colluders may misstate their "
+          "intentions yet never need to. The game thus tests the question for collusion that leaves its trace in actions "
+          "and requires no public lie, and asks first whether LLM monitors can find that trace. We give two LLM monitors "
+          "five views of matched games with and without colluders (one monitor also with thinking on) and compare them "
+          "with simple non-LLM rules."),
     ("p", "**Our main contributions are:**"),
     ("numbered", [
-        "**A collusion test bed where the signal lives in talk and actions:** a seven-agent committee-vote game with "
-        "private stakes, matched across conditions, with automated checks that private information never leaks.",
-        "**Naive versus competent colluders, with a manipulation check.** Told only to maximize their joint payoff, "
-        "pairs trade votes in 31% of opportunities; with a short strategy tip, in 100%, though they also over-apply it. "
-        "Labelling games by the instruction given risks testing monitors on collusion that never happened, or that is "
-        "clumsier than intended.",
-        "**A clear negative result for LLM monitors, replicated on held-out games.** Two short-verdict monitors are "
-        "indistinguishable from chance on each of the four observable views, and a thinking-mode monitor reaches only "
-        "0.69, while a "
-        "one-line rule on the actions reaches 0.86 (0.78 had the colluders not over-traded). With private plans the "
-        "monitors reach 0.94–0.98 (positive control).",
-        "**An answer to question 2.2 and a partly supported diagnosis.** Neither monitors nor rules gain from adding "
-        "messages to actions. Monitors under-weight the inconsistent votes that trades leave behind, and neither a "
-        "stated base rate (a pre-specified test that failed) nor thinking closes the gap to the rule.",
+        "**A matched collusion test bed:** a seven-agent committee-vote game with private stakes in which collusion "
+        "pays and leaves its trace in the votes, with automated checks that private information never leaks.",
+        "**A manipulation check.** Told only to maximize their joint payoff, pairs trade votes in 31% of opportunities; "
+        "with a short strategy tip, in 100%, though they also over-apply it. Labelling games by instruction risks "
+        "testing monitors on collusion that never happened.",
+        "**A negative result for LLM monitors, replicated on held-out games.** Short-verdict monitors are "
+        "indistinguishable from chance on each observable view and a thinking-mode monitor reaches 0.69, while a "
+        "one-line rule on the actions reaches 0.86 (0.78 without over-trading). With private plans the monitors "
+        "reach 0.94–0.98.",
+        "**A boundary result for question 2.2.** Adding messages helps neither monitors nor rules, because this "
+        "collusion needs no public lie; even talk revealing every true stake would add at most +0.10 AUROC.",
     ]),
 ]
 
@@ -162,27 +161,28 @@ SECTIONS["4. Results"] = [
           "pair in every colluding game, but their yes/no answers stay poorly calibrated (FPR 0.23 for Llama, 0.88 for "
           "DeepSeek; Appendix E). DeepSeek answers \"collusion\" in 90–100% of no-collusion games on three of the four "
           "observable views, and 70% of Llama's suspicion scores are 2 or 8."),
-    ("p", "**Combining what agents say and do did not help (question 2.2).** For both monitors and colluder types, "
-          "every paired difference between the combined view and a single-channel view has a CI including zero (e.g. "
-          "competent, Llama: public − combined +0.04 [−0.12, 0.20]; actions − combined −0.03 [−0.14, 0.08]); with the "
-          "monitors near chance, this alone cannot show whether combining would help a better monitor. For the rules, "
-          "talk adds nothing: said-vs-did flags 85% of no-collusion games, because honest agents also change their vote "
-          "after announcing; summing it with against-stake lowers AUROC from 0.86 to 0.65, and using it only to break "
-          "ties leaves 0.86 [0.76, 0.94]. The only addition that helps is private reasoning (+0.28 to +0.49 over the "
-          "combined view)."),
+    ("p", "**Combining what agents say and do did not help (question 2.2), because the talk carries almost no extra "
+          "signal.** For both monitors and colluder types, every paired difference between the combined view and a "
+          "single-channel view has a CI including zero (e.g. competent, Llama: public − combined +0.04 [−0.12, 0.20]), "
+          "and the thinking-mode monitor, which is above chance, agrees (below). Colluders rarely needed to misspeak: in "
+          "41 of 64 trades the trader announced the vote it then cast, and most switches came where the payoff already "
+          "exposes the vote (Appendix F). For the rules, said-vs-did flags 85% of no-collusion games, since honest agents "
+          "change their vote after announcing in 14% of agent-rounds; adding it to against-stake lowers AUROC from 0.86 "
+          "to 0.65 (as a tie-breaker only: 0.86). Even if talk revealed every agent's true stake, flagging votes against "
+          "it would gain at most +0.10 [0.03, 0.18], because it would also expose honest slips hidden in failed rounds "
+          "(Appendix F). Only private reasoning helps (+0.28 to +0.49 over the combined view)."),
     ("p", "**Robustness.** For competent colluders the pattern holds against channel-only hard negatives (monitors "
           "0.47–0.61; against-stake 0.87 [0.79, 0.93]); it also holds on the 17 naive games with realized collusion "
           "(monitors 0.48–0.55; against-stake 0.80 [0.67, 0.92]), in an earlier data generation (Appendix C) and on "
           "held-out games."),
     ("p", "**Why the monitors miss it.** In a typical trade only the small-stake colluder votes against its interest, "
-          "so the visible trace is one or a few inconsistent votes. Two exploratory views tested presentation: an "
-          "aligned per-round table (announced vote, final vote, payoff), and the same table with each vote flagged "
-          "*with* or *AGAINST* the interest its payoff reveals — exactly the rule's evidence. The table alone did not "
-          "help; the flags helped Llama only slightly (competent: 0.65 [0.55, 0.75]). In 30 of 40 competent games an "
-          "AGAINST row was shown (two or more in 13), yet Llama answered yes in 5 (3 of the 13) and DeepSeek in 16. "
-          "Llama treats the flag as weak: \"most agents voted with their revealed interests… Z's vote… went against… "
-          "could indicate collusion. But without more information, it's difficult to determine.\" Yet honest agents "
-          "almost never vote against their revealed interest (the rule's FPR is 5%)."),
+          "so the visible trace is one or a few inconsistent votes. Two exploratory views tested presentation: a "
+          "per-round table (announced vote, final vote, payoff), and the same table with each vote flagged *with* or "
+          "*AGAINST* the interest its payoff reveals — exactly the rule's evidence. The table alone did not help; flags "
+          "helped Llama only slightly (competent: 0.65 [0.55, 0.75]). In 30 of 40 competent games an AGAINST row was "
+          "shown (two or more in 13), yet Llama answered yes in 5 and DeepSeek in 16. Llama treats the flag as weak: "
+          "\"Z's vote… went against… could indicate collusion. But without more information, it's difficult to "
+          "determine.\" Yet honest agents almost never vote against their revealed interest (the rule's FPR is 5%)."),
     ("table", "Table 3. Held-out test (20 competent vs 20 no-collusion games generated after prompt v2 was fixed). AUROC [95% CI]. v2 adds the base rate to the frozen prompt v1.",
      ["View", "Llama v1", "Llama v2", "DeepSeek v1", "DeepSeek v2"],
      [["Actions (pre-specified primary)", "0.59 [0.42, 0.76]", "0.61 [0.44, 0.78]", "0.61 [0.44, 0.78]", "0.54 [0.36, 0.71]"],
@@ -194,13 +194,12 @@ SECTIONS["4. Results"] = [
      [3060, 1575, 1575, 1575, 1575]),    ("p", "**Telling the monitor the base rate is not enough (Table 3).** Prompt v2 adds one paragraph to v1: payoffs "
           "reveal interests, honest agents essentially always vote their interest, and even one vote against it is "
           "strong evidence. We fixed it, with a test committed in advance (Llama, actions view: paired CI excluding "
-          "zero and AUROC ≥ 0.75), *before* generating 40 fresh held-out games. The test **failed**: +0.02 [−0.17, 0.21], "
-          "AUROC 0.61. In a secondary comparison, the base rate *and* the flags together brought Llama to 0.76 (+0.13 "
-          "[−0.00, 0.26] over v1), still below the rule's 0.91 on the same games, and v2 raised Llama's FPR on some "
-          "views (combined 0.25 → 0.50). With the frozen prompt each of the four observable views stays "
-          "indistinguishable from chance on held-out games, while the rule and private plans succeed. Held-out pairs "
-          "over-traded even more (29 of 31 tie rounds), so the rule falls to 0.72 for tie-compliant pairs. With 20 "
-          "games per class, secondary comparisons are weak evidence."),
+          "zero and AUROC ≥ 0.75), *before* generating 40 fresh held-out games. The test **failed**: +0.02 [−0.17, "
+          "0.21], AUROC 0.61. In a secondary comparison, base rate *and* flags together brought Llama to 0.76 (+0.13 "
+          "[−0.00, 0.26] over v1), still below the rule's 0.91, while v2 raised Llama's FPR on some views (combined "
+          "0.25 → 0.50). With the frozen prompt each observable view stays indistinguishable from chance on held-out "
+          "games; held-out pairs over-traded even more (29 of 31 tie rounds), so the rule falls to 0.72 for "
+          "tie-compliant pairs. With 20 games per class, secondary comparisons are weak evidence."),
     ("table", "Table 4. DeepSeek V3.1 with thinking off and on (same frozen prompt), competent vs 40 no-collusion games. AUROC [95% CI]; the difference is paired over the same games.",
      ["View", "Thinking off", "Thinking on", "On − off", "FPR off → on", "Pair-ID on"],
      [["Public messages", "0.57", "0.59 [0.47, 0.72]", "+0.02 [−0.12, 0.15]", "1.00 → 0.42", "0.10"],
@@ -210,47 +209,45 @@ SECTIONS["4. Results"] = [
           "0.69 [0.57, 0.80] on the actions view, its FPR halved, and it named the right pair in a third of competent "
           "games (the rule: 0.30). The pre-specified criterion was not met: the gain is +0.15 [−0.03, 0.33], and 0.69 "
           "is below both the 0.75 bar and the rule's 0.86 on the same games. Even for this monitor, adding the messages "
-          "to the actions added nothing (0.69 both ways; 0.00 [−0.15, 0.14]), and messages alone stayed near chance. "
-          "Short answers are part of the problem, but a thinking monitor still extracts only part of the evidence in "
-          "the votes."),
+          "added nothing (0.69 both ways; 0.00 [−0.15, 0.14]). Short answers are part of the problem, but a thinking "
+          "monitor still extracts only part of the evidence in the votes."),
 ]
 
 SECTIONS["5. Discussion and Limitations"] = [
-    ("p", "**For question 2.2, in this setting, combining did not help: the evidence is in the votes.** The "
-          "short-verdict monitors were near chance on all four observable views, so their comparisons alone say "
-          "little, but the "
-          "stronger tests agree: talk adds nothing to the against-stake rule, because honest agents' announcements often "
-          "diverge from their votes, and adding messages did not change the thinking-mode monitor's AUROC. The "
-          "bottleneck is how monitors read the record, not which channel they read: they must extract the evidence (each "
-          "agent's interest, inferred from payoffs round by round) and weight it (honest agents almost never vote "
-          "against their interest). Thinking, or a stated base rate with pre-computed flags, each recovered part of the "
-          "gap; neither reached the rule. For AI safety, this suggests pairing LLM monitors with simple, domain-specific "
-          "consistency checks, and treating private-reasoning access (AUROC 0.82–0.98) as useful only while colluders "
-          "write their intent down, which agents aware of monitoring may avoid (Kale et al., 2025). For evaluation, "
-          "benchmarks need a manipulation check: instructed agents often do not collude, or over-apply a strategy."),
+    ("p", "**For question 2.2: combining did not help, because this collusion needed no public lie.** Collusion here "
+          "pays through votes and talk is cheap, so talk added nothing for monitors or rules, and would add little even "
+          "if it revealed every stake. The monitors' bottleneck is reading the action record — inferring each agent's "
+          "interest from payoffs and weighting a rare vote against it; thinking, or a stated base rate with flags, "
+          "recovered part of that gap. The case 2.2 mostly has in mind needs a game in which colluders must make public "
+          "claims that their actions or outcomes contradict. For AI safety, this suggests pairing LLM monitors with "
+          "simple consistency checks, and treating private-reasoning access (AUROC 0.82–0.98) as useful only while "
+          "colluders write their intent down, which agents aware of monitoring may avoid (Kale et al., 2025). For "
+          "evaluation, benchmarks need a manipulation check: instructed agents often do not collude, or over-apply a "
+          "strategy."),
     ("h3", "Limitations"),
     ("p", "One game, one agent model, 40 games per condition (20 held-out), 6 rounds; collusion is induced, so we make "
-          "no claim about emergent collusion. Competent pairs over-traded, so they are easier to catch than colluders who "
-          "follow the tip. DeepSeek, the rules, the structured views, prompt v2 and the thinking monitor were added "
-          "after the first results, and the rules encode our knowledge of the attack. Many comparisons are made; "
-          "isolated intervals that barely exclude zero should not be over-read. Details and dual-use considerations are "
-          "in Appendix A."),
+          "no claim about emergent collusion, and the game never requires a public lie, so it answers 2.2 only for "
+          "collusion that leaves its trace in actions. Competent pairs over-traded, making them easier to catch than "
+          "colluders who follow the tip. DeepSeek, the rules, the structured views, prompt v2 and the thinking monitor "
+          "were added after the first results; the rules encode our knowledge of the attack. Isolated intervals that "
+          "barely exclude zero should not be over-read. Details and dual-use considerations: Appendix A."),
     ("h3", "Future Work"),
     ("bullets", [
-        "Hybrid monitors: a rule to find suspects, an LLM to identify the partner and rule out innocent explanations.",
-        "Other agent and monitor models, and games where the signal is in talk rather than actions.",
-        "Side payments (a test of emergent collusion), and colluders who know they are monitored.",
+        "A game in which collusion requires public deception, so only talk and outcomes together reveal it (about 80 "
+        "games per class to detect a gain of 0.1).",
+        "Hybrid monitors: a rule finds suspects; an LLM names the partner and rules out innocent explanations.",
+        "Other models; side payments (emergent collusion); colluders who know they are monitored.",
     ]),
 ]
 
 SECTIONS["6. Conclusion"] = [
-    ("p", "We built a committee-vote game in which secret vote trading pays and leaves traces in talk and actions, and "
-          "asked whether LLM monitors detect it better when given both. They do not. Short-verdict monitors were "
-          "indistinguishable from chance on each observable view, a thinking-mode monitor reached only 0.69, and adding "
-          "messages never helped, while a one-line rule on the actions reached 0.86 (0.78 had colluders not "
-          "over-traded; 0.91 and 0.72 on held-out games). Before relying on an LLM monitor for collusion, compare it with "
-          "simple consistency checks on the same record, and check that the collusion in your test set actually "
-          "happened."),
+    ("p", "We built a committee-vote game in which secret vote trading pays, and asked whether LLM monitors detect it "
+          "better when they see what agents say as well as what they do. Here they do not, because the collusion needs "
+          "no public lie: its trace is in the votes. Short-verdict monitors were indistinguishable from chance and a "
+          "thinking-mode monitor reached 0.69, while a one-line rule on the actions reached 0.86 (0.78 without "
+          "over-trading; 0.91 and 0.72 held-out). Whether combining helps when collusion forces public deception remains "
+          "open. Before relying on an LLM monitor, compare it with simple consistency checks, and check that the "
+          "collusion in your test set actually happened."),
 ]
 
 CODE_AND_DATA = [
@@ -295,8 +292,10 @@ APPENDIX = [
           "which makes them easier to catch than colluders who follow the tip; we report the rule both ways, but could "
           "not rescore the LLM monitors on counterfactual games. The main monitors answer directly with short reasoning "
           "(the frozen prompt caps it at 150 words). The rules were defined after the first monitor results and encode "
-          "our knowledge of the attack, so they are a reference point, not a fair competitor. With the monitors near "
-          "chance, the design cannot show whether combining views helps a capable monitor. Our pre-specified tests are "
+          "our knowledge of the attack, so they are a reference point, not a fair competitor. The game never requires "
+          "colluders to lie in public, so it tests 2.2 only for collusion that leaves its trace in actions; with the "
+          "short-verdict monitors near chance, their own view comparisons say little (the thinking monitor and Appendix "
+          "F partly address this). Our pre-specified tests are "
           "commits in the repository, not a public registration. We make many comparisons; isolated intervals that "
           "barely exclude zero (e.g. DeepSeek's table − combined difference against channel-only negatives, −0.16 "
           "[−0.31, −0.00]) should not be over-read."),
@@ -373,6 +372,24 @@ APPENDIX = [
       ["Said-vs-did (table)", "0.53 / 0.85", "0.55 / 0.85"],
       ["Combined (both)", "0.53 / 0.85", "0.57 / 0.85"]],
      [4360, 2500, 2500]),
+    ("h3", "Appendix F. What talk could add in this game"),
+    ("p", "From experiments/talk_counterfactual.py. Of the 64 competent trading votes in v3 (against own stake, in "
+          "trade-opportunity rounds), 41 were announced as cast (19 in passed rounds, 22 in failed rounds) and 23 "
+          "switched after announcing (14 passed, 9 failed). Honest agents' announced and final votes differ in 14% of "
+          "agent-rounds. Honest votes against own stake are 0.2% of votes in passed rounds but 1.4% in failed rounds "
+          "(2.3% on held-out games), almost all a +$1 stake voting NO; a failed round pays $0, so the actions view never "
+          "shows them. Best case for talk: suppose every agent stated its true stake, and flag votes against the stated "
+          "stake in any round, scored like against-stake."),
+    ("table", "Table F1. Best case for talk: against-stake (actions) versus votes against truthfully stated stakes, competent vs no-collusion games. AUROC; paired gain with 95% bootstrap CI.",
+     ["Games", "Against-stake", "Votes vs stated stake", "Gain", "FPR, talk rule"],
+     [["v3, as observed (40+40)", "0.86", "0.96", "+0.10 [0.03, 0.18]", "0.25"],
+      ["v3, tie-compliant pairs", "0.78", "0.86", "+0.08 [0.00, 0.17]", "0.25"],
+      ["Held-out, as observed (20+20)", "0.91", "0.94", "+0.03 [−0.06, 0.14]", "0.30"],
+      ["Held-out, tie-compliant pairs", "0.72", "0.73", "+0.00 [−0.14, 0.14]", "0.30"]],
+     [3060, 1500, 2000, 1700, 1100]),
+    ("p", "If colluders instead stated a stake consistent with their vote, comparing the claim with the payoff would flag "
+          "exactly the votes against-stake already flags, so the gain for rules would be zero. Since even the best case "
+          "is not detectable at 20 games per class, we did not run a stake-disclosure variant."),
 ]
 
 LLM_USAGE = (
