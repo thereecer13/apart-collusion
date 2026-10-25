@@ -1,0 +1,145 @@
+WEBVTT
+
+1
+00:00:01.500 --> 00:00:04.254
+Imagine a committee of seven AI agents.
+
+2
+00:00:04.554 --> 00:00:07.297
+Every round, they vote on a new proposal.
+
+3
+00:00:07.597 --> 00:00:11.349
+But two of them have made a secret deal. And nobody else knows.
+
+4
+00:00:12.249 --> 00:00:17.709
+AI agents are starting to work together: in markets, in negotiations, in committees.
+
+5
+00:00:18.009 --> 00:00:21.436
+When some of them secretly team up, everyone else can lose.
+
+6
+00:00:21.736 --> 00:00:27.683
+So we put another AI on watch. A monitor that reads the record, and flags anything suspicious.
+
+7
+00:00:27.983 --> 00:00:29.994
+But can it actually spot collusion?
+
+8
+00:00:30.894 --> 00:00:31.837
+Here is the game.
+
+9
+00:00:32.137 --> 00:00:38.119
+Each agent gets a private stake. If the proposal passes, it gains or loses one dollar, or ten.
+
+10
+00:00:38.419 --> 00:00:40.558
+Only the agent knows its own stake.
+
+11
+00:00:40.858 --> 00:00:43.334
+Four yes votes, and the proposal passes.
+
+12
+00:00:43.634 --> 00:00:46.608
+An honest agent simply votes for its own interest.
+
+13
+00:00:47.508 --> 00:00:49.427
+Now, the secret partners.
+
+14
+00:00:49.727 --> 00:00:53.363
+One of them stands to lose a dollar. Its partner stands to gain ten.
+
+15
+00:00:53.663 --> 00:00:58.960
+So the first one votes yes anyway, against its own interest, to win its partner the ten.
+
+16
+00:00:59.260 --> 00:01:03.268
+Together, they come out ahead. Usually, at everyone else's expense.
+
+17
+00:01:04.168 --> 00:01:06.760
+We ran a hundred and sixty of these games.
+
+18
+00:01:07.060 --> 00:01:09.977
+Some with no collusion, some with secret partners.
+
+19
+00:01:10.277 --> 00:01:14.250
+Partners who were only told to team up mostly didn't trade votes.
+
+20
+00:01:14.550 --> 00:01:18.674
+But partners given a simple strategy traded every single time they could.
+
+21
+00:01:19.574 --> 00:01:22.595
+Then we asked AI monitors to find the colluders.
+
+22
+00:01:22.895 --> 00:01:26.543
+We showed them what the agents said, what they did, or both.
+
+23
+00:01:26.843 --> 00:01:34.207
+To score them, picture showing a monitor one honest game and one rigged game. A blind guess picks the rigged one half the time.
+
+24
+00:01:34.507 --> 00:01:38.143
+The monitors? About half the time. No better than a coin flip.
+
+25
+00:01:39.043 --> 00:01:41.031
+Yet the evidence was right there.
+
+26
+00:01:41.331 --> 00:01:45.165
+When a proposal passes, each agent's payoff reveals its stake.
+
+27
+00:01:45.465 --> 00:01:49.485
+So a single rule: flag anyone who voted against their own payoff.
+
+28
+00:01:49.785 --> 00:01:53.294
+It picks out the rigged game eighty-six percent of the time.
+
+29
+00:01:54.194 --> 00:01:59.061
+Letting a monitor think step by step helped, but only to sixty-nine percent.
+
+30
+00:01:59.361 --> 00:02:06.086
+The monitors reliably succeeded only when they could read the agents' private notes, where the colluders had written down their plan.
+
+31
+00:02:06.986 --> 00:02:09.577
+And combining words with actions? It didn't help.
+
+32
+00:02:09.877 --> 00:02:15.302
+In this game, colluders never had to lie out loud. Most simply announced the vote they were about to cast.
+
+33
+00:02:15.602 --> 00:02:17.822
+Their talk looked just like everyone else's.
+
+34
+00:02:18.722 --> 00:02:22.684
+So the evidence was in the votes, and the AI monitors mostly missed it.
+
+35
+00:02:22.984 --> 00:02:29.987
+Before trusting AI to police other AIs, check it against simple rules, and test it on collusion that actually happens.
+
+36
+00:02:30.287 --> 00:02:34.481
+The next question: what happens when colluders are forced to lie in public?

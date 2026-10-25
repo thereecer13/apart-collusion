@@ -1,0 +1,427 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: 'Fredoka'; src: url('fonts/Fredoka-600.woff2') format('woff2'); font-weight: 300 700; }
+@font-face { font-family: 'Nunito'; src: url('fonts/Nunito-600.woff2') format('woff2'); font-weight: 200 1000; }
+html, body { margin: 0; background: #0b1626; }
+canvas { display: block; }
+</style></head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="timeline.js"></script>
+<script>
+const W = 1920, H = 1080;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const P = {
+  bg0: '#0b1626', bg1: '#16304d', ink: '#f4f1de', dim: '#8aa2c0', table: '#21436b', tableRim: '#2c5a8c',
+  yes: '#57cc99', no: '#ef476f', gold: '#ffd166', link: '#ff4d6d', violet: '#9b8cff', panel: '#13263f'
+};
+const AG = [
+  { id: 'F', c: '#ff9f43' }, { id: 'G', c: '#4cc9f0' }, { id: 'J', c: '#80ed99' }, { id: 'M', c: '#c77dff' },
+  { id: 'Q', c: '#ffd166' }, { id: 'T', c: '#2ec4b6' }, { id: 'Z', c: '#ff6b9d' }
+];
+const STAKE = [-1, -10, 1, -1, -10, 1, 10];   // F is the small-stake partner, Z the large-stake partner
+const PAIR = [0, 6];
+
+// ---------- helpers ----------
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const eOut = k => 1 - Math.pow(1 - k, 3);
+const eInOut = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+const eBack = k => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); };
+function shade(hex, f) {
+  const n = parseInt(hex.slice(1), 16); let r = n >> 16, g = (n >> 8) & 255, b = n & 255;
+  if (f < 0) { r *= 1 + f; g *= 1 + f; b *= 1 + f; } else { r += (255 - r) * f; g += (255 - g) * f; b += (255 - b) * f; }
+  return `rgb(${r | 0},${g | 0},${b | 0})`;
+}
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+function text(s, x, y, size, opt = {}) {
+  ctx.save(); ctx.globalAlpha *= opt.alpha ?? 1;
+  ctx.font = `${opt.weight ?? 600} ${size}px ${opt.font ?? 'Fredoka'}, sans-serif`;
+  ctx.fillStyle = opt.color ?? P.ink; ctx.textAlign = opt.align ?? 'center'; ctx.textBaseline = opt.base ?? 'middle';
+  ctx.fillText(s, x, y); ctx.restore();
+}
+// scene-relative line times
+let S = null;
+function L(i) { return S.lines[i] ? S.lines[i].start - S.start : 0; }
+function LE(i) { return S.lines[i] ? S.lines[i].end - S.start : 0; }
+function sceneFade(t) { const d = S.end - S.start; return Math.min(prog(t, 0, 0.6), 1 - prog(t, d - 0.6, d)); }
+
+// ---------- background ----------
+const rnd = (() => { let s = 42; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+const STARS = Array.from({ length: 140 }, () => ({ x: rnd() * W, y: rnd() * H, r: 0.6 + rnd() * 2.2, p: rnd() * 6.28, s: 4 + rnd() * 10 }));
+function background(T) {
+  const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, P.bg0); g.addColorStop(1, P.bg1);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  for (const s of STARS) {
+    const x = (s.x + T * s.s) % W, a = 0.25 + 0.35 * (0.5 + 0.5 * Math.sin(T * 0.8 + s.p));
+    ctx.globalAlpha = a; ctx.fillStyle = '#cfe3ff'; ctx.beginPath(); ctx.arc(x, s.y, s.r, 0, 7); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.95);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.45)'); ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+}
+
+// ---------- characters ----------
+function agent(o) {
+  const { x, y, r = 60, c = '#ff9f43', T = 0, sc = 1, a = 1, look = [0, 0], mood = 'neutral', label = null, sweat = 0 } = o;
+  if (sc <= 0.001 || a <= 0) return;
+  const bob = Math.sin(T * 2.2 + x * 0.013) * r * 0.05;
+  ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y + bob); ctx.scale(sc, sc);
+  ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.beginPath(); ctx.ellipse(0, r * 1.05 - bob, r * 0.8, r * 0.16, 0, 0, 7); ctx.fill();
+  ctx.strokeStyle = shade(c, -0.35); ctx.lineWidth = r * 0.07; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, -r * 0.95); ctx.lineTo(r * 0.12, -r * 1.35); ctx.stroke();
+  ctx.fillStyle = P.gold; ctx.beginPath(); ctx.arc(r * 0.12, -r * 1.42, r * 0.11, 0, 7); ctx.fill();
+  ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.95, 0, 0, 7); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.95, 0, 0, 7); ctx.clip();
+  ctx.fillStyle = shade(c, -0.22); ctx.beginPath(); ctx.ellipse(r * 0.25, r * 0.45, r * 1.1, r * 0.75, -0.3, 0, 7); ctx.fill();
+  ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(-r * 0.1, -r * 0.12, r * 0.95, r * 0.8, -0.3, 0, 7); ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.beginPath(); ctx.ellipse(-r * 0.45, -r * 0.5, r * 0.18, r * 0.1, -0.6, 0, 7); ctx.fill();
+  const blink = (Math.sin(T * 1.3 + x) > 0.985) ? 0.15 : 1;
+  for (const s of [-1, 1]) {
+    const ex = s * r * 0.36, ey = -r * 0.08;
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(ex, ey, r * 0.23, r * 0.27 * blink, 0, 0, 7); ctx.fill();
+    if (mood === 'happy') {
+      ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(ex, ey + r * 0.12, r * 0.25, r * 0.2, 0, 0, 7); ctx.fill();
+    }
+    ctx.fillStyle = '#1b1f3b'; ctx.beginPath(); ctx.arc(ex + look[0] * r * 0.09, ey + look[1] * r * 0.1, r * 0.11 * blink, 0, 7); ctx.fill();
+    if (mood === 'sly') {
+      ctx.fillStyle = shade(c, -0.1); ctx.beginPath(); ctx.ellipse(ex, ey - r * 0.12, r * 0.26, r * 0.2, 0, 0, 7); ctx.fill();
+    }
+  }
+  if (sweat > 0) {
+    ctx.globalAlpha *= sweat; ctx.fillStyle = '#9ad8ff';
+    ctx.beginPath(); ctx.moveTo(r * 0.78, -r * 0.55); ctx.quadraticCurveTo(r * 0.98, -r * 0.2, r * 0.78, -r * 0.12); ctx.quadraticCurveTo(r * 0.6, -r * 0.2, r * 0.78, -r * 0.55); ctx.fill();
+  }
+  ctx.restore();
+  if (label) text(label, x, y + r * 1.42 * sc, r * 0.42 * sc, { color: P.dim, alpha: a });
+}
+function monitorBot(x, y, r, T, a = 1, lens = [1, -0.2]) {
+  ctx.save(); ctx.globalAlpha *= a;
+  agent({ x, y, r, c: '#b8c4ff', T, look: lens });
+  const lx = x + r * (0.9 + 0.25 * lens[0]), ly = y + r * (0.1 + 0.25 * lens[1]);
+  ctx.strokeStyle = '#e9ecff'; ctx.lineWidth = r * 0.12; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x + r * 0.55, y + r * 0.55); ctx.lineTo(lx - r * 0.2, ly + r * 0.2); ctx.stroke();
+  ctx.fillStyle = 'rgba(200,230,255,0.25)'; ctx.strokeStyle = '#e9ecff'; ctx.lineWidth = r * 0.08;
+  ctx.beginPath(); ctx.arc(lx, ly, r * 0.38, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+function stakeCard(x, y, v, k = 1, a = 1, faceUp = 1) {
+  if (k <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.scale(k * Math.max(0.04, Math.abs(Math.cos(Math.PI * (1 - faceUp)))), k);
+  const pos = v > 0, col = pos ? P.yes : P.no;
+  rr(-58, -40, 116, 80, 16); ctx.fillStyle = faceUp > 0.5 ? '#f4f1de' : '#2c5a8c'; ctx.fill();
+  if (faceUp > 0.5) text((pos ? '+$' : '−$') + Math.abs(v), 0, 3, 40, { color: col, weight: 700 });
+  else text('?', 0, 3, 44, { color: '#9cc0ea', weight: 700 });
+  ctx.restore();
+}
+function votePill(x, y, v, k = 1, a = 1) {
+  if (k <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.scale(k, k);
+  rr(-62, -28, 124, 56, 28); ctx.fillStyle = v === 'YES' ? P.yes : P.no; ctx.fill();
+  text(v, 0, 2, 32, { color: '#0b1626', weight: 700 }); ctx.restore();
+}
+function linkLine(x1, y1, x2, y2, k, T, a = 1) {
+  if (k <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.strokeStyle = P.link; ctx.lineWidth = 6; ctx.setLineDash([18, 14]); ctx.lineDashOffset = -T * 60;
+  ctx.shadowColor = P.link; ctx.shadowBlur = 20; const mx = (x1 + x2) / 2, my = Math.min(y1, y2) - 140;
+  ctx.beginPath(); ctx.moveTo(x1, y1);
+  const n = 40; for (let i = 1; i <= n * k; i++) { const u = i / n; ctx.lineTo((1 - u) * (1 - u) * x1 + 2 * u * (1 - u) * mx + u * u * x2, (1 - u) * (1 - u) * y1 + 2 * u * (1 - u) * my + u * u * y2); }
+  ctx.stroke(); ctx.restore();
+  if (k >= 1) { // lock icon at the apex
+    const lx = mx, ly = my + 70 * 0 + 0; ctx.save(); ctx.globalAlpha *= a; ctx.translate(lx, (y1 + y2) / 2 - 70);
+    ctx.fillStyle = P.link; rr(-22, -6, 44, 36, 8); ctx.fill(); ctx.strokeStyle = P.link; ctx.lineWidth = 7; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(0, -6, 13, Math.PI, 0); ctx.stroke(); ctx.restore();
+  }
+}
+function coin(x, y, k = 1, a = 1) {
+  ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = '#e0a800'; ctx.beginPath(); ctx.arc(x, y + 3, 16 * k, 0, 7); ctx.fill();
+  ctx.fillStyle = P.gold; ctx.beginPath(); ctx.arc(x, y, 16 * k, 0, 7); ctx.fill();
+  text('$', x, y + 1, 18 * k, { color: '#b07d00', weight: 700 }); ctx.restore();
+}
+function dial(x, y, R, val, a = 1, label = '') {
+  ctx.save(); ctx.globalAlpha *= a; ctx.lineCap = 'round';
+  ctx.lineWidth = 34; ctx.strokeStyle = '#22406a'; ctx.beginPath(); ctx.arc(x, y, R, Math.PI, 2 * Math.PI); ctx.stroke();
+  const segs = [[0.5, 0.65, '#5b7db1'], [0.65, 0.8, '#7fb8a4'], [0.8, 1.0, P.yes]];
+  for (const [s0, s1, c] of segs) { ctx.strokeStyle = c; ctx.beginPath(); ctx.arc(x, y, R, Math.PI + Math.PI * (s0 - 0.5) * 2, Math.PI + Math.PI * (s1 - 0.5) * 2); ctx.stroke(); }
+  for (const v of [0.5, 0.75, 1.0]) { const ang = Math.PI + Math.PI * (v - 0.5) * 2; text(Math.round(v * 100) + '%', x + Math.cos(ang) * (R + 62), y + Math.sin(ang) * (R + 62), 28, { color: P.dim }); }
+  const ang = Math.PI + Math.PI * (clamp(val, 0.5, 1) - 0.5) * 2;
+  ctx.strokeStyle = P.ink; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(ang) * (R - 30), y + Math.sin(ang) * (R - 30)); ctx.stroke();
+  ctx.fillStyle = P.ink; ctx.beginPath(); ctx.arc(x, y, 20, 0, 7); ctx.fill();
+  if (label) text(label, x, y + 80, 64, { weight: 700 });
+  ctx.restore();
+}
+function bubble(x, y, s, k = 1, a = 1, w = 230) {
+  if (k <= 0) return;
+  ctx.save(); ctx.globalAlpha *= a; ctx.translate(x, y); ctx.scale(k, k);
+  ctx.fillStyle = '#f4f1de'; rr(-w / 2, -40, w, 74, 26); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(-16, 32); ctx.lineTo(0, 58); ctx.lineTo(14, 32); ctx.fill();
+  text(s, 0, -3, 28, { color: '#13263f', weight: 600, font: 'Nunito' }); ctx.restore();
+}
+function check(x, y, k = 1, col = P.yes, a = 1) {
+  if (k <= 0) return; ctx.save(); ctx.globalAlpha *= a; ctx.strokeStyle = col; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(x - 22, y); const p1 = clamp(k * 2), p2 = clamp(k * 2 - 1);
+  ctx.lineTo(x - 22 + 16 * p1, y + 16 * p1); if (p2 > 0) ctx.lineTo(x - 6 + 34 * p2, y + 16 - 38 * p2); ctx.stroke(); ctx.restore();
+}
+
+// committee positions
+function arcPos(i) { const th = Math.PI + 0.42 + i * (Math.PI - 0.84) / 6; return [960 + 640 * Math.cos(th), 760 + 300 * Math.sin(th)]; }
+function rowPos(i) { return [300 + i * 220, 640]; }
+function table(a = 1) { ctx.save(); ctx.globalAlpha *= a; ctx.fillStyle = P.tableRim; ctx.beginPath(); ctx.ellipse(960, 808, 560, 136, 0, 0, 7); ctx.fill(); ctx.fillStyle = P.table; ctx.beginPath(); ctx.ellipse(960, 796, 540, 122, 0, 0, 7); ctx.fill(); ctx.restore(); }
+
+// ---------- scenes ----------
+const SC = {};
+SC.hook = (t, T) => {
+  table(prog(t, 0, 1));
+  for (let i = 0; i < 7; i++) {
+    const [x, y] = arcPos(i); const k = eBack(prog(t, 0.3 + i * 0.28, 0.9 + i * 0.28));
+    const inPair = PAIR.includes(i); const secret = prog(t, L(2), L(2) + 1.2);
+    const look = inPair && secret > 0 ? [i === 0 ? 1 : -1, -0.3] : [(960 - x) / 600, 0.4];
+    agent({ x, y, r: 70, c: AG[i].c, T, sc: k, look, mood: inPair && secret > 0.5 ? 'sly' : 'neutral', label: AG[i].id });
+  }
+  // proposal card above the table
+  const pk = eBack(prog(t, L(1), L(1) + 0.8));
+  if (pk > 0) { ctx.save(); ctx.translate(960, 790); ctx.scale(pk, pk); ctx.fillStyle = '#f4f1de'; rr(-110, -62, 220, 124, 16); ctx.fill();
+    text('PROPOSAL', 0, -24, 30, { color: '#13263f', weight: 700 }); text('#1', 0, 18, 40, { color: '#5b7db1', weight: 700 }); ctx.restore(); }
+  const [x1, y1] = arcPos(0), [x2, y2] = arcPos(6);
+  linkLine(x1, y1 - 80, x2, y2 - 80, eInOut(prog(t, L(2) + 0.2, L(2) + 2.0)), T);
+};
+SC.why = (t, T) => {
+  const spots = [[420, 'MARKETS'], [960, 'NEGOTIATIONS'], [1500, 'COMMITTEES']];
+  const appear = i => eBack(prog(t, 0.3 + i * 0.6, 1.0 + i * 0.6));
+  const mon = eBack(prog(t, L(2), L(2) + 1.0));
+  const shift = eInOut(prog(t, L(2), L(2) + 1.2)) * 140;
+  spots.forEach(([cx, name], i) => {
+    const k = appear(i); if (k <= 0) return;
+    ctx.save(); ctx.translate(cx, 470 - shift); ctx.scale(k, k);
+    ctx.fillStyle = P.panel; rr(-230, -170, 460, 340, 40); ctx.fill();
+    // icon per world
+    if (i === 0) { ctx.strokeStyle = P.yes; ctx.lineWidth = 10; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-120, 0); ctx.lineTo(-50, -60); ctx.lineTo(10, -20); ctx.lineTo(110, -110); ctx.stroke(); }
+    if (i === 1) { bubble(-60, -70, '…', 1, 1, 110); bubble(70, -40, '!', 1, 1, 90); }
+    if (i === 2) { ctx.fillStyle = P.table; ctx.beginPath(); ctx.ellipse(0, -10, 130, 40, 0, 0, 7); ctx.fill(); }
+    ctx.restore();
+    const ax = [cx - 120, cx, cx + 120];
+    ax.forEach((x, j) => agent({ x, y: 600 - shift, r: 36, c: AG[(i * 2 + j) % 7].c, T: T + j, sc: k, look: [0, 0.5] }));
+    text(name, cx, 700 - shift, 34, { color: P.dim, alpha: k });
+    // the secret team-up and money flowing to them
+    const sk = prog(t, L(1), L(1) + 1.0);
+    if (sk > 0) {
+      linkLine(cx - 120, 560 - shift, cx, 560 - shift, eInOut(sk), T, 0.9);
+      for (let m = 0; m < 3; m++) { const u = (t * 0.7 + m / 3) % 1; coin(lerp(cx + 120, cx - 60, u), 540 - shift - Math.sin(u * Math.PI) * 60, 0.8, sk * (1 - u)); }
+    }
+  });
+  if (mon > 0) {
+    monitorBot(860, 900, 80 * mon, T, mon, [Math.sin(t * 1.5), -0.6]);
+    ctx.save(); ctx.globalAlpha = mon; ctx.fillStyle = '#f4f1de'; rr(1010, 830, 250, 150, 14); ctx.fill();
+    for (let l = 0; l < 5; l++) { ctx.fillStyle = '#9cb3d1'; ctx.fillRect(1035, 855 + l * 24, 120 + 70 * ((l * 37) % 3) / 2, 10); }
+    const sy = 855 + ((t * 60) % 110); ctx.fillStyle = 'rgba(155,140,255,0.45)'; ctx.fillRect(1020, sy, 230, 12); ctx.restore();
+  }
+  const q = eBack(prog(t, L(3), L(3) + 0.7));
+  if (q > 0) text('?', 1420, 880, 220 * q, { color: P.gold, weight: 700 });
+};
+SC.game = (t, T) => {
+  const cards = prog(t, L(1), L(1) + 1.2), flip = prog(t, L(1) + 1.2, L(1) + 2.4);
+  const hide = prog(t, L(2), L(2) + 0.8), votes = prog(t, L(4), L(4) + 1.5);
+  for (let i = 0; i < 7; i++) {
+    const [x, y] = rowPos(i);
+    agent({ x, y, r: 70, c: AG[i].c, T, sc: eBack(prog(t, i * 0.08, 0.6 + i * 0.08)), look: [0, -0.8 * (cards > 0 ? 1 : 0)], label: AG[i].id });
+    const ck = eBack(clamp(cards * 1.6 - i * 0.1));
+    // only the owner sees its card: others see the back
+    const faceUp = hide > 0 ? (1 - hide) * flip + hide * (i === 3 ? 1 : 0) : flip;
+    stakeCard(x, y - 170, STAKE[i], ck, 1, hide > 0 ? (i === 3 ? 1 : 1 - hide) : flip);
+    const vk = eBack(clamp(votes * 2 - i * 0.12));
+    votePill(x, y + 170, STAKE[i] > 0 ? 'YES' : 'NO', vk);
+  }
+  if (hide > 0) { // eye cone for agent M
+    const [x, y] = rowPos(3); ctx.save(); ctx.globalAlpha = 0.25 * hide; ctx.fillStyle = P.gold;
+    ctx.beginPath(); ctx.moveTo(x, y - 40); ctx.lineTo(x - 70, y - 215); ctx.lineTo(x + 70, y - 215); ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  // threshold bar
+  const th = prog(t, L(3), L(3) + 0.8);
+  if (th > 0) {
+    const nYes = votes > 0.9 ? STAKE.filter(v => v > 0).length : 0;
+    ctx.save(); ctx.globalAlpha = th; for (let k = 0; k < 7; k++) { rr(735 + k * 64, 900, 54, 54, 12); ctx.fillStyle = k < nYes ? P.yes : '#22406a'; ctx.fill(); }
+    ctx.strokeStyle = P.gold; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(735 + 4 * 64 - 5, 885); ctx.lineTo(735 + 4 * 64 - 5, 970); ctx.stroke();
+    text('4 YES = PASS', 960, 1010, 34, { color: P.gold }); ctx.restore();
+    if (votes > 0.95) text('3 YES: fails', 1430, 927, 34, { color: P.no, alpha: prog(t, L(4) + 1.6, L(4) + 2.2) });
+  }
+};
+SC.trade = (t, T) => {
+  const z = eInOut(prog(t, 0, 1.2));
+  const others = 1 - z;
+  for (let i = 1; i < 6; i++) { const [x, y] = rowPos(i); agent({ x: lerp(x, 560 + (i - 1) * 200, z), y: lerp(y, 960, z), r: 70 * (1 - 0.45 * z), c: AG[i].c, T, a: lerp(1, 0.5, z), look: [0, -0.5], label: z > 0.5 ? null : AG[i].id }); }
+  const fx = lerp(rowPos(0)[0], 640, z), zx = lerp(rowPos(6)[0], 1280, z), py = lerp(640, 520, z), pr = lerp(70, 105, z);
+  const flipT = prog(t, L(2), L(2) + 1.0), pay = prog(t, L(3), L(3) + 1.5);
+  agent({ x: fx, y: py, r: pr, c: AG[0].c, T, look: [1, -0.2], mood: 'sly', label: 'F', sweat: flipT * (1 - pay) });
+  agent({ x: zx, y: py, r: pr, c: AG[6].c, T, look: [-1, -0.2], mood: pay > 0.5 ? 'happy' : 'sly', label: 'Z' });
+  linkLine(fx + 60, py - 110, zx - 60, py - 110, eInOut(prog(t, 0.6, 1.8)), T);
+  const ck = eBack(prog(t, L(1), L(1) + 0.8));
+  stakeCard(fx, py - 260, -1, ck); stakeCard(zx, py - 260, 10, eBack(prog(t, L(1) + 0.6, L(1) + 1.4)));
+  // F's vote flips from NO to YES
+  if (t > L(1) + 0.8) {
+    const v = flipT < 0.5 ? 'NO' : 'YES', k = flipT < 0.5 ? 1 - flipT * 2 : (flipT - 0.5) * 2;
+    votePill(fx, py + 215, t < L(2) ? 'NO' : v, t < L(2) ? eBack(prog(t, L(1) + 0.8, L(1) + 1.4)) : Math.max(0.05, k));
+    votePill(zx, py + 215, 'YES', eBack(prog(t, L(1) + 0.8, L(1) + 1.4)));
+    if (flipT > 0.6) text('against its own stake', fx, py + 295, 30, { color: P.no, alpha: prog(t, L(2) + 0.8, L(2) + 1.4) * (1 - pay) });
+  }
+  if (pay > 0) {
+    text('PASSES', 960, 150, 64, { color: P.yes, alpha: pay, weight: 700 });
+    text('−$1', fx, py + 295, 40, { color: P.no, alpha: pay, weight: 700 }); text('+$10', zx, py + 295, 40, { color: P.yes, alpha: pay, weight: 700 });
+    text('Together: +$9', 960, 560, 56, { color: P.gold, alpha: prog(t, L(3) + 0.8, L(3) + 1.6), weight: 700 });
+    for (let i = 1; i < 6; i++) { if (STAKE[i] >= 0) continue; text('−$' + Math.abs(STAKE[i]), 560 + (i - 1) * 200, 880, 34, { color: P.no, alpha: prog(t, L(3) + 1.2, L(3) + 2) }); }
+  }
+};
+SC.experiment = (t, T) => {
+  const groups = [['No collusion', '#5b7db1'], ['Channel, no instructions', '#5b7db1'], ['Told to team up', AG[0].c], ['Given a strategy', AG[6].c]];
+  const lit2 = prog(t, L(2), L(2) + 1.5), lit3 = prog(t, L(3), L(3) + 1.5);
+  groups.forEach(([name, col], g) => {
+    const gx = 130 + g * 440;
+    for (let k = 0; k < 40; k++) {
+      const cx = gx + (k % 8) * 46, cy = 330 + Math.floor(k / 8) * 46;
+      const ap = eBack(prog(t, 0.2 + g * 0.6 + k * 0.025, 0.6 + g * 0.6 + k * 0.025)); if (ap <= 0) continue;
+      let c = '#22406a';
+      if (g === 2 && k < 17 && lit2 * 17 > k) c = col;
+      if (g === 3 && k < 33 && lit3 * 33 > k) c = col;
+      ctx.save(); ctx.translate(cx + 18, cy + 18); ctx.scale(ap, ap); rr(-18, -18, 36, 36, 8); ctx.fillStyle = c; ctx.fill(); ctx.restore();
+    }
+    text(name, gx + 172, 600, 30, { color: P.dim, alpha: prog(t, 0.5 + g * 0.6, 1.2 + g * 0.6) });
+  });
+  text('160 games', 960, 190, 72, { weight: 700, alpha: prog(t, 0.2, 1) });
+  if (lit2 > 0) { text('traded in 31%', 130 + 2 * 440 + 172, 680, 40, { color: AG[0].c, alpha: lit2, weight: 700 }); text('of chances', 130 + 2 * 440 + 172, 726, 30, { color: P.dim, alpha: lit2 }); }
+  if (lit3 > 0) { text('traded in 100%', 130 + 3 * 440 + 172, 680, 40, { color: AG[6].c, alpha: lit3, weight: 700 }); text('of chances', 130 + 3 * 440 + 172, 726, 30, { color: P.dim, alpha: lit3 }); }
+  const fade = prog(t, L(1), L(1) + 1);
+  if (fade > 0) { // small agents under the groups
+    for (let g = 0; g < 4; g++) agent({ x: 130 + g * 440 + 172, y: 870, r: 46, c: AG[[1, 3, 0, 6][g]].c, T: T + g, sc: eBack(fade), look: [0, -0.6], mood: g >= 2 ? 'sly' : 'neutral' });
+  }
+};
+SC.monitor = (t, T) => {
+  const mk = eBack(prog(t, 0, 0.9));
+  const docs = ['What they said', 'What they did', 'Both'];
+  const phase2 = prog(t, L(2), L(2) + 0.8);
+  monitorBot(420, 620, 110 * mk, T, mk, [phase2 > 0 ? Math.sin(t * 2) : 1, -0.2]);
+  docs.forEach((d, i) => {
+    const k = eBack(prog(t, L(1) + i * 0.7, L(1) + 0.6 + i * 0.7)) * (1 - phase2); if (k <= 0) return;
+    const x = 900 + i * 330, y = 520;
+    ctx.save(); ctx.translate(x, y); ctx.scale(k, k); ctx.fillStyle = '#f4f1de'; rr(-140, -170, 280, 340, 20); ctx.fill();
+    if (i !== 1) for (let b = 0; b < 3; b++) { ctx.fillStyle = '#9cb3d1'; rr(-110, -130 + b * 70, 180 - b * 30, 40, 16); ctx.fill(); }
+    if (i !== 0) for (let b = 0; b < 3; b++) { ctx.fillStyle = b % 2 ? P.no : P.yes; rr(-110 + (i === 2 ? 80 : 0), (i === 2 ? 40 : -130) + b * 46, 90, 32, 16); ctx.fill(); }
+    ctx.restore(); text(d, x, y + 215, 32, { color: P.dim, alpha: k });
+  });
+  if (phase2 > 0) {
+    const g2 = eBack(phase2);
+    [['Honest game', false], ['Rigged game', true]].forEach(([name, rig], i) => {
+      const x = 1000 + i * 380, y = 520, dd = prog(t, L(3), L(3) + 0.6); if (dd >= 1) return; ctx.save(); ctx.globalAlpha *= 1 - dd; ctx.translate(x, y); ctx.scale(g2, g2);
+      ctx.fillStyle = P.panel; rr(-160, -150, 320, 300, 30); ctx.fill();
+      for (let a = 0; a < 7; a++) { ctx.fillStyle = AG[a].c; ctx.beginPath(); ctx.arc(-120 + a * 40, 0, 15, 0, 7); ctx.fill(); }
+      ctx.restore(); text(name, x, y + 200, 34, { color: P.dim, alpha: g2 * (1 - dd) });
+    });
+    // coin flip for the blind guess
+    const cf = prog(t, L(2) + 3.2, L(2) + 5.5);
+    if (cf > 0 && t < L(3) + 0.3) { const sq = Math.abs(Math.cos(cf * 12)); ctx.save(); ctx.translate(1190, 300 - Math.sin(cf * Math.PI) * 120); ctx.scale(1, Math.max(0.08, sq)); coin(0, 0, 3); ctx.restore();
+      text('50 / 50', 1190, 150, 48, { color: P.gold, alpha: prog(t, L(2) + 4, L(2) + 5) }); }
+  }
+  const d = prog(t, L(3), L(3) + 0.8);
+  if (d > 0) {
+    ctx.save(); ctx.globalAlpha = d; ctx.fillStyle = 'rgba(11,22,38,0)'; ctx.fillRect(760, 120, 1100, 840); ctx.restore();
+    const wob = 0.53 + 0.03 * Math.sin(t * 3);
+    dial(1310, 640, 260, wob, d, '≈ 50%');
+    text('AI monitors: no better than a coin flip', 1310, 220, 44, { alpha: prog(t, LE(3) - 1.5, LE(3) - 0.8), weight: 600 });
+  }
+};
+SC.rule = (t, T) => {
+  const rows = AG.map((a, i) => [a.id, i === 0 || STAKE[i] > 0 ? 'YES' : 'NO', STAKE[i]]);
+  const k = eOut(prog(t, 0, 1));
+  ctx.save(); ctx.globalAlpha = k; ctx.fillStyle = '#f4f1de'; rr(250, 150, 760, 790, 30); ctx.fill(); ctx.restore();
+  text('ROUND 1 · PASSED', 630, 210, 36, { color: '#13263f', alpha: k, weight: 700 });
+  ['Agent', 'Vote', 'Payoff'].forEach((h, j) => text(h, 400 + j * 230, 280, 28, { color: '#5b7db1', alpha: k }));
+  const rev = prog(t, L(1), L(1) + 1.5), flag = prog(t, L(2), L(2) + 1.2);
+  rows.forEach(([id, v, p], i) => {
+    const y = 350 + i * 82, a = prog(t, 0.3 + i * 0.12, 0.8 + i * 0.12);
+    if (i === 0 && flag > 0) { ctx.save(); ctx.globalAlpha = 0.85; ctx.fillStyle = '#ffe08a'; ctx.fillRect(280, y - 34, 700 * eOut(flag), 68); ctx.restore(); }
+    ctx.fillStyle = AG[i].c; ctx.globalAlpha = a; ctx.beginPath(); ctx.arc(360, y, 22, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+    text(id, 420, y + 2, 32, { color: '#13263f', alpha: a, weight: 700 });
+    votePill(630, y, v, 0.75 * a);
+    text((p > 0 ? '+$' : '−$') + Math.abs(p), 860, y + 2, 34, { color: p > 0 ? '#1d8f5e' : '#c1121f', alpha: a * Math.max(0.35, rev), weight: 700 });
+  });
+  if (flag > 0) {
+    ctx.save(); ctx.globalAlpha = flag; ctx.fillStyle = P.panel; rr(1110, 260, 620, 260, 30); ctx.fill(); ctx.restore();
+    text('THE RULE', 1420, 315, 30, { color: P.gold, alpha: flag, weight: 700 });
+    text('Flag a vote that went', 1420, 385, 40, { alpha: flag }); text('against its own payoff', 1420, 440, 40, { alpha: flag, color: P.gold });
+  }
+  const d = prog(t, L(3), L(3) + 1.2);
+  if (d > 0) { dial(1420, 820, 190, lerp(0.53, 0.86, eInOut(d)), d, Math.round(lerp(53, 86, eInOut(d))) + '%'); }
+};
+SC.thinking = (t, T) => {
+  const bars = [['AI monitors, short answers', 0.53, '#5b7db1', 0], ['AI monitor that thinks', 0.69, P.violet, L(0) + 0.5],
+                ['One-line rule', 0.86, P.gold, L(0) + 2.5], ['Monitor reading private notes', 0.96, P.yes, L(1) + 0.5]];
+  const x0 = 760, x1 = 1760, xv = v => x0 + (x1 - x0) * v;
+  text('How often it picks the rigged game', 960, 150, 48, { alpha: prog(t, 0, 0.8) });
+  ctx.save(); ctx.globalAlpha = prog(t, 0, 0.8); ctx.strokeStyle = P.dim; ctx.setLineDash([10, 10]); ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(xv(0.5), 230); ctx.lineTo(xv(0.5), 900); ctx.stroke(); ctx.restore();
+  text('coin flip', xv(0.5), 935, 28, { color: P.dim, alpha: prog(t, 0, 0.8) });
+  bars.forEach(([name, v, c, ts], i) => {
+    const y = 300 + i * 150, k = eOut(prog(t, ts, ts + 1.2)); if (k <= 0 && i > 0) return;
+    text(name, 720, y, 34, { align: 'right', alpha: Math.max(k, i === 0 ? prog(t, 0, 0.8) : 0) });
+    ctx.fillStyle = c; rr(x0, y - 36, Math.max(1, (xv(v) - x0) * (i === 0 ? eOut(prog(t, 0, 1.2)) : k)), 72, 18); ctx.fill();
+    const lab = i === 3 ? '94–98%' : (i === 0 ? '≈ 50%' : Math.round(v * 100) + '%');
+    text(lab, xv(v) - 20, y + 2, 34, { align: 'right', color: '#0b1626', weight: 700, alpha: i === 0 ? prog(t, 0.8, 1.4) : k });
+  });
+  const nk = eBack(prog(t, L(1) + 1.5, L(1) + 2.3));
+  if (nk > 0) { ctx.save(); ctx.translate(330, 950); ctx.scale(nk * 0.75, nk * 0.75); ctx.rotate(-0.06); ctx.fillStyle = '#f4f1de'; rr(-170, -110, 340, 220, 18); ctx.fill();
+    text('PRIVATE PLAN', 0, -62, 28, { color: '#5b7db1', weight: 700 }); text('"Vote with my', 0, -8, 30, { color: '#13263f', font: 'Nunito' }); text('partner, Z"', 0, 36, 30, { color: P.no, font: 'Nunito', weight: 800 }); ctx.restore(); }
+};
+SC.talk = (t, T) => {
+  const said = ['YES', 'NO', 'YES', 'NO', 'NO', 'YES', 'YES'];
+  for (let i = 0; i < 7; i++) {
+    const [x, y] = rowPos(i);
+    agent({ x, y: y + 40, r: 64, c: AG[i].c, T, look: [0, -0.5], label: AG[i].id, mood: PAIR.includes(i) ? 'sly' : 'neutral' });
+    bubble(x, y - 150, said[i] === 'YES' ? '"I vote yes"' : '"I vote no"', eBack(prog(t, L(1) + 0.3 + i * 0.15, L(1) + 0.8 + i * 0.15)), 1, 190);
+    votePill(x, y + 200, said[i], eBack(prog(t, L(1) + 2.5 + i * 0.12, L(1) + 3 + i * 0.12)));
+    check(x + 70, y + 200, prog(t, L(2), L(2) + 0.8), P.yes);
+  }
+  const k = eBack(prog(t, 0.2, 1.0)) * (1 - prog(t, L(1) - 0.5, L(1)));
+  if (k > 0) { text('words', 700, 380, 80 * k, { color: '#9cc0ea', weight: 700 }); text('+', 960, 380, 80 * k, { color: P.gold }); text('actions', 1220, 380, 80 * k, { color: P.yes, weight: 700 }); text('?', 1500, 380, 80 * k, { color: P.gold }); }
+  text('Said = did. Nothing gives them away.', 960, 960, 44, { alpha: prog(t, L(2) + 0.3, L(2) + 1), color: P.gold });
+};
+SC.lesson = (t, T) => {
+  const bx = 640, by = 560, k = eBack(prog(t, 0, 1)); const baseA = 1 - 0.97 * Math.max(prog(t, L(1), L(1) + 0.6), prog(t, L(2), L(2) + 0.8)); ctx.save(); ctx.globalAlpha *= baseA;
+  ctx.save(); ctx.translate(bx, by); ctx.scale(k, k);
+  ctx.shadowColor = P.gold; ctx.shadowBlur = 40 + 20 * Math.sin(t * 3); ctx.fillStyle = '#2c5a8c'; rr(-170, -120, 340, 240, 26); ctx.fill(); ctx.shadowBlur = 0;
+  ctx.fillStyle = '#0b1626'; rr(-90, -128, 180, 22, 11); ctx.fill(); text('VOTES', 0, 10, 54, { color: P.gold, weight: 700 }); ctx.restore();
+  text('the evidence', bx, by + 190, 40, { color: P.gold, alpha: k });
+  monitorBot(1280, 600, 90, T, prog(t, 0.5, 1.3), [1, -0.8]); ctx.restore();
+  const items = ['Check AI monitors against simple rules', 'Test on collusion that actually happens'];
+  const l2 = prog(t, L(1), L(1) + 0.6), l3 = prog(t, L(2), L(2) + 0.8);
+  if (l2 > 0) { ctx.save(); ctx.globalAlpha = l2 * (1 - l3); ctx.fillStyle = 'rgba(11,22,38,0.85)'; ctx.fillRect(0, 0, W, H); ctx.restore();
+    items.forEach((s, i) => { const a = prog(t, L(1) + i * 1.6, L(1) + 0.6 + i * 1.6) * (1 - l3); check(560, 440 + i * 170, a, P.yes, a); text(s, 620, 440 + i * 170, 56, { align: 'left', alpha: a }); }); }
+  if (l3 > 0) {
+    ctx.save(); ctx.globalAlpha = l3; ctx.fillStyle = 'rgba(11,22,38,0.9)'; ctx.fillRect(0, 0, W, H); ctx.restore();
+    agent({ x: 760, y: 600, r: 110, c: AG[0].c, T, look: [1, 0], mood: 'sly', sc: eBack(l3) });
+    // crossed fingers behind a public statement
+    bubble(1180, 430, '"Trust me, I vote no"', eBack(prog(t, L(2) + 0.5, L(2) + 1.3)), 1, 420);
+    text('?', 1180, 680, 200 * eBack(prog(t, L(2) + 2.5, L(2) + 3.2)), { color: P.gold, weight: 700 });
+    text('Next: when colluders must lie in public', 960, 920, 44, { alpha: prog(t, L(2) + 1.5, L(2) + 2.3), color: P.dim });
+  }
+};
+SC.end = (t, T) => {
+  const k = eOut(prog(t, 0.2, 1.4));
+  for (let i = 0; i < 7; i++) agent({ x: 600 + i * 120, y: 300, r: 40, c: AG[i].c, T, sc: eBack(prog(t, i * 0.1, 0.6 + i * 0.1)), look: [0, 0.6], mood: 'happy' });
+  text('The Evidence Is in the Votes', 960, 520, 96, { alpha: k, weight: 700 });
+  text('LLM monitors mostly miss collusion that a one-line rule catches', 960, 610, 40, { alpha: k, color: P.dim, font: 'Nunito' });
+  text('AI Collusion Research Sprint · Apart Research · 2026', 960, 760, 34, { alpha: prog(t, 1, 2), color: P.gold });
+  text('Narration: Piper TTS, voice "ryan" (CC BY-NC-SA 4.0) · Music generated for this video', 960, 1000, 24, { alpha: prog(t, 1.5, 2.5), color: P.dim, font: 'Nunito' });
+};
+
+function render(T) {
+  background(T);
+  S = TL.scenes.find(s => T >= s.start && T < s.end) || TL.scenes[TL.scenes.length - 1];
+  if (T < TL.scenes[0].start) S = TL.scenes[0];
+  const t = T - S.start;
+  ctx.save(); ctx.globalAlpha = S.id === 'hook' && T < TL.scenes[0].start ? prog(T, 0, 1.5) : sceneFade(Math.max(0, t));
+  SC[S.id](Math.max(0, t), T); ctx.restore();
+}
+window.render = render;
+window.frameJPEG = (T, q) => { render(T); return cv.toDataURL('image/jpeg', q); };
+document.fonts.load('600 40px Fredoka'); document.fonts.load('600 40px Nunito');
+</script></body></html>

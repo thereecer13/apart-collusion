@@ -908,3 +908,13 @@ scoped question.
 - The Conclusion was rewritten to match, and Related Work says "Closest to question 2.2".
 - No results changed. Main text still pp. 1–8 (the Introduction now starts on p. 1, after the
   shorter abstract); XSD validation passed.
+
+### Explainer video (2026-10-25, no API spend)
+- `video/evidence-in-the-votes.mp4`: 2:42 general-audience explainer for the participant's website,
+  with a poster, captions and rebuild sources in `video/`.
+- Production:
+  - original flat-vector characters, drawn on a canvas and rendered frame by frame;
+  - narration by Piper TTS (voice "ryan", CC BY-NC-SA 4.0, credited);
+  - procedurally generated music.
+- Numbers shown, all from the paper: monitors ≈ 50%, thinking monitor 69%, rule 86%, private
+  notes 94–98%, naive pairs traded 31% of chances, competent pairs 100%.
