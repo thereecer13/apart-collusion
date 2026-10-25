@@ -5,21 +5,20 @@
 TITLE = "The Evidence Is in the Votes: LLM Monitors Mostly Miss Collusion That a One-Line Rule Catches"
 
 ABSTRACT = (
-    "Monitors for multi-agent systems typically read either what agents say or what they do. We test whether "
-    "combining the two helps a monitor detect collusion. Seven Llama 3.3 70B agents play a committee-vote "
-    "game with private stakes, in which a secret colluding pair profits by vote trading: one member votes against its "
-    "own small stake to secure its partner's large one. Across 160 matched games we compare no collusion, a private "
-    "channel without instructions, naive colluders told to maximize their joint payoff, and competent colluders also "
-    "given a vote-trading tip. Competent colluders traded at every opportunity (64 of 64), each gaining 0.43 points "
-    "per round, and also traded where it gained nothing. Two LLM monitors with a prompt frozen in advance (Llama 3.3 "
-    "70B and DeepSeek V3.1) saw public messages, actions, both, a said-versus-did table, and an upper-bound view adding "
-    "private plans. On each of the four observable views both were indistinguishable from chance (AUROC 0.44 to 0.60), "
-    "while a one-line rule on actions, flagging votes against one's revealed payoff, reached 0.86 at a 5% "
-    "false-positive rate (0.78 had colluders not over-traded). The monitors succeeded only with private plans (0.94 "
-    "to 0.98); with thinking on, DeepSeek rose to 0.69. Adding messages never helped monitors or rules: the collusion "
-    "needed no public lie, and even talk revealing every true stake would add at most 0.10. We expect combining to "
-    "help only where collusion forces public deception; here the evidence is in the votes, and LLM monitors extract "
-    "little of it."
+    "Can LLM monitors detect collusion among AI agents from the record of their interaction, and does it help to show "
+    "them what agents say as well as what they do? Seven Llama 3.3 70B agents play a committee-vote game with private "
+    "stakes, in which a secret colluding pair profits by vote trading: one member votes against its own small stake to "
+    "secure its partner's large one. Across 160 matched games we compare no collusion, a private channel without "
+    "instructions, naive colluders told to maximize their joint payoff, and competent colluders also given a "
+    "vote-trading tip. Competent colluders traded at every opportunity (64 of 64), each gaining 0.43 points per round, "
+    "and also traded where it gained nothing. Two LLM monitors with a prompt frozen in advance (Llama 3.3 70B and "
+    "DeepSeek V3.1) saw public messages, actions, both, a said-versus-did table, and an upper-bound view adding private "
+    "plans. On each of the four observable views both were indistinguishable from chance (AUROC 0.44 to 0.60), while a "
+    "one-line rule on actions, flagging votes against one's revealed payoff, reached 0.86 at a 5% false-positive rate "
+    "(0.78 had colluders not over-traded). The monitors succeeded only with private plans (0.94 to 0.98); with "
+    "thinking on, DeepSeek rose to 0.69. Adding messages never helped monitors or rules, because this collusion needed "
+    "no public lie; even talk revealing every true stake would add at most 0.10. The evidence is in the votes, and LLM "
+    "monitors extract little of it."
 )
 
 SECTIONS = {}
@@ -27,18 +26,18 @@ SECTIONS = {}
 SECTIONS["1. Introduction"] = [
     ("p", "AI agents increasingly act in shared environments such as markets, negotiations and committees, where "
           "collusion is a natural failure mode: a subset of agents secretly coordinates to benefit at the others' "
-          "expense. A natural defence is a monitor that reads the interaction record and flags suspicious behaviour. "
-          "What should it read? Messages are cheap to fake; actions carry the consequences but lack context. A "
-          "plausible hypothesis is that the *combination* is most informative, because a colluder may have to say one "
-          "thing and do another. Track 2 of this sprint asks the question directly: does combining what agents say "
-          "with what they do improve detection?"),
-    ("p", "We test it in a Committee Vote Game in which a colluding pair profits by *vote trading*: one member votes "
+          "expense. A natural defence is an LLM monitor that reads the interaction record and flags suspicious "
+          "behaviour. We ask two questions. First, can such a monitor find the evidence of collusion that the record "
+          "contains? Second, the sprint's question 2.2: does it help to combine what agents say with what they do? "
+          "Messages are cheap to fake and actions lack context, so the combination might be most informative, because "
+          "a colluder may have to say one thing and do another."),
+    ("p", "We study both in a Committee Vote Game in which a colluding pair profits by *vote trading*: one member votes "
           "against its own small stake to secure its partner's large one. Honest play makes truthful announcements and "
-          "stake-following votes the natural baseline, but announcements are cheap talk, so colluders may misstate their "
-          "intentions yet never need to. The game thus tests the question for collusion that leaves its trace in actions "
-          "and requires no public lie, and asks first whether LLM monitors can find that trace. We give two LLM monitors "
-          "five views of matched games with and without colluders (one monitor also with thinking on) and compare them "
-          "with simple non-LLM rules."),
+          "stake-following votes the natural baseline, but announcements are cheap talk, so colluders may misstate "
+          "their intentions yet never need to. The game is therefore a clean test of the first question, since the "
+          "trace of collusion is in the actions, and answers the second only for collusion that requires no public "
+          "lie. We give two LLM monitors five views of matched games with and without colluders (one monitor also with "
+          "thinking on) and compare them with simple non-LLM rules."),
     ("p", "**Our main contributions are:**"),
     ("numbered", [
         "**A matched collusion test bed:** a seven-agent committee-vote game with private stakes in which collusion "
@@ -58,7 +57,7 @@ SECTIONS["1. Introduction"] = [
 SECTIONS["2. Related Work"] = [
     ("p", "We build on the harness of Shi et al. (2026), which separates private intent, public announcement and final "
           "action in repeated games; deviations from announcements were mostly planned in private (over 90% in their "
-          "highest-deception conditions), consistent with our private-plans upper bound. Closest to our question, "
+          "highest-deception conditions), consistent with our private-plans upper bound. Closest to question 2.2, "
           "Radev et al. (2026) find that a monitor catches coordinated sabotage by coding agents more often when it also "
           "reads their communication, which carries the shared plan (68–99% of attempts from code edits alone at FPR ≤ "
           "2%; 81–100% with it). In our game the visible talk is public cheap talk, and the coordination happens in a "
@@ -214,16 +213,18 @@ SECTIONS["4. Results"] = [
 ]
 
 SECTIONS["5. Discussion and Limitations"] = [
-    ("p", "**For question 2.2: combining did not help, because this collusion needed no public lie.** Collusion here "
-          "pays through votes and talk is cheap, so talk added nothing for monitors or rules, and would add little even "
-          "if it revealed every stake. The monitors' bottleneck is reading the action record — inferring each agent's "
-          "interest from payoffs and weighting a rare vote against it; thinking, or a stated base rate with flags, "
-          "recovered part of that gap. The case 2.2 mostly has in mind needs a game in which colluders must make public "
-          "claims that their actions or outcomes contradict. For AI safety, this suggests pairing LLM monitors with "
-          "simple consistency checks, and treating private-reasoning access (AUROC 0.82–0.98) as useful only while "
-          "colluders write their intent down, which agents aware of monitoring may avoid (Kale et al., 2025). For "
-          "evaluation, benchmarks need a manipulation check: instructed agents often do not collude, or over-apply a "
-          "strategy."),
+    ("p", "**LLM monitors miss evidence that is plainly in the record.** The colluders' trace — a vote against the "
+          "interest the payoff reveals — is visible to a one-line rule, yet short-verdict monitors were at chance, and "
+          "thinking, or a stated base rate with pre-computed flags, recovered only part of the gap. The bottleneck is "
+          "reading the record: inferring each agent's interest from payoffs, round by round, and weighting a rare vote "
+          "against it. For AI safety, this suggests pairing LLM monitors with simple, domain-specific consistency "
+          "checks, and treating private-reasoning access (AUROC 0.82–0.98) as useful only while colluders write their "
+          "intent down, which agents aware of monitoring may avoid (Kale et al., 2025). For evaluation, benchmarks need "
+          "a manipulation check: instructed agents often do not collude, or over-apply a strategy."),
+    ("p", "**For question 2.2: combining did not help, because this collusion needed no public lie.** Talk is cheap "
+          "here and collusion pays through votes, so adding messages helped neither monitors nor rules, and would add "
+          "little even if talk revealed every stake. The case 2.2 mostly has in mind needs a game in which colluders "
+          "must make public claims that their actions or outcomes contradict (Future Work)."),
     ("h3", "Limitations"),
     ("p", "One game, one agent model, 40 games per condition (20 held-out), 6 rounds; collusion is induced, so we make "
           "no claim about emergent collusion, and the game never requires a public lie, so it answers 2.2 only for "
@@ -241,13 +242,13 @@ SECTIONS["5. Discussion and Limitations"] = [
 ]
 
 SECTIONS["6. Conclusion"] = [
-    ("p", "We built a committee-vote game in which secret vote trading pays, and asked whether LLM monitors detect it "
-          "better when they see what agents say as well as what they do. Here they do not, because the collusion needs "
-          "no public lie: its trace is in the votes. Short-verdict monitors were indistinguishable from chance and a "
-          "thinking-mode monitor reached 0.69, while a one-line rule on the actions reached 0.86 (0.78 without "
-          "over-trading; 0.91 and 0.72 held-out). Whether combining helps when collusion forces public deception remains "
-          "open. Before relying on an LLM monitor, compare it with simple consistency checks, and check that the "
-          "collusion in your test set actually happened."),
+    ("p", "We built a committee-vote game in which secret vote trading pays and leaves its trace in the votes, and asked "
+          "whether LLM monitors find it. Short-verdict monitors were indistinguishable from chance and a thinking-mode "
+          "monitor reached 0.69, while a one-line rule on the actions reached 0.86 (0.78 without over-trading; 0.91 and "
+          "0.72 held-out); only private plans let the monitors succeed. Showing them what agents said as well did not "
+          "help, because this collusion needed no public lie; whether combining helps when collusion forces public "
+          "deception remains open. Before relying on an LLM monitor, compare it with simple consistency checks, and "
+          "check that the collusion in your test set actually happened."),
 ]
 
 CODE_AND_DATA = [

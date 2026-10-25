@@ -895,3 +895,16 @@ Participant's decision, after the variant check above.
     where…").
 - Text tightened to stay within 8 pages. LibreOffice render: main text pp. 1–8 with ~4 lines
   spare on p. 8; References p. 9; Appendix pp. 10–13. XSD validation passed.
+
+### Framing: detection from the record first, 2.2 second (2026-10-25, no API calls)
+Participant's decision: the paper does not test 2.2 in its general form, so the main question is
+now whether LLM monitors find the evidence of collusion in the record, with 2.2 as a second,
+scoped question.
+- Abstract (242 words) opens with both questions.
+- The introduction states the two questions; the game is a clean test of the first and answers
+  the second only for collusion that needs no public lie.
+- The Discussion now gives the main finding and its implications first, then a short 2.2
+  paragraph.
+- The Conclusion was rewritten to match, and Related Work says "Closest to question 2.2".
+- No results changed. Main text still pp. 1–8 (the Introduction now starts on p. 1, after the
+  shorter abstract); XSD validation passed.
