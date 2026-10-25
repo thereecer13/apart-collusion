@@ -830,3 +830,14 @@ Participant's question. Counts from the v3 games, computed with ad-hoc queries o
   talk mostly mirrors the vote, mismatch is common in honest play, and the partnership and the
   real stakes stay out of public messages. So messages add text without independent signal.
   These are rough text counts; they are not in the paper.
+- Follow-up count (participant asked whether the study really tests 2.2). The 64 competent trading
+  votes split by round outcome:
+  - passed rounds (the payoff reveals the vote as against-interest, so the actions view already
+    shows it): 33 = 19 announced as cast + 14 switched;
+  - failed rounds (payoff 0; the actions view cannot reveal it): 31 = 22 announced as cast + 9
+    switched.
+
+  So the only trace that talk adds beyond actions is 9 switches in failed rounds over 40 games.
+  Those switches look like ordinary changes of mind, which honest agents make in 14% of
+  agent-rounds. The game never requires colluders to say one thing and do another, so it tests 2.2
+  only for settings where collusion needs no public deception.
