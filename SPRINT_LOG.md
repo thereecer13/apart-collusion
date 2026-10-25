@@ -841,3 +841,32 @@ Participant's question. Counts from the v3 games, computed with ad-hoc queries o
   Those switches look like ordinary changes of mind, which honest agents make in 14% of
   agent-rounds. The game never requires colluders to say one thing and do another, so it tests 2.2
   only for settings where collusion needs no public deception.
+
+### Does a stake-disclosure variant make sense? (2026-10-25, offline check, no API calls)
+Proposed variant: every announcement must state a stake (free to lie), as a real test of 2.2.
+The participant asked for a check before spending the remaining budget ($8.17). Best-case bound
+from existing data: assume every agent states its true stake, and use a rule that flags votes
+against the stated stake in any round (passed or failed), versus `against_stake` (passed rounds
+only). Paired bootstrap over games, competent vs `none`:
+- v3 (40+40):
+  - as observed: 0.86 → 0.96, gain **+0.10 [+0.03, +0.18]**;
+  - tie-compliant pairs: 0.78 → 0.86, gain +0.08 [+0.00, +0.17].
+- Held-out (20+20, the size the variant could afford):
+  - as observed: 0.91 → 0.94, gain +0.03 [−0.06, +0.14];
+  - tie-compliant pairs: 0.72 → 0.73, gain +0.00 [−0.14, +0.14].
+- **Why the bound is small:** the talk rule's FPR is 0.25 (v3) and 0.30 (held-out), against 0.05
+  for `against_stake`. Honest agents vote against their own stake mostly in failed rounds, which
+  pay $0 and so hide it: v3 12/847 (1.4%) of votes in failed rounds vs 2/833 (0.2%) in passed
+  rounds; held-out 11/483 vs 1/357. These are almost all "+1 stake, voted NO" (v3 10 of 12;
+  held-out 11 of 11). Revealing stakes would expose these honest slips along with the colluders'
+  failed-round trades.
+- **If colluders lie** (state a stake consistent with their vote), the claim-vs-payoff check
+  flags the same votes as `against_stake`, so the expected gain for rules is zero. Any gain for
+  LLM monitors (the stated stake sitting next to the vote) is speculative.
+- **Cost estimate** from logged runs: pilot ~$0.5–0.9, 40 games ~$3.5 (held-out: $3.49), monitors
+  ~$0.3–1.2, so ~$4.5–5.5. One lost run (cf. the $2.29 lost to a container restart) would
+  exhaust the margin.
+- **Conclusion:** at 20+20 games even the best case is not detectable, so the variant is not
+  worth the remaining budget. Recommended instead: reframe 2.2 as a boundary condition, use this
+  bound as evidence, and list stake disclosure as future work (it would need roughly 80+ games
+  per class).
