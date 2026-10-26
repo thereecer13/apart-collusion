@@ -83,18 +83,28 @@ function agent(o) {
   for (const s of [-1, 1]) {
     const ex = s * r * 0.36, ey = -r * 0.08;
     if (mood === 'sly') {
-      const ry = r * 0.09 * blink;
-      ctx.save(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(ex, ey, r * 0.24, ry, s * 0.12, 0, 7); ctx.fill(); ctx.clip();
-      ctx.fillStyle = '#1b1f3b'; ctx.beginPath(); ctx.arc(ex + look[0] * r * 0.09, ey, r * 0.1, 0, 7); ctx.fill(); ctx.restore();
-      ctx.strokeStyle = shade(c, -0.55); ctx.lineWidth = r * 0.07; ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(ex + s * r * 0.26, ey - r * 0.26); ctx.lineTo(ex - s * r * 0.2, ey - r * 0.15); ctx.stroke();
+      // mischievous: half-lidded eyes glancing sideways, one relaxed brow raised
+      const side = look[0] < -0.1 ? -1 : 1, lidY = ey - r * 0.04;
+      ctx.save(); ctx.beginPath(); ctx.ellipse(ex, ey, r * 0.23, r * 0.25 * Math.max(blink, 0.5), 0, 0, 7); ctx.clip();
+      ctx.fillStyle = '#fff'; ctx.fillRect(ex - r * 0.3, lidY, r * 0.6, r * 0.4);
+      ctx.fillStyle = '#1b1f3b'; ctx.beginPath(); ctx.arc(ex + side * r * 0.1, ey + r * 0.09, r * 0.1, 0, 7); ctx.fill();
+      ctx.restore();
+      ctx.strokeStyle = shade(c, -0.55); ctx.lineWidth = r * 0.055; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(ex - r * 0.25, lidY + r * 0.015); ctx.quadraticCurveTo(ex, lidY - r * 0.02, ex + r * 0.25, lidY + r * 0.015); ctx.stroke();
+      const raised = s === side, by = ey - r * (raised ? 0.43 : 0.33);
+      ctx.beginPath(); ctx.moveTo(ex - r * 0.17, by + r * 0.04); ctx.quadraticCurveTo(ex, by - r * (raised ? 0.1 : 0.03), ex + r * 0.17, by + r * 0.04); ctx.stroke();
       continue;
     }
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(ex, ey, r * 0.23, r * 0.27 * blink, 0, 0, 7); ctx.fill();
-    if (mood === 'happy') {
+    ctx.fillStyle = '#1b1f3b'; ctx.beginPath(); ctx.arc(ex + look[0] * r * 0.09, ey + look[1] * r * 0.1, r * 0.11 * blink, 0, 7); ctx.fill();
+    if (mood === 'happy') {   // the lower lid covers the pupil, leaving a smiling arc
       ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(ex, ey + r * 0.12, r * 0.25, r * 0.2, 0, 0, 7); ctx.fill();
     }
-    ctx.fillStyle = '#1b1f3b'; ctx.beginPath(); ctx.arc(ex + look[0] * r * 0.09, ey + look[1] * r * 0.1, r * 0.11 * blink, 0, 7); ctx.fill();
+  }
+  if (mood === 'sly') {   // lopsided smirk, rising on the side the agent glances toward
+    const side = look[0] < -0.1 ? -1 : 1;
+    ctx.strokeStyle = shade(c, -0.55); ctx.lineWidth = r * 0.06; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-side * r * 0.15, r * 0.36); ctx.quadraticCurveTo(side * r * 0.05, r * 0.45, side * r * 0.25, r * 0.27); ctx.stroke();
   }
   if (sweat > 0) {
     ctx.globalAlpha *= sweat; ctx.fillStyle = '#9ad8ff';

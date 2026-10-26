@@ -927,3 +927,6 @@ scoped question.
   - colluders' eyes now squint, with angled brows;
   - the participant's name is on the title card;
   - the opening scene's secret link is raised above the agents' heads.
+- Video revision, at the participant's request: colluders now look mischievous rather than angry
+  (half-lidded eyes glancing at the partner, one raised relaxed brow, a lopsided smirk), and
+  happy eyes now hide the pupil behind the lower lid.
