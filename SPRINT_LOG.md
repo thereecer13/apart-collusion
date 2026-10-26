@@ -930,3 +930,5 @@ scoped question.
 - Video revision, at the participant's request: colluders now look mischievous rather than angry
   (half-lidded eyes glancing at the partner, one raised relaxed brow, a lopsided smirk), and
   happy eyes now hide the pupil behind the lower lid.
+- Video revision, at the participant's request: agents relabelled A–G (previously F, G, J, M, Q, T,
+  Z); colours and roles unchanged (A is the small-stake partner, G the large-stake partner).
