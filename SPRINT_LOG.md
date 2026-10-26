@@ -921,3 +921,9 @@ scoped question.
 - Re-voiced the video with Kokoro TTS (voice "Heart", Apache 2.0), chosen by the participant from
   five samples. Now 2:50; the timeline, music, captions, poster and end-card credit were
   regenerated.
+- Video revisions, at the participant's request:
+  - the "160 games" grid now shows one square per trade chance (64 per group; trades lit: 1, 3,
+    20, 64), so "31%" and "100% of chances" match the squares exactly;
+  - colluders' eyes now squint, with angled brows;
+  - the participant's name is on the title card;
+  - the opening scene's secret link is raised above the agents' heads.
