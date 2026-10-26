@@ -918,3 +918,6 @@ scoped question.
   - procedurally generated music.
 - Numbers shown, all from the paper: monitors ≈ 50%, thinking monitor 69%, rule 86%, private
   notes 94–98%, naive pairs traded 31% of chances, competent pairs 100%.
+- Re-voiced the video with Kokoro TTS (voice "Heart", Apache 2.0), chosen by the participant from
+  five samples. Now 2:50; the timeline, music, captions, poster and end-card credit were
+  regenerated.
