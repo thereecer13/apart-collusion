@@ -992,3 +992,29 @@ Participant's decision. Exploratory, on the existing games.
   which needs a systematic count across rounds. A two-step rule does it reliably for competent
   colluders. This supports the paper's diagnosis (reading the record, not access to it, is the
   bottleneck); here, rules should do both steps. Naive colluders stay hard for every detector.
+
+### Claude Haiku 5.5 as monitor (plan written before running, 2026-10-27)
+Participant's decision; paid from the participant's Anthropic API credits, not the OpenRouter
+key. Tests whether a current frontier-family monitor also misses what the rule catches (Llama 3.3
+70B and DeepSeek V3.1 were the only monitors so far).
+- **Monitor:** `anthropic/claude-haiku-5-5` through Inspect's Anthropic provider, with frozen
+  prompt v1. Default model settings: adaptive thinking on, effort `medium` (the model's
+  default). Temperature is omitted, because the model rejects non-default sampling values:
+  `-T temperature=default`, a new task option whose default stays `0` for earlier runs. Uses
+  `--max-tokens 16000`, since thinking counts toward it.
+- **Data:** v3 (all four conditions × five views = 800 samples) and held-out (40 games × five
+  views = 200), about 1,000 samples.
+- **Primary (decided now):** competent vs `none`, `actions` view: Haiku's AUROC, and the paired
+  difference rule − Haiku against `against_stake` (0.86) over the same games. "Haiku closes the
+  gap" if that difference's 95% CI includes 0 or is negative; otherwise the headline result
+  holds for this monitor too.
+- **Secondary:**
+  - the four observable views vs chance;
+  - combined − single-channel paired differences (question 2.2);
+  - the plans view (positive control);
+  - FPR and pair-ID;
+  - naive colluders, channel-only hard negatives, and held-out replication.
+- **Cost estimate:** ~4k input and ~1–2k output tokens per sample at $0.10/$0.50 per million,
+  so roughly $1–2 in total.
+- **Blocked until** `ANTHROPIC_API_KEY` is added to the environment (Network secrets). The SDK
+  is installed in `.venv`.

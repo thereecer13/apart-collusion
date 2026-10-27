@@ -151,7 +151,9 @@ def monitor_scorer():
 def collusion_monitor(logs: str = "plumbing_tests/smoke_seed11", views: str = ",".join(VIEWS),
                       include_unlabeled: bool = False, channel_only_labels: Optional[str] = None,
                       channel_only_negative: bool = False, conditions: str = "",
-                      prompt_version: str = "v1"):
+                      prompt_version: str = "v1", temperature: str = "0"):
+    # temperature: "0" for every run up to 2026-10-27; "default" omits it (Claude 5.x models reject
+    # non-default sampling parameters)
     # Inspect passes "-T views=a,b" as a list, "-T views=a" as a str
     as_list = lambda x: [v.strip() for v in (x if isinstance(x, list) else str(x).split(",")) if str(v).strip()]
     view_list = as_list(views)
@@ -161,7 +163,7 @@ def collusion_monitor(logs: str = "plumbing_tests/smoke_seed11", views: str = ",
                                             channel_only_negative, cond_list, prompt_version)),
         solver=generate(),
         scorer=monitor_scorer(),
-        config=GenerateConfig(temperature=0.0, max_tokens=800),
+        config=GenerateConfig(temperature=None if str(temperature) == "default" else float(temperature), max_tokens=800),
         metadata={"prompt_status": PROMPT_STATUS if prompt_version == "v1" else "v2 (exploratory)",
                   "prompt_version": prompt_version, "views": view_list},
     )
