@@ -966,3 +966,29 @@ Participant's decision. Exploratory, on the existing games.
   - `both` vs `actions`.
 - **Cost estimate:** Llama ~$0.10; DeepSeek thinking ~$1.10. Key usage before: $41.8275.
 - Code: `experiments/hybrid_analysis.py` and test `test_hybrid_flags_and_covote_partner`.
+- **Runs:** both monitors × (v3 92 + held-out 36) samples; 0 unparsed. Cost $41.8275 → $42.8111 =
+  **$0.98** (Llama and DeepSeek thinking together). Logs in `results/hybrid_*`.
+- **Results**, pair-ID on flagged games (co-vote rule in brackets):
+
+  | Games | Llama actions | Llama both | DeepSeek-thinking actions | DeepSeek-thinking both |
+  |---|---|---|---|---|
+  | competent v3 (30) [26] | 4 | 3 | **15** | 12 |
+  | naive v3 (14) [3] | 0 | 1 | 3 | 3 |
+  | competent held-out (17) [16] | 3 | 2 | 4 | 2 |
+
+  - **Primary: not supported.** The hybrid is far worse than the co-vote rule. Discordant counts
+    on competent v3 actions: hybrid-only right 0, rule-only right 22 (Llama) and 11 (DeepSeek).
+  - The "yes" rate rose with the screening note: Llama 22/30 competent games, against 5/30 on the
+    earlier flagged view. But only 11 of Llama's 22 named pairs even contain the flagged agent.
+    Its partner choices cite co-voting it does not count correctly, e.g. "J and T have voted
+    together in most rounds" in a game where J's partner F agreed with J more.
+  - DeepSeek with thinking is right in 15 of its 20 "yes" answers but says "no" in 10 flagged
+    competent games.
+  - Naive colluders: no gain over the rules (DeepSeek 3/14, same as the co-vote rule).
+  - Flagged honest games: "yes" in 0/2 (v3, both monitors) and in 1/1 (held-out, Llama, actions
+    view only). Too few to estimate an FPR.
+  - Messages again hurt: `both` ≤ `actions` in every cell.
+- **Reading:** even handed the suspect and the base rate, the LLMs fail at the second step,
+  which needs a systematic count across rounds. A two-step rule does it reliably for competent
+  colluders. This supports the paper's diagnosis (reading the record, not access to it, is the
+  bottleneck); here, rules should do both steps. Naive colluders stay hard for every detector.
