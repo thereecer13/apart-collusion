@@ -89,6 +89,19 @@ def test_truthful_talk_sees_failed_rounds():
     assert score_truthful_talk(g) == 1       # visible if the stake had been stated
 
 
+def test_hybrid_flags_and_covote_partner():
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "experiments"))
+    from monitor.hybrid_task import flags
+    from hybrid_analysis import covote_pair
+    trade = honest_round(dict(zip(AGENTS, [-1, 10, 1, 1, -1, -1, -1])))
+    trade["A"] = ("YES", "YES", -1)          # A trades for B: passes 4-3, A gets -1
+    other = honest_round(dict(zip(AGENTS, [1, 1, -1, -1, 1, -1, -10])))   # A and B agree again
+    g = game([trade, other])
+    fl = flags(g)
+    assert [(f["round"], f["agent"]) for f in fl] == [(1, "A")]
+    assert covote_pair(g) == ["A", "B"]
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):

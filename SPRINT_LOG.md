@@ -932,3 +932,37 @@ scoped question.
   happy eyes now hide the pupil behind the lower lid.
 - Video revision, at the participant's request: agents relabelled A–G (previously F, G, J, M, Q, T,
   Z); colours and roles unchanged (A is the small-stake partner, G the large-stake partner).
+
+## Post-sprint follow-up
+
+### Hybrid monitor: a rule screens, an LLM decides (plan written before running, 2026-10-27)
+Participant's decision. Exploratory, on the existing games.
+- **Rule-only baselines (offline, computed before any LLM run)** on games the `against_stake`
+  rule flags:
+  - a flagged agent is in the true pair in 29/30 competent v3, 13/14 naive v3 and 17/17 held-out
+    competent games;
+  - the rule's own pair is right in 12/30, 3/14 and 4/17;
+  - a new **co-vote rule** (partner = the agent who voted the same as the most-flagged agent in
+    the most rounds) is right in **26/30, 3/14 and 16/17**.
+
+  So for competent colluders, a two-step rule already finds the pair; naive pairs, who rarely
+  bloc-vote, are where it fails. Flagged no-collusion games: v3 2/40, held-out 1/20.
+- **Hybrid** (`monitor/hybrid_task.py`): only flagged games go to the LLM. It gets the view plus
+  the rule's findings (round, agent, vote, payoff) and the honest base rate ("about 5% of honest
+  games contain one"), and must decide and name both members. The prompt does *not* say how to
+  find the partner. Views `actions` (primary) and `both`. Conditions: competent, naive and `none`
+  (flagged games only): v3 92 samples, held-out 36.
+- **Monitors:**
+  - Llama 3.3 70B (pinned to DeepInfra, short verdict);
+  - DeepSeek V3.1 with thinking on (CoreWeave, `--max-tokens 16000`).
+- **Primary (decided now):** pair-ID on the 30 flagged competent v3 games, `actions` view,
+  versus the co-vote rule (26/30), with discordant counts. The hybrid is useful as a second step
+  only if it is at least as good as the co-vote rule. At n = 30 it cannot be shown better near
+  the ceiling.
+- **Secondary:**
+  - naive colluders (14 games, where the co-vote rule fails);
+  - held-out replication (17);
+  - "yes" rate on the 3 flagged honest games (descriptive only; too few to measure FPR);
+  - `both` vs `actions`.
+- **Cost estimate:** Llama ~$0.10; DeepSeek thinking ~$1.10. Key usage before: $41.8275.
+- Code: `experiments/hybrid_analysis.py` and test `test_hybrid_flags_and_covote_partner`.
