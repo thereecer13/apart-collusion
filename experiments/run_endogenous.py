@@ -213,6 +213,11 @@ def main():
         help="Skip the per-agent LLM-as-judge call (openai/gpt-5-mini). Non-queued runner only."
     )
     parser.add_argument(
+        "--anthropic-direct", action="store_true",
+        help="Send agent requests to the Anthropic API (key in ANTHROPIC_API_KEY) instead of OpenRouter; "
+             "for Claude models, e.g. --model claude-haiku-5-5 (follow-up E1, SPRINT_LOG.md)"
+    )
+    parser.add_argument(
         "--dump-requests", type=str, default=None,
         help="Append every request and its parsed response to this JSONL file "
              "(for plumbing checks). Non-queued runner only."
@@ -295,13 +300,20 @@ def main():
     # ------------------------------------------------------------------
     # LLM clients (routes to OpenAI for GPT, OpenRouter for others)
     # ------------------------------------------------------------------
-    llm_client, parallel_client = create_llm_clients(
-        model=model,
-        openrouter_api_key=settings.OPENROUTER_API_KEY,
-        openai_api_key=settings.OPENAI_API_KEY,
-        temperature=args.temperature,
-        max_workers=20,
-    )
+    if args.anthropic_direct:
+        from src.llm.providers.parallel_anthropic import AnthropicLLM, AnthropicParallelClient
+        if args.use_queue or agent_models_raw:
+            parser.error("--anthropic-direct supports one model and the non-queued runner only")
+        llm_client, parallel_client = AnthropicLLM(model, args.temperature), AnthropicParallelClient(max_concurrent=20)
+        print(f"Using the Anthropic API with model: {model}")
+    else:
+        llm_client, parallel_client = create_llm_clients(
+            model=model,
+            openrouter_api_key=settings.OPENROUTER_API_KEY,
+            openai_api_key=settings.OPENAI_API_KEY,
+            temperature=args.temperature,
+            max_workers=20,
+        )
     if args.dump_requests:
         parallel_client = RequestDumper(parallel_client, args.dump_requests)
 
@@ -411,6 +423,11 @@ def main():
         }
         if args.private_history != "full":
             analysis["metadata"]["private_channel"]["history"] = args.private_history
+
+    if args.anthropic_direct:
+        analysis["metadata"]["provider"] = "anthropic"
+        analysis["metadata"]["anthropic_usage"] = dict(parallel_client.usage)
+        print(f"Anthropic usage: {parallel_client.usage}")
 
     save_results(
         rounds=rounds,
