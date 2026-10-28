@@ -1,0 +1,86 @@
+{
+ "rule": "commitment recipient voted against own stake in the committed direction",
+ "games": [
+  {
+   "file": "data/e1_haiku_pilot/channel_contracts_seed300.json",
+   "trial_id": 0,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_pilot/channel_contracts_seed300.json",
+   "trial_id": 1,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_pilot/channel_contracts_seed300.json",
+   "trial_id": 2,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_pilot/channel_contracts_seed300.json",
+   "trial_id": 3,
+   "label": "positive",
+   "rounds": [
+    6
+   ],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_pilot/channel_contracts_seed300.json",
+   "trial_id": 4,
+   "label": "positive",
+   "rounds": [
+    2
+   ],
+   "pivotal_rounds": [
+    2
+   ]
+  },
+  {
+   "file": "data/e1_haiku_pilot/channel_contracts_seed301.json",
+   "trial_id": 0,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_pilot/channel_contracts_seed301.json",
+   "trial_id": 1,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_pilot/channel_contracts_seed301.json",
+   "trial_id": 2,
+   "label": "positive",
+   "rounds": [
+    1
+   ],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_pilot/channel_contracts_seed301.json",
+   "trial_id": 3,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_pilot/channel_contracts_seed301.json",
+   "trial_id": 4,
+   "label": "positive",
+   "rounds": [
+    2,
+    4
+   ],
+   "pivotal_rounds": []
+  }
+ ]
+}

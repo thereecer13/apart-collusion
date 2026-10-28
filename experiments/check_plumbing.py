@@ -32,6 +32,10 @@ def focal_agent(cid):
     return cid.rsplit("_", 1)[1]
 
 
+# channel_contracts lines written by PrivateChannel.contracts_block
+COMMIT_RE = re.compile(r"^  (?:(You|Agent \w) (committed: if the proposal|made no commitment\.)|(Paid after the vote): )", re.M)
+
+
 def stage_of(cid):
     for s in ("_s1_", "_pm", "_pc_", "_s2_", "_s3_", "_refl_", "_judge_"):
         if s in cid:
@@ -167,11 +171,12 @@ def check_game(data, tid, reqs):
             for r in reqs:
                 if r["round"] != rd["round_id"]:
                     continue
+                # match the game's own sentences only: agents' free text can say "made no commitments"
                 if r["agent"] not in pair:
-                    expect("committed:" not in r["user"] and "made no commitment" not in r["user"] and "Paid after the vote" not in r["user"],
-                           f"LEAK: commitment text in {r['cid']}")
+                    expect(not COMMIT_RE.search(r["user"]), f"LEAK: commitment text in {r['cid']}")
                 elif r["stage"] in ("s2", "s3", "refl"):
-                    expect(all(("committed:" if c["pay_if"] != "NONE" else "made no commitment") in r["user"] for c in cs),
+                    shown = COMMIT_RE.findall(r["user"])
+                    expect(len([x for x in shown if not x[2]]) == len(cs),
                            f"pair prompt {r['cid']} round {r['round']+1} missing this round's commitments")
 
     # 4. Voting stakes: each prompt shows exactly the focal agent's own stake for that round.
