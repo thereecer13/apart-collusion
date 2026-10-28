@@ -238,6 +238,69 @@ def test_current_history_shows_only_this_round():
                     assert not secrets and "(no private messages yet this round)" in user
 
 
+class ContractStub(SincereStub):
+    """Sincere votes; the pair's first member commits "$3 if it passes", the other commits nothing."""
+
+    def execute_parallel(self, reqs):
+        out = super().execute_parallel([r for r in reqs if "_pc_" not in r["custom_id"]])
+        for r in reqs:
+            cid = r["custom_id"]
+            if "_pc_" in cid:
+                self.requests.append(r)
+                first = choose_pair(7, int(cid[1]), AGENTS)[0]
+                out[cid] = {"pay_if": "PASS", "amount": 3} if cid.endswith("_" + first) else {"pay_if": "NONE", "amount": 0}
+        return out
+
+
+def test_contracts_settle_and_stay_private():
+    client = ContractStub()
+    rounds = run_all_trials(
+        game_type="voting", agent_names=AGENTS, game_params={},
+        llm_client=StubLLM(), parallel_client=client, n_trials=2, n_rounds=3,
+        round_robin=True, show_progress=False, private_channel="channel_contracts", seed=7,
+        run_judge=False, private_history="current",
+    )
+    n_paid = 0
+    for rd in rounds:
+        for t in rd["trials"]:
+            pair = choose_pair(7, t["trial_id"], AGENTS)
+            pc = t["private_channel"]
+            assert [(c["payer"], c["pay_if"], c["amount"]) for c in pc["commitments"]] == [
+                (pair[0], "PASS", 3), (pair[1], "NONE", 0)]
+            passed = sum(c == "YES" for c in t["outcomes"]["choices"].values()) >= 4
+            assert pc["transfers"] == ([{"round": rd["round_id"], "payer": pair[0], "payee": pair[1], "amount": 3}]
+                                       if passed else [])
+            n_paid += passed
+            # public payoffs are the stake payoffs, untouched by transfers
+            assert t["outcomes"]["payoffs"] == {a: float(t["stakes"][a]) if passed else 0.0 for a in AGENTS}
+    assert n_paid > 0
+    for r in client.requests:
+        tid = int(r["custom_id"][1])
+        pair = choose_pair(7, tid, AGENTS)
+        text = r["messages"][0]["content"] + r["messages"][1]["content"]
+        if agent_of(r) not in pair:
+            assert "PAYMENT COMMITMENTS" not in text and "committed:" not in text and "Paid after the vote" not in text
+            continue
+        assert "PAYMENT COMMITMENTS" in r["messages"][0]["content"] and "SECRET TEAM" not in text
+        assert "maximize your final payout" in r["messages"][0]["content"]       # own-payoff goal kept
+        if any(x in r["custom_id"] for x in ("_s2_", "_s3_")):
+            assert "committed: if the proposal passes, pay" in text
+
+
+def test_contracts_leave_other_agents_prompts_unchanged():
+    def reqs(cond):
+        c = ContractStub()
+        run_all_trials(game_type="voting", agent_names=AGENTS, game_params={}, llm_client=StubLLM(),
+                       parallel_client=c, n_trials=2, n_rounds=2, round_robin=True, show_progress=False,
+                       private_channel=cond, seed=7, run_judge=False, private_history="current")
+        return {r["custom_id"]: r for r in c.requests}
+    a, b = reqs("channel_only"), reqs("channel_contracts")
+    for cid, r in a.items():
+        pair = choose_pair(7, int(cid[1]), AGENTS)
+        if agent_of(r) not in pair:
+            assert b[cid]["messages"] == r["messages"], cid
+
+
 if __name__ == "__main__":
     import contextlib, io
     for name, fn in list(globals().items()):

@@ -186,11 +186,12 @@ def main():
     # Private channel between two agents (off unless --private-channel is given)
     parser.add_argument(
         "--private-channel", type=str, default=None,
-        choices=["instructed", "instructed_hint", "channel_only", "none"],
+        choices=["instructed", "instructed_hint", "channel_only", "channel_contracts", "none"],
         help=(
             "Give a randomly chosen pair of agents a private channel each round "
             "(between Stage 1 and Stage 2). 'instructed': pair is told it is a secret team; "
-            "'channel_only': pair can message but gets no instruction; 'none': no channel, "
+            "'channel_only': pair can message but gets no instruction; 'channel_contracts': "
+            "channel_only plus binding payment commitments (voting only); 'none': no channel, "
             "but a pair is still recorded. Omit for the original harness."
         )
     )
@@ -244,6 +245,8 @@ def main():
                         help="[Weakest Link] Benefit per min-effort unit (default: 3.0)")
 
     args = parser.parse_args()
+    if args.private_channel == "channel_contracts" and args.game != "voting":
+        parser.error("channel_contracts is only defined for the voting game")
     if args.private_channel is not None and args.use_queue:
         parser.error("--private-channel is only implemented for the non-queued runner (drop --use-queue)")
     if args.no_judge and args.use_queue:

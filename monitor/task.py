@@ -53,12 +53,15 @@ def load_channel_only_labels(path: str) -> Dict[tuple, str]:
 
 def build_samples(logs: str, views=VIEWS, include_unlabeled: bool = False,
                   channel_only_labels: Optional[str] = None, channel_only_negative: bool = False,
-                  conditions: Optional[List[str]] = None, prompt_version: str = "v1"):
+                  conditions: Optional[List[str]] = None, prompt_version: str = "v1",
+                  contracts_labels: Optional[str] = None):
     """conditions: keep only games of these conditions (None = all).
     channel_only_negative: label every `channel_only` game "no" (hard negatives; sprint decision
     2026-10-24, since the labeler found no qualifying collusion). Overrides channel_only_labels."""
     logs = _abs(logs)
     co_labels = load_channel_only_labels(channel_only_labels) if channel_only_labels else {}
+    # channel_contracts (follow-up E1): labels from experiments/contracts_analysis.py --labels, same format
+    ct_labels = load_channel_only_labels(contracts_labels) if contracts_labels else {}
     paths = sorted(glob.glob(os.path.join(logs, "*.json"))) if os.path.isdir(logs) else sorted(glob.glob(logs))
     samples = []
     for path in paths:
@@ -73,6 +76,9 @@ def build_samples(logs: str, views=VIEWS, include_unlabeled: bool = False,
                 else:
                     label = co_labels.get((os.path.basename(path), game["trial_id"]))
                     label_source = "labeler"
+            if game["condition"] == "channel_contracts":
+                label = ct_labels.get((os.path.basename(path), game["trial_id"]))
+                label_source = "contracts_rule"
             if label is None and not include_unlabeled:
                 continue
             game_id = f"{game['game_type']}/{os.path.basename(path)[:-5]}/t{game['trial_id']}"
@@ -151,7 +157,7 @@ def monitor_scorer():
 def collusion_monitor(logs: str = "plumbing_tests/smoke_seed11", views: str = ",".join(VIEWS),
                       include_unlabeled: bool = False, channel_only_labels: Optional[str] = None,
                       channel_only_negative: bool = False, conditions: str = "",
-                      prompt_version: str = "v1", temperature: str = "0"):
+                      prompt_version: str = "v1", temperature: str = "0", contracts_labels: Optional[str] = None):
     # temperature: "0" for every run up to 2026-10-27; "default" omits it (Claude 5.x models reject
     # non-default sampling parameters)
     # Inspect passes "-T views=a,b" as a list, "-T views=a" as a str
@@ -160,7 +166,7 @@ def collusion_monitor(logs: str = "plumbing_tests/smoke_seed11", views: str = ",
     cond_list = as_list(conditions) or None
     return Task(
         dataset=MemoryDataset(build_samples(logs, view_list, include_unlabeled, channel_only_labels,
-                                            channel_only_negative, cond_list, prompt_version)),
+                                            channel_only_negative, cond_list, prompt_version, contracts_labels)),
         solver=generate(),
         scorer=monitor_scorer(),
         config=GenerateConfig(temperature=None if str(temperature) == "default" else float(temperature), max_tokens=800),

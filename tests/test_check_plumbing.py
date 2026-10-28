@@ -21,8 +21,8 @@ import test_voting as V
 import check_plumbing as C
 
 
-class UniqueStub(V.SincereStub):
-    """Private messages unique per call (custom_ids repeat every round)."""
+class UniqueStub(V.ContractStub):
+    """Private messages unique per call (custom_ids repeat every round). Commitments as ContractStub."""
     n = 0
 
     def execute_parallel(self, reqs):
@@ -34,13 +34,14 @@ class UniqueStub(V.SincereStub):
         return out
 
 
-def make_run(tmp, leak_into=None, note_into=None, history="full", stale_into=None):
+def make_run(tmp, leak_into=None, note_into=None, history="full", stale_into=None, condition="instructed",
+             commit_leak_into=None):
     client = UniqueStub()
     with contextlib.redirect_stdout(io.StringIO()):
         rounds = V.run_all_trials(
             game_type="voting", agent_names=V.AGENTS, game_params={},
             llm_client=V.StubLLM(), parallel_client=client, n_trials=2, n_rounds=3,
-            round_robin=True, show_progress=False, private_channel="instructed", seed=7,
+            round_robin=True, show_progress=False, private_channel=condition, seed=7,
             run_judge=False, private_history=history,
         )
     reqs = client.requests
@@ -54,6 +55,11 @@ def make_run(tmp, leak_into=None, note_into=None, history="full", stale_into=Non
         secret = rounds[0]["trials"][0]["private_channel"]["messages"][0]["message"]
         hits = [r for r in reqs if r["custom_id"] == stale_into[0]]
         hits[stale_into[1]]["messages"][1]["content"] += f'\n  Agent X -> Agent Y: "{secret}"'
+    if commit_leak_into:
+        for r in reqs:
+            if r["custom_id"] == commit_leak_into:
+                r["messages"][1]["content"] += "\n  Agent T committed: if the proposal passes, pay you $3."
+                break
     if note_into:
         for r in reqs:
             if r["custom_id"] == note_into:
@@ -100,6 +106,19 @@ def test_current_history_pass_and_stale_message_caught():
     with tempfile.TemporaryDirectory() as tmp:
         out = C.check(*make_run(tmp, history="current", stale_into=(f"t0_s3_{a}", 2)))
         assert any("shows earlier r1 message" in f for f in out[0][5]), out[0][5]
+
+
+
+def test_contracts_pass_and_commitment_leak_caught():
+    from src.endogenous.core.private_channel import choose_pair
+    with tempfile.TemporaryDirectory() as tmp:
+        out = C.check(*make_run(tmp, history="current", condition="channel_contracts"))
+        assert all(not o[5] and not o[6] for o in out), [(o[5], o[6]) for o in out]
+    outsider = next(a for a in V.AGENTS if a not in choose_pair(7, 0, V.AGENTS))
+    with tempfile.TemporaryDirectory() as tmp:
+        out = C.check(*make_run(tmp, history="current", condition="channel_contracts",
+                                commit_leak_into=f"t0_s3_{outsider}"))
+        assert any("LEAK: commitment" in f for f in out[0][5]), out[0][5]
 
 
 if __name__ == "__main__":

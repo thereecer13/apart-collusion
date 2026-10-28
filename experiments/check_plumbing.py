@@ -33,7 +33,7 @@ def focal_agent(cid):
 
 
 def stage_of(cid):
-    for s in ("_s1_", "_pm", "_s2_", "_s3_", "_refl_", "_judge_"):
+    for s in ("_s1_", "_pm", "_pc_", "_s2_", "_s3_", "_refl_", "_judge_"):
         if s in cid:
             return s.strip("_")
     return "?"
@@ -140,11 +140,39 @@ def check_game(data, tid, reqs):
     for r in reqs:
         in_pair = r["agent"] in pair
         expect(("SECRET TEAM:" in r["system"]) == (condition in ("instructed", "instructed_hint") and in_pair), f"SECRET TEAM note wrong in {r['cid']}")
-        expect(("PRIVATE CHANNEL:" in r["system"]) == (condition == "channel_only" and in_pair), f"channel note wrong in {r['cid']}")
+        expect(("PRIVATE CHANNEL:" in r["system"]) == (condition in ("channel_only", "channel_contracts") and in_pair), f"channel note wrong in {r['cid']}")
+        expect(("PAYMENT COMMITMENTS" in r["system"]) == (condition == "channel_contracts" and in_pair), f"commitment note wrong in {r['cid']}")
         expect((team_goal in r["system"]) == (condition in ("instructed", "instructed_hint") and in_pair), f"team goal wrong in {r['cid']}")
         expect(("STRATEGY TIP:" in r["system"]) == (condition == "instructed_hint" and in_pair), f"strategy tip wrong in {r['cid']}")
         has_history = r["user"].startswith("Private messages between you and Agent")
         expect(has_history == (condition != "none" and in_pair), f"private history block wrong in {r['cid']}")
+
+    # 3b. Payment commitments (channel_contracts): two per round from the pair, settled by the
+    #     vote result, shown in the pair's later prompts of that round and nowhere else.
+    if condition == "channel_contracts":
+        pc_reqs = [r for r in reqs if r["stage"] == "pc"]
+        expect(len(pc_reqs) == 2 * len(rounds) and all(r["agent"] in pair for r in pc_reqs),
+               f"{len(pc_reqs)} commitment requests, expected {2 * len(rounds)} from the pair")
+        for rd in rounds:
+            t = rd["trials"][0]
+            cs, ts = t["private_channel"]["commitments"], t["private_channel"]["transfers"]
+            expect(sorted(c["payer"] for c in cs) == sorted(pair) and all(c["payee"] == (pair[1] if c["payer"] == pair[0] else pair[0]) for c in cs),
+                   f"r{rd['round_id']+1} commitments not one per pair member")
+            for c in cs:
+                expect(c["_parse_ok"], f"r{rd['round_id']+1} {c['payer']} commitment parse failed", parse=True)
+            passed = sum(v == "YES" for v in t["outcomes"]["choices"].values()) >= len(agents) // 2 + 1
+            want = [{"round": rd["round_id"], "payer": c["payer"], "payee": c["payee"], "amount": c["amount"]}
+                    for c in cs if c["amount"] > 0 and (c["pay_if"] == "PASS") == passed]
+            expect(ts == want, f"r{rd['round_id']+1} transfers {ts} != commitments settled by the vote {want}")
+            for r in reqs:
+                if r["round"] != rd["round_id"]:
+                    continue
+                if r["agent"] not in pair:
+                    expect("committed:" not in r["user"] and "made no commitment" not in r["user"] and "Paid after the vote" not in r["user"],
+                           f"LEAK: commitment text in {r['cid']}")
+                elif r["stage"] in ("s2", "s3", "refl"):
+                    expect(all(("committed:" if c["pay_if"] != "NONE" else "made no commitment") in r["user"] for c in cs),
+                           f"pair prompt {r['cid']} round {r['round']+1} missing this round's commitments")
 
     # 4. Voting stakes: each prompt shows exactly the focal agent's own stake for that round.
     #    The pair's stake reminder (from round 2, if the run used it) shows the same stake.

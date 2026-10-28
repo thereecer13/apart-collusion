@@ -37,6 +37,7 @@ from src.endogenous.core.prompt_builders import (
 )
 from src.endogenous.core.private_channel import (
     PrivateChannel, choose_pair, build_private_message_prompt,
+    build_commitment_prompt, parse_commitment,
 )
 from src.games.voting import draw_stakes
 
@@ -771,6 +772,34 @@ def _run_private_channel(
                 "_parse_ok": bool(parsed.get("message")),
             })
 
+    # channel_contracts: both members commit at the same time, after the messages
+    if channel.contracts:
+        reqs = {}
+        for sender in channel.pair:
+            agent_model = agent_models[sender] if agent_models else llm_client.model
+            agent_supports_structured = _model_supports_structured_output(agent_model)
+            base_system_p, _, _ = build_stage2_prompt(
+                game_type=game_type, agent_name=sender, agent_names=agent_names,
+                stage1_result=stage1_results.get(sender, {}), game_params=game_params,
+            )
+            system_p, user_p, schema = build_commitment_prompt(
+                channel, sender, base_system_p, supports_structured=agent_supports_structured,
+            )
+            reqs[sender] = _build_request(
+                custom_id=f"t{trial_id}_pc_{sender}", model=agent_model,
+                system_prompt=system_p, user_prompt=user_p, json_schema=schema,
+                temperature=llm_client.temperature, supports_structured=agent_supports_structured,
+                llm_client=llm_client,
+            )
+        raw = parallel_client.execute_parallel(list(reqs.values()))
+        for sender, req in reqs.items():
+            parsed = _parse_response(raw.get(req["custom_id"], {}), ["pay_if", "amount"])
+            pay_if, amount = parse_commitment(parsed)
+            channel.commitments.append({
+                "round": round_idx, "payer": sender, "payee": channel.partner(sender),
+                "pay_if": pay_if, "amount": amount, "_parse_ok": bool(parsed.get("pay_if")),
+            })
+
 
 # ---------------------------------------------------------------------------
 # Judge executor  (LLM-as-judge, always uses openai/gpt-5-mini)
@@ -1016,6 +1045,9 @@ def run_trial(
     if round_robin:
         result["announcement_order"] = order
     if channel is not None:
+        if channel.contracts:
+            n_yes = sum(c == "YES" for c in choices.values())
+            channel.settle(round_idx, n_yes >= len(agent_names) // 2 + 1)
         # Kept separate from the public stage2 messages under "agents"
         result["private_channel"] = channel.round_log(round_idx)
 
