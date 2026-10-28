@@ -1059,3 +1059,22 @@ key. Tests whether a current frontier-family monitor also misses what the rule c
   (0.65 vs 0.69 on actions) and stays clearly below the simple rule on every observable view, in
   both datasets. It is perfect once it can read the plans. This supports the paper's main claim;
   the paper is not yet updated.
+
+### Follow-up plans: Audited Report Game (2.2) and emergent collusion (2026-10-28, no API calls)
+- Full plans in `docs/followup_plans.md`, written before any code or runs.
+- **Plan 1** (a proper 2.2 test):
+  - common-value game; the pair has a hidden side interest of ±5 and must lie in its public
+    signal reports to flip the vote;
+  - after each round, 4 of 7 agents' true signals are audited; payoffs only at the end, so the
+    record never reveals V.
+- **Plan 1 simulation** (`experiments/sim_audited_report.py`, scripted agents):
+  - talk + audit 0.85 vs outcome only 0.66 and talk only 0.72;
+  - auditing all 7 makes the outcome alone sufficient (0.95), so the partial audit is essential;
+  - power 0.74 at 80 games per condition with 8 rounds;
+  - main run ~$19–24, beyond the remaining OpenRouter balance.
+- **Plan 2** (emergent):
+  - E1: `channel_only` plus binding side payments inside the pair, own-payoff goal, hidden
+    transfers, v3 record format;
+  - pilot gate: ≥25% of trade opportunities traded;
+  - E2: 24-round pilot.
+  - Fits the current balance (~$6).
