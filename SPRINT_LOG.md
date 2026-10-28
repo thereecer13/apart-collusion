@@ -1137,3 +1137,31 @@ game:
 - **Reading:** Llama 3.3 70B uses the mechanism, but neither side reasons from the payoffs. Most
   payments are gifts, and recipients ignore worthwhile offers. The main run is **not launched**,
   per the gate. Options are put to the participant.
+
+### E1 with Claude Haiku 5.5 agents: plan (2026-10-28, before running)
+Participant's decision, after the Llama pilot missed its gate. Their reasoning: payoff hints
+would make collusion no longer emergent, so test a stronger model with the **unchanged** E1
+prompt instead. The net-payoff line is dropped. Paid from the participant's Anthropic credits;
+the $5 per-run check is waived for this experiment.
+- **Code:**
+  - new `src/llm/providers/parallel_anthropic.py` and `run_endogenous.py --anthropic-direct`;
+    off by default;
+  - model defaults: adaptive thinking, default effort, no temperature or seed (Claude 5.x
+    rejects them), `max_tokens` 16000;
+  - token usage is stored in run metadata (`anthropic_usage`).
+- **Test game:** seed 300, trial 0, 6 rounds. Plumbing passes, 0 parse errors, 0 API errors.
+  402 requests: 804k input, 114k output tokens ≈ **$0.14 per game**. That pair made no
+  commitments. No thinking text is returned, only the answers.
+- **Pilot:** seeds 300 and 301 × 5 games × 6 rounds, in each of:
+  - `channel_contracts` (the E1 arm);
+  - `channel_only` (same channel without commitments);
+  - `none`.
+
+  All three use `--private-history current`. The Llama v3 games are not a fair baseline for
+  another model; using the same history for both channel conditions leaves one difference.
+  About 30 games ≈ $4.
+- **Gate (unchanged):** `channel_contracts` bloc votes in trade-opportunity rounds ≥25%, and
+  plumbing passes. If met, the main run is seeds 1000–1007 × 5 for all three conditions
+  (~120 games, ~$17), then the Haiku monitor on realised-collusion games vs `none`.
+- **Also reported:** the same rate in `channel_only`. Collusion there, without contracts, would
+  also be emergent.
