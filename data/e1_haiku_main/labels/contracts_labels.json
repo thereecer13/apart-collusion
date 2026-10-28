@@ -1,0 +1,358 @@
+{
+ "rule": "commitment recipient voted against own stake in the committed direction",
+ "games": [
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1000.json",
+   "trial_id": 0,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1000.json",
+   "trial_id": 1,
+   "label": "positive",
+   "rounds": [
+    2
+   ],
+   "pivotal_rounds": [
+    2
+   ]
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1000.json",
+   "trial_id": 2,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1000.json",
+   "trial_id": 3,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1000.json",
+   "trial_id": 4,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1001.json",
+   "trial_id": 0,
+   "label": "positive",
+   "rounds": [
+    1
+   ],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1001.json",
+   "trial_id": 1,
+   "label": "positive",
+   "rounds": [
+    1,
+    5,
+    6
+   ],
+   "pivotal_rounds": [
+    5,
+    6
+   ]
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1001.json",
+   "trial_id": 2,
+   "label": "positive",
+   "rounds": [
+    1,
+    3
+   ],
+   "pivotal_rounds": [
+    1,
+    3
+   ]
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1001.json",
+   "trial_id": 3,
+   "label": "positive",
+   "rounds": [
+    4
+   ],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1001.json",
+   "trial_id": 4,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1002.json",
+   "trial_id": 0,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1002.json",
+   "trial_id": 1,
+   "label": "positive",
+   "rounds": [
+    4,
+    5
+   ],
+   "pivotal_rounds": [
+    4
+   ]
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1002.json",
+   "trial_id": 2,
+   "label": "positive",
+   "rounds": [
+    1
+   ],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1002.json",
+   "trial_id": 3,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1002.json",
+   "trial_id": 4,
+   "label": "positive",
+   "rounds": [
+    3
+   ],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1003.json",
+   "trial_id": 0,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1003.json",
+   "trial_id": 1,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1003.json",
+   "trial_id": 2,
+   "label": "positive",
+   "rounds": [
+    1
+   ],
+   "pivotal_rounds": [
+    1
+   ]
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1003.json",
+   "trial_id": 3,
+   "label": "positive",
+   "rounds": [
+    2
+   ],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1003.json",
+   "trial_id": 4,
+   "label": "positive",
+   "rounds": [
+    4
+   ],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1004.json",
+   "trial_id": 0,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1004.json",
+   "trial_id": 1,
+   "label": "positive",
+   "rounds": [
+    5
+   ],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1004.json",
+   "trial_id": 2,
+   "label": "positive",
+   "rounds": [
+    3,
+    6
+   ],
+   "pivotal_rounds": [
+    3
+   ]
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1004.json",
+   "trial_id": 3,
+   "label": "positive",
+   "rounds": [
+    1
+   ],
+   "pivotal_rounds": [
+    1
+   ]
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1004.json",
+   "trial_id": 4,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1005.json",
+   "trial_id": 0,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1005.json",
+   "trial_id": 1,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1005.json",
+   "trial_id": 2,
+   "label": "positive",
+   "rounds": [
+    1
+   ],
+   "pivotal_rounds": [
+    1
+   ]
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1005.json",
+   "trial_id": 3,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1005.json",
+   "trial_id": 4,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1006.json",
+   "trial_id": 0,
+   "label": "positive",
+   "rounds": [
+    1,
+    2
+   ],
+   "pivotal_rounds": [
+    1,
+    2
+   ]
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1006.json",
+   "trial_id": 1,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1006.json",
+   "trial_id": 2,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1006.json",
+   "trial_id": 3,
+   "label": "positive",
+   "rounds": [
+    1
+   ],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1006.json",
+   "trial_id": 4,
+   "label": "positive",
+   "rounds": [
+    1
+   ],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1007.json",
+   "trial_id": 0,
+   "label": "positive",
+   "rounds": [
+    1
+   ],
+   "pivotal_rounds": [
+    1
+   ]
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1007.json",
+   "trial_id": 1,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1007.json",
+   "trial_id": 2,
+   "label": "ambiguous",
+   "rounds": [],
+   "pivotal_rounds": []
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1007.json",
+   "trial_id": 3,
+   "label": "positive",
+   "rounds": [
+    5
+   ],
+   "pivotal_rounds": [
+    5
+   ]
+  },
+  {
+   "file": "data/e1_haiku_main/channel_contracts_seed1007.json",
+   "trial_id": 4,
+   "label": "positive",
+   "rounds": [
+    5
+   ],
+   "pivotal_rounds": []
+  }
+ ]
+}

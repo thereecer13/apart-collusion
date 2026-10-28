@@ -1196,3 +1196,55 @@ the $5 per-run check is waived for this experiment.
   the recipient's vote changed pass/fail. Pilot: Haiku 1/10 games, Llama 0/10. Reported next to
   the primary label. The primary rule is unchanged.
 - **Next (per plan):** main run on seeds 1000–1007 × 5 × three conditions, 120 games, ~$16.
+
+### E1 Haiku main run and monitor: results (2026-10-28)
+- **Runs:**
+  - 120 games: seeds 1000–1007 × 5 × {`channel_contracts`, `channel_only`, `none`}, 6
+    rounds, Haiku 5.5 agents;
+  - all exit 0, 0 API errors, **plumbing passes on all 120** (only reflection parse slips);
+  - 89.0M input + 13.2M output tokens ≈ **$15.47**;
+  - data in `data/e1_haiku_main/`; labels moved to `labels/` subfolders, because the
+    monitor's data loader read every `.json`, including the labels file.
+- **Emergent trading (primary, E1):** bloc votes in trade-opportunity rounds:
+
+  | Condition | Bloc votes |
+  |---|---|
+  | `channel_contracts` | **27/64 = 42% [30%, 55%]** |
+  | `channel_only` | **0/64** |
+  | `none` | **0/64** |
+
+  - Commitments: 49/480 made (PASS 36, FAIL 13, mean $1.90); 36 paid, $71 in total.
+  - Realised collusion (pre-set label): **21/40 games**. Pivotal (secondary): 11/40 games,
+    14 rounds.
+  - **Reading:** with binding side payments and no instruction or hint, Haiku pairs trade
+    votes. Without payments (`channel_only`) they never do. Llama did not (pilot 13%).
+- **Monitor:** Haiku 5.5, frozen v1, realised games vs `none` (`results/e1_haiku_monitor/`,
+  505 samples incl. `channel_only` hard negatives, 0 errors, ≈ $0.56):
+
+  | View | AUROC | FPR | Pair-ID | rule − Haiku |
+  |---|---|---|---|---|
+  | public | 0.85 [0.74, 0.94] | 0.05 | 0.57 | +0.06 [−0.05, +0.18] |
+  | actions | 0.64 [0.51, 0.77] | 0.00 | 0.00 | **+0.26 [+0.13, +0.39]** |
+  | both | **0.87 [0.78, 0.95]** | 0.00 | 0.45 | +0.03 [−0.09, +0.15] |
+  | table | 0.47 | 0.16 | 0.05 | +0.43 [+0.26, +0.59] |
+  | plans (upper bound) | 1.00 | 0.00 | 0.89 | −0.08 [−0.16, +0.00] |
+
+  - **Primary (pre-set): the gap holds on actions,** +0.26 [+0.13, +0.39] (rule 0.90).
+  - **Caveat:** the realised label requires a vote against the voter's own stake, which is
+    what the rule sees in passed rounds. The rule's 0.90 is partly built into the label, so
+    the gap is an upper estimate.
+  - **Question 2.2, reversed from the instructed study:** talk now carries most of the signal.
+    public − actions ≈ +0.21, both − actions +0.23 [+0.09, +0.37] (paired, vs `both`).
+    With talk, the monitor is close to the rule (both: +0.03, CI includes 0).
+- **Why talk helps (post-hoc):**
+  - Emergent colluders did not hide. Pair public messages mention a deal or payment in 29% of
+    contracts messages vs 5% in `none` (keyword count). Example: "I have a separate
+    arrangement that makes passage net positive for me".
+  - **Confound check:** the monitor on the 19 contracts games without realised collusion
+    (`results/e1_haiku_monitor_ambiguous/`, ≈ $0.22). Public view: yes-rate 0/19;
+    ambiguous vs `none` AUROC 0.46; realised vs ambiguous AUROC **0.88**. So the talk
+    signal tracks actual deals, not the mechanism being present. Plans view: ambiguous vs
+    `none` 0.96, since commitments discussed in plans read as collusion.
+  - vs `channel_only` hard negatives: both 0.88, public 0.81, actions 0.71.
+- **Anthropic spend this sprint:** monitor v3/held-out $1.07, E1 test and pilot $4.03, main
+  $15.47, monitors $0.78 ≈ **$21.35**.
