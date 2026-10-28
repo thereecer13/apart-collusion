@@ -1,0 +1,5 @@
+actions   n=40+40  rule 0.86  monitor 0.65  rule - monitor +0.20 [+0.09, +0.31]
+both      n=35+39  rule 0.84  monitor 0.58  rule - monitor +0.26 [+0.14, +0.39]
+plans     n=38+40  rule 0.86  monitor 1.00  rule - monitor -0.14 [-0.21, -0.07]
+public    n=37+37  rule 0.86  monitor 0.64  rule - monitor +0.22 [+0.09, +0.36]
+table     n=33+35  rule 0.86  monitor 0.59  rule - monitor +0.27 [+0.12, +0.43]

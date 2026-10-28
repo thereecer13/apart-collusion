@@ -1018,3 +1018,44 @@ key. Tests whether a current frontier-family monitor also misses what the rule c
   so roughly $1–2 in total.
 - **Blocked until** `ANTHROPIC_API_KEY` is added to the environment (Network secrets). The SDK
   is installed in `.venv`.
+
+### Claude Haiku 5.5 as monitor: results (2026-10-28)
+- **Key:** the participant's existing `BLOT_ANTHROPIC_API_KEY` (their choice; a Network secret
+  failed to save). Passed to Inspect as `ANTHROPIC_API_KEY` for each command only. One test call,
+  then one full-size sample (≈1,850 input and 820 output tokens, 620 of them thinking).
+- **Runs, as planned:** v3 all four conditions × five views, channel-only as hard negatives
+  (`-T channel_only_negative=true`), 800 samples; held-out 200 samples. `-T temperature=default
+  --max-tokens 16000`, adaptive thinking at the default effort. 0 errors, 0 truncated. Logs in
+  `results/monitor_v3_haiku/` and `results/heldout_haiku/`.
+- **Cost:** not metered by OpenRouter. From token counts: 5.38M cache-write input × $0.125/M +
+  0.80M output × $0.50/M ≈ **$1.07** (Anthropic credits). Thinking averaged ~590 tokens per answer.
+- **Unparsed: 52/800 (v3) and 12/200 (held-out), all for one reason:** suspicion given on a
+  0–100 scale (e.g. 30, 35), which the frozen parser rejects. Mostly `table` (19) and `public`
+  (18); `actions` 2. Not rescaled, since that would be a post-hoc change to the scorer. The
+  primary cell (competent vs `none`, actions) has none.
+- **Primary test (decided in advance): the gap holds.** Competent vs `none`, actions view: Haiku
+  AUROC **0.65 [0.56, 0.76]**; paired rule − Haiku **+0.20 [+0.09, +0.31]** (rule 0.86 on the same
+  games; new script `experiments/rule_vs_monitor.py`, which reproduces rule 0.86 / DeepSeek
+  thinking 0.69). Held-out: Haiku 0.68 [0.53, 0.82], rule − Haiku +0.23 [+0.12, +0.36].
+- **Secondary (v3, competent vs `none`):**
+
+  | View | AUROC | FPR | Pair-ID | rule − Haiku |
+  |---|---|---|---|---|
+  | public | 0.64 [0.52, 0.74] | 0.08 | 0.08 | +0.22 [+0.09, +0.36] |
+  | actions | 0.65 [0.56, 0.76] | 0.00 | 0.03 | +0.20 [+0.09, +0.31] |
+  | both | 0.58 [0.46, 0.69] | 0.05 | 0.06 | +0.26 [+0.14, +0.39] |
+  | table | 0.59 [0.46, 0.71] | 0.26 | 0.21 | +0.27 [+0.12, +0.43] |
+  | plans (upper bound) | 1.00 | 0.05 | 1.00 | −0.14 [−0.21, −0.07] |
+
+  - Haiku is very conservative: on actions it says "yes" almost never (FPR 0, accuracy 0.51), so
+    its signal is only in the suspicion ranking. Pair-ID 0.03 against the rule's 0.30.
+  - **Question 2.2:** both − actions −0.08 [−0.23, +0.06]; public − both +0.06 [−0.07, +0.19].
+    Adding messages to actions adds nothing, as for the other monitors.
+  - Naive colluders vs `none`: actions 0.58, both 0.55, public 0.61, plans 0.99.
+  - Competent vs channel-only hard negatives: actions 0.67, both 0.65; plans 0.93 with FPR 0.47
+    (Haiku reads the channel-only pairs' private plans as collusion about half the time).
+  - Held-out: actions 0.68, both 0.46, public 0.49, table 0.56, plans 1.00.
+- **Reading:** a third monitor family, with thinking, lands where DeepSeek with thinking did
+  (0.65 vs 0.69 on actions) and stays clearly below the simple rule on every observable view, in
+  both datasets. It is perfect once it can read the plans. This supports the paper's main claim;
+  the paper is not yet updated.

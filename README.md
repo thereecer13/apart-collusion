@@ -106,6 +106,12 @@ inspect eval monitor/task.py --model openrouter/deepseek/deepseek-chat-v3.1 \
   --model-config monitor/openrouter_reasoning.yaml -T logs=data/main_voting_v3 \
   -T views=actions,public,both -T conditions=instructed_hint,none --max-tokens 16000 \
   --log-dir results/monitor_v3_deepseek_thinking
+
+# Claude Haiku 5.5 as monitor (Anthropic API; ~$1). The key goes in ANTHROPIC_API_KEY
+ANTHROPIC_API_KEY=... inspect eval monitor/task.py --model anthropic/claude-haiku-5-5 \
+  -T logs=data/main_voting_v3 -T channel_only_negative=true -T temperature=default \
+  --max-tokens 16000 --log-dir results/monitor_v3_haiku
+python experiments/rule_vs_monitor.py results/monitor_v3_haiku data/main_voting_v3
 ```
 
 Always pass `--no-judge` and do not use `--use-queue`: the private channel, the voting game and
