@@ -6,8 +6,12 @@ and must say whether a colluding pair is present and which agents it is. Built f
 AI Collusion Research Sprint** (Oct 23–25, 2026), Track 2, question 2.2, with post-sprint
 follow-ups.
 
+[![Explainer video: The Evidence Is in the Votes (2:50)](video/poster.jpg)](https://youtu.be/s2dTi_drLmo)
+
+*Explainer video (2:50): [watch on YouTube](https://youtu.be/s2dTi_drLmo). The source and
+captions are in [`video/`](video/).*
+
 - Report: [`docs/submission/`](docs/submission/) (`report_submission.docx`, PDF preview)
-- Explainer video: [`video/evidence-in-the-votes.mp4`](video/) (2:50)
 - Full dated record: [`SPRINT_LOG.md`](SPRINT_LOG.md)
 
 ## Findings
