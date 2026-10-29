@@ -1248,3 +1248,14 @@ the $5 per-run check is waived for this experiment.
   - vs `channel_only` hard negatives: both 0.88, public 0.81, actions 0.71.
 - **Anthropic spend this sprint:** monitor v3/held-out $1.07, E1 test and pilot $4.03, main
   $15.47, monitors $0.78 ≈ **$21.35**.
+
+### README rewritten (2026-10-29, no API calls)
+Participant's request: describe only the latest version of the project, more concisely.
+- Removed: the original upstream README, the long file-by-file provenance list, and mentions of
+  superseded material (El Farol, `main_voting_v1`/`v2`, the report drafts).
+- Added: post-sprint results (stronger monitors, hybrid monitor, E1 emergent collusion with
+  side payments), a conditions table including `channel_contracts`, and the E1 monitor command.
+- Kept: a short provenance section (upstream source, pre-sprint commit range, pointers to both
+  logs).
+- Checked: all offline tests pass in a fresh venv. The baselines and `rule_vs_monitor.py`
+  commands reproduce the README's figures (rule 0.86 at 5% FPR; rule − Haiku +0.20).
