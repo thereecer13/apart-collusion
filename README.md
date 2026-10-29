@@ -1,10 +1,10 @@
-# Does combining what agents say with what they do help a monitor detect collusion?
+# The Evidence Is in the Votes: LLM Monitors Mostly Miss Collusion That a One-Line Rule Catches
 
 Seven LLM agents play a repeated committee-vote game. In some games, two of them secretly
 collude through a private channel. Monitors (LLMs and simple rules) see one view of each game
 and must say whether a colluding pair is present and which agents it is. Built for the **Apart
-AI Collusion Research Sprint** (Oct 23–25, 2026), Track 2, question 2.2, with post-sprint
-follow-ups.
+AI Collusion Research Sprint** (Oct 23–25, 2026), Track 2, question 2.2: does combining what
+agents say with what they do help a monitor detect collusion? Includes post-sprint follow-ups.
 
 [![Explainer video: The Evidence Is in the Votes (2:50)](video/poster.jpg)](https://youtu.be/s2dTi_drLmo)
 
